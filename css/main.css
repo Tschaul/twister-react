@@ -1,0 +1,66 @@
+.context {
+
+    width: 30em;
+
+}
+
+.post {
+
+    padding: 1em;
+    background-color: #eee;
+
+}
+
+.post hr {
+
+    
+    clear: both;
+}
+
+.post-avatar {
+
+    float: left;
+
+}
+
+.post-avatar img {
+
+    width: 3em;
+
+}
+
+.post-bulk {
+
+    float: right;
+    width: 23em;
+    padding: 0 1em;
+
+}
+
+.post-timestamp {
+
+    font-style: italic;
+    font-size: 0.7em;
+    float: right;
+    
+}
+
+.post-username {
+
+    float: left;
+    font-size: 0.7em;
+    width: 20em;
+    
+}
+
+.post-id {
+
+    float: right;
+    font-size: 0.7em;
+    
+}
+
+.post-content {
+    clear: both;
+    padding: 0.5em 0 0.5em 0;
+}
