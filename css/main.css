@@ -1,66 +1,44 @@
-.context {
-
-    width: 30em;
-
+.container {
+  padding-right:0.4em;
+  padding-left:0.4em;
 }
 
-.post {
-
-    padding: 1em;
-    background-color: #eee;
-
+.col-xs-2 {
+  padding-right:0.4em;
+  padding-left:0.4em;
 }
 
-.post hr {
-
-    
-    clear: both;
+.col-xs-1 {
+  padding-right:0.4em;
+  padding-left:0.4em;
 }
 
-.post-avatar {
-
-    float: left;
-
+.col-xs-10 {
+  padding-right:0.4em;
+  padding-left:0.4em;
 }
 
-.post-avatar img {
-
-    width: 3em;
-
+.col-xs-9 {
+  padding-right:0.4em;
+  padding-left:0.4em;
 }
 
-.post-bulk {
-
-    float: right;
-    width: 23em;
-    padding: 0 1em;
-
+.col-xs-11 {
+  padding-right:0.4em;
+  padding-left:0.4em;
 }
 
-.post-timestamp {
-
-    font-style: italic;
-    font-size: 0.7em;
-    float: right;
-    
+.col-xs-12 {
+  padding-right:0.4em;
+  padding-left:0.4em;
+  padding-top:0.2em;
 }
 
-.post-username {
-
-    float: left;
-    font-size: 0.7em;
-    width: 20em;
-    
+.list-group-item {
+  padding-right:0.4em;
+  padding-left:0.4em;
 }
 
-.post-id {
-
-    float: right;
-    font-size: 0.7em;
-    
-}
-
-.post-content {
-    clear: both;
-    padding: 0.5em 0 0.5em 0;
+.img-responsive {
+  width: 100%;
 }
