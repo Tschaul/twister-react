@@ -1,0 +1,32 @@
+{
+  "name": "twister-react",
+  "version": "1.0.0",
+  "description": "proxy-based Twister client written with react-js",
+  "main": "index.js",
+  "dependencies": {
+    "classnames": "^1.2.0",
+    "react-bootstrap": "^0.20.3",
+    "react": "^0.13.2",
+    "react-router": "^0.13.2",
+    "react-router-bootstrap": "^0.13.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "jsx jsx js && browserify js/App.js -o build/app-bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tschaul/twister-react.git"
+  },
+  "keywords": [
+    "react",
+    "twister"
+  ],
+  "author": "Julian Steinwachs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Tschaul/twister-react/issues"
+  },
+  "homepage": "https://github.com/Tschaul/twister-react#readme"
+}
