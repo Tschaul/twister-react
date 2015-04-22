@@ -4,9 +4,9 @@ module.exports = StreamMixin = {
         
         var postid = post.getUsername() + ":post" + post.getId();
         
-        if (!this.state.postIdentifiers[postid] && this.verifyPost(post)) {
+        if (this.isMounted() && !this.state.postIdentifiers[postid] && this.verifyPost(post)) {
             
-            this.setStateSafe(function(previousState, currentProps) {
+            this.setState(function(previousState, currentProps) {
         
                 previousState.postIdentifiers[postid] = true;
 

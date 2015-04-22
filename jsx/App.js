@@ -56,7 +56,7 @@ App = React.createClass({
             pampalulu
           </NavItem>
         </Nav>
-        <RouteHandler pollInterval="60000" key={this.getHandlerKey()}/>
+        <RouteHandler pollInterval="60" key={this.getHandlerKey()}/>
       </div>
     );
   }
@@ -91,3 +91,12 @@ loadCache();
 setInterval(saveCache,300000);
 
 Twister.loadServerAccounts(intitializeApp);
+
+////// INIT EVENTLISTENERS ON WINDOW
+
+window.onscroll = function(ev) {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+    var event = new Event('scrolledtobottom');
+    window.dispatchEvent(event);
+  }
+};

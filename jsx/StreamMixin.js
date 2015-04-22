@@ -6,7 +6,7 @@ module.exports = StreamMixin = {
         
         if (!this.state.postIdentifiers[postid] && this.verifyPost(post)) {
             
-            this.setState(function(previousState, currentProps) {
+            this.setStateSafe(function(previousState, currentProps) {
         
                 previousState.postIdentifiers[postid] = true;
 

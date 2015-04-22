@@ -15,7 +15,7 @@ var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
 
 var EventListenerMixin = require('./EventListenerMixin.js')
 
-module.exports = Timeline = React.createClass({
+module.exports = Timeline = React.createClass({displayName: "Timeline",
     
     mixins: [StreamMixin,SetIntervalMixin,SafeStateChangeMixin,EventListenerMixin('scrolledtobottom')],
     contextTypes: {
@@ -153,8 +153,8 @@ module.exports = Timeline = React.createClass({
     },
     onscrolledtobottom: function () {
     
-      this.setStateSafe(function(previousState, currentProps){
-        previousState.postrange -= 6*60*60;
+      this.setSateSafe(function(previousState, currentProps){
+        previousState.postrange+= 6*60*60;
         return previousState;
       },function(){
         this.updatePosts(2*this.props.pollInterval);
@@ -163,10 +163,10 @@ module.exports = Timeline = React.createClass({
     },
     render: function() {
         return (
-          <div>
-            <h3>{'Timeline of '+this.context.router.getCurrentParams().timelineUser}</h3>
-            <Postboard data={this.state.data}/>
-            </div>
+          React.createElement("div", null, 
+            React.createElement("h3", null, 'Timeline of '+this.context.router.getCurrentParams().timelineUser), 
+            React.createElement(Postboard, {data: this.state.data})
+            )
         );
   }
 });

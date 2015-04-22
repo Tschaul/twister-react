@@ -8,9 +8,10 @@ var ReactBootstrap = require('react-bootstrap')
 var React = require('react');
 
 var SetIntervalMixin = require("./SetIntervalMixin.js");
+var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
 
 module.exports = Post = React.createClass({
-    mixins: [SetIntervalMixin],
+    mixins: [SetIntervalMixin,SafeStateChangeMixin],
     getInitialState: function() {
         return {
           avatar: "img/genericPerson.png", 
@@ -29,7 +30,7 @@ module.exports = Post = React.createClass({
       else if (secondsAgo<45*60*60) {newTimeAgo=Math.round(secondsAgo/60/60)+"h"}
       else if (secondsAgo<60*60*60*18) {newTimeAgo=Math.round(secondsAgo/60/60/60)+"d"}
       
-      this.setState({timeAgo: newTimeAgo});
+      this.setStateSafe({timeAgo: newTimeAgo});
       
     },
     componentDidMount: function () {
@@ -37,16 +38,16 @@ module.exports = Post = React.createClass({
 
       //console.log(this.props.post.username+":post"+this.props.post.id);
       Twister.getUser(this.props.post.username).doAvatar(function(avatar){
-        thisComponent.setState({avatar: avatar.getUrl()});  
+        thisComponent.setStateSafe({avatar: avatar.getUrl()});  
       });
       Twister.getUser(this.props.post.username).doProfile(function(profile){
-        thisComponent.setState({fullname: profile.getField("fullname")});  
+        thisComponent.setStateSafe({fullname: profile.getField("fullname")});  
       });
 
       if (this.props.post.isRetwist) {
 
         Twister.getUser(this.props.post.retwistingUser).doProfile(function(profile){
-          thisComponent.setState({retwistingUser: profile.getField("fullname")});  
+          thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
         });
 
       }
@@ -58,22 +59,22 @@ module.exports = Post = React.createClass({
     render: function() {
         var post = this.props.post;
         return (
-          <ListGroupItem>
+          <ListGroupItem fill>
             <Grid fill>
                 <Row>
-                  <Col xs={2}><img className="img-responsive" src={this.state.avatar}/></Col>
+                  <Col xs={2} className="fullytight"><img className="img-responsive" src={this.state.avatar}/></Col>
                   <Col xs={9}>
                     <strong>{this.state.fullname}</strong>&nbsp;
                     {post.content}
                   </Col>
-                  <Col xs={1}><p className="text-right">{this.state.timeAgo}</p></Col>
+                  <Col xs={1} className="fullytight"><p className="text-right">{this.state.timeAgo}</p></Col>
                 </Row>
                 <Row>
-                  <Col xs={4}>
+                  <Col xs={6}>
               {post.isRetwist && <small><span className="glyphicon glyphicon-retweet" aria-hidden="true"></span> <em> &nbsp;retwisted by {this.state.retwistingUser}</em></small>
                 }
                   </Col>
-                  <Col xs={8}><p className="text-right"><small><em>test</em></small></p></Col>
+                  <Col xs={6}><p className="text-right"><small><em>test</em></small></p></Col>
                 </Row>
             </Grid>
             

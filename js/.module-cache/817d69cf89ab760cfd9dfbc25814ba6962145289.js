@@ -70,11 +70,11 @@ module.exports = Post = React.createClass({displayName: "Post",
                   React.createElement(Col, {xs: 1, className: "fullytight"}, React.createElement("p", {className: "text-right"}, this.state.timeAgo))
                 ), 
                 React.createElement(Row, null, 
-                  React.createElement(Col, {xs: 6}, 
+                  React.createElement(Col, {xs: 4}, 
               post.isRetwist && React.createElement("small", null, React.createElement("span", {className: "glyphicon glyphicon-retweet", "aria-hidden": "true"}), " ", React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
                 
                   ), 
-                  React.createElement(Col, {xs: 6}, React.createElement("p", {className: "text-right"}, React.createElement("small", null, React.createElement("em", null, "test"))))
+                  React.createElement(Col, {xs: 8}, React.createElement("p", {className: "text-right"}, React.createElement("small", null, React.createElement("em", null, "test"))))
                 )
             )
             

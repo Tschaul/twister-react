@@ -13,11 +13,9 @@ var SetIntervalMixin = require("./SetIntervalMixin.js");
 var StreamMixin = require("./StreamMixin.js");
 var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
 
-var EventListenerMixin = require('./EventListenerMixin.js')
-
-module.exports = Timeline = React.createClass({
+module.exports = Timeline = React.createClass({displayName: "Timeline",
     
-    mixins: [StreamMixin,SetIntervalMixin,SafeStateChangeMixin,EventListenerMixin('scrolledtobottom')],
+    mixins: [StreamMixin,SetIntervalMixin,SafeStateChangeMixin],
     contextTypes: {
       router: React.PropTypes.func
     },
@@ -40,7 +38,7 @@ module.exports = Timeline = React.createClass({
             postIdentifiers: {}, 
             usernames: [], 
             timelineUser: [], 
-            postrange: ( Date.now()/1000 - 12*60*60 ),
+            postrange: ( Date.now()/1000 - 24*60*60 ),
             min_posts: 30
         };
     },
@@ -100,7 +98,7 @@ module.exports = Timeline = React.createClass({
     },
     updatePosts: function(outdatedLimit) {
 		
-        if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
+        if (!outdatedLimit) {outdatedLimit=30;}
       
         for (var i = 0; i<this.state.usernames.length; i++) {
         
@@ -142,31 +140,21 @@ module.exports = Timeline = React.createClass({
 
                 }
               
-                thisComponent.updatePosts(thisComponent.props.pollInterval);
+                thisComponent.updatePosts(60);
 
             });
         
         });
       
-        this.setInterval(this.updatePosts, this.props.pollInterval*1000);
+        this.setInterval(this.updatePosts, this.props.pollInterval);
         
-    },
-    onscrolledtobottom: function () {
-    
-      this.setStateSafe(function(previousState, currentProps){
-        previousState.postrange -= 6*60*60;
-        return previousState;
-      },function(){
-        this.updatePosts(2*this.props.pollInterval);
-      });
-      
     },
     render: function() {
         return (
-          <div>
-            <h3>{'Timeline of '+this.context.router.getCurrentParams().timelineUser}</h3>
-            <Postboard data={this.state.data}/>
-            </div>
+          React.createElement("div", null, 
+            React.createElement("h3", null, 'Timeline of '+this.context.router.getCurrentParams().timelineUser), 
+            React.createElement(Postboard, {data: this.state.data})
+            )
         );
   }
 });

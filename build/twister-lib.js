@@ -31261,7 +31261,7 @@ TwisterPubKey.prototype.verifySignature = function (message_ori, signature_ori, 
 
     Twister._signatureVerificationsInProgress++;
 
-    var timeout=Twister._signatureVerificationsInProgress*Twister._averageSignatureCompTime*2;
+    var timeout=Twister._signatureVerificationsInProgress*Twister._averageSignatureCompTime*4;
 
     setTimeout(function(){
 
@@ -31577,7 +31577,7 @@ TwisterResource.prototype._handleError = function (error) {
 
 TwisterResource.prototype.RPC = function (method, params, resultFunc, errorFunc) {
     
-    console.log(method,params);
+    //console.log(method,params);
   
 	var thisResource = this;
 	
@@ -31607,12 +31607,14 @@ TwisterResource.prototype.RPC = function (method, params, resultFunc, errorFunc)
                     
         var request = require('request');
         request({
+          
             uri: this.getQuerySetting("host"),
             method: "POST",
             timeout: this.getQuerySetting("timeout"),
             followRedirect: true,
             maxRedirects: 10,
             body: '{"jsonrpc": "2.0", "method": "'+method+'", "params": '+JSON.stringify(params)+', "id": 0}'
+          
         }, function(error, response, body) {
             
             if (error) { 
@@ -31639,14 +31641,11 @@ TwisterResource.prototype.RPC = function (method, params, resultFunc, errorFunc)
 
 TwisterResource.prototype.dhtget = function (args,cbfunc) {
 
-  
-  
     var Twister = this._scope;
     
     var thisResource = this;
-    
   
-    console.log(thisResource._name+" "+thisResource._type)
+    //console.log(thisResource._name+" "+thisResource._type)
   
     if ( Twister._activeDHTQueries < Twister._maxDHTQueries ) {
     
@@ -32008,7 +32007,7 @@ TwisterStream.prototype._doPost = function (id,cbfunc) {
             
         } else {
             
-            console.log("post "+id+" not in cache");
+            //console.log("post "+id+" not in cache");
           
             var thisResource = this;
             
@@ -32295,7 +32294,7 @@ TwisterTorrent.prototype._fillCacheUsingGetposts = function (count,usernames,max
                         
                 }
               
-                console.log("maxId = "+maxId+" "+usernames)
+                //console.log("maxId = "+maxId+" "+usernames)
                 
                 if ( !maxId || maxId==-1 ) {
                 
@@ -32438,17 +32437,17 @@ TwisterTorrent.prototype.updateCache = function (cbfunc) {
     var thisTorrent = this;
     var thisStream = Twister.getUser(this._name)._stream;
       
-    console.log("update cache "+thisTorrent._name)  
+    //console.log("update cache "+thisTorrent._name)  
     thisTorrent._checkForUpdatesUsingGetLastHave(function(uptodate){
     
       
         if (uptodate) {
-        console.log("lasthaves "+thisTorrent._name+" worked") 
+        //console.log("lasthaves "+thisTorrent._name+" worked") 
             
             cbfunc(true);
             
         } else {
-        console.log("lasthaves "+thisTorrent._name+" failed") 
+        //console.log("lasthaves "+thisTorrent._name+" failed") 
             
             thisTorrent._fillCacheUsingGetposts(30,[thisTorrent._name],-1,-1,cbfunc);
             
@@ -32466,7 +32465,7 @@ TwisterTorrent.prototype.fillCache = function (id,cbfunc) {
     var thisTorrent = this;
     var thisUser = Twister.getUser(this._name);
   
-    console.log("fill cache "+thisTorrent._name)  
+    //console.log("fill cache "+thisTorrent._name)  
     
     thisTorrent._fillCacheUsingGetposts(30,[thisTorrent._name],id,-1,cbfunc);
 

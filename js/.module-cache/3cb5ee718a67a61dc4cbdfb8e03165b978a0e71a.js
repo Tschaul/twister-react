@@ -8,10 +8,10 @@ var ReactBootstrap = require('react-bootstrap')
 var React = require('react');
 
 var SetIntervalMixin = require("./SetIntervalMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
+var SafeStateChangeMixin = require('react-mixin-safe-state-change');
 
 module.exports = Post = React.createClass({displayName: "Post",
-    mixins: [SetIntervalMixin,SafeStateChangeMixin],
+    mixins: [SetIntervalMixin],
     getInitialState: function() {
         return {
           avatar: "img/genericPerson.png", 
@@ -59,22 +59,22 @@ module.exports = Post = React.createClass({displayName: "Post",
     render: function() {
         var post = this.props.post;
         return (
-          React.createElement(ListGroupItem, {fill: true}, 
+          React.createElement(ListGroupItem, null, 
             React.createElement(Grid, {fill: true}, 
                 React.createElement(Row, null, 
-                  React.createElement(Col, {xs: 2, className: "fullytight"}, React.createElement("img", {className: "img-responsive", src: this.state.avatar})), 
+                  React.createElement(Col, {xs: 2}, React.createElement("img", {className: "img-responsive", src: this.state.avatar})), 
                   React.createElement(Col, {xs: 9}, 
                     React.createElement("strong", null, this.state.fullname), " ", 
                     post.content
                   ), 
-                  React.createElement(Col, {xs: 1, className: "fullytight"}, React.createElement("p", {className: "text-right"}, this.state.timeAgo))
+                  React.createElement(Col, {xs: 1}, React.createElement("p", {className: "text-right"}, this.state.timeAgo))
                 ), 
                 React.createElement(Row, null, 
-                  React.createElement(Col, {xs: 6}, 
+                  React.createElement(Col, {xs: 4}, 
               post.isRetwist && React.createElement("small", null, React.createElement("span", {className: "glyphicon glyphicon-retweet", "aria-hidden": "true"}), " ", React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
                 
                   ), 
-                  React.createElement(Col, {xs: 6}, React.createElement("p", {className: "text-right"}, React.createElement("small", null, React.createElement("em", null, "test"))))
+                  React.createElement(Col, {xs: 8}, React.createElement("p", {className: "text-right"}, React.createElement("small", null, React.createElement("em", null, "test"))))
                 )
             )
             

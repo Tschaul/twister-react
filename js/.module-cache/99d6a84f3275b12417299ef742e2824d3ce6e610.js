@@ -56,7 +56,7 @@ App = React.createClass({displayName: "App",
             "pampalulu"
           )
         ), 
-        React.createElement(RouteHandler, {pollInterval: "60", key: this.getHandlerKey()})
+        React.createElement(RouteHandler, {pollInterval: "60000", key: this.getHandlerKey()})
       )
     );
   }

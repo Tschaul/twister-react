@@ -1,8 +1,16 @@
-.container {
+
+
+.tight {
   padding-right:0.4em;
   padding-left:0.4em;
 }
 
+.fullytight {
+  padding-right:0;
+  padding-left:0;
+}
+
+/*
 .col-xs-2 {
   padding-right:0.4em;
   padding-left:0.4em;
@@ -38,6 +46,7 @@
   padding-right:0.4em;
   padding-left:0.4em;
 }
+*/
 
 .img-responsive {
   width: 100%;

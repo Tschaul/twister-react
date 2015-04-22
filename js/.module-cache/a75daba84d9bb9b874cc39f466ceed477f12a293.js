@@ -56,7 +56,7 @@ App = React.createClass({displayName: "App",
             "pampalulu"
           )
         ), 
-        React.createElement(RouteHandler, {pollInterval: "60", key: this.getHandlerKey()})
+        React.createElement(RouteHandler, {pollInterval: "60000", key: this.getHandlerKey()})
       )
     );
   }
@@ -95,8 +95,7 @@ Twister.loadServerAccounts(intitializeApp);
 ////// INIT EVENTLISTENERS ON WINDOW
 
 window.onscroll = function(ev) {
-  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-    var event = new Event('scrolledtobottom');
-    window.dispatchEvent(event);
-  }
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+        alert("you're at the bottom of the page");
+    }
 };
