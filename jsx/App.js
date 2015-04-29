@@ -28,13 +28,13 @@ var React = require('react');
 var Router = require('react-router');
 var { Route, DefaultRoute, RouteHandler, Link } = Router;
 
-var Home = require("./Home.js");
-var Profile = require("./Profile.js");
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var Timeline = require('./Timeline.js');
-var Followings = require('./Followings.js');
-var Mentions = require('./Mentions.js');
+var Home = require("./home/Home.js");
+var Profile = require("./profile/Profile.js");
+var SetIntervalMixin = require("./common/SetIntervalMixin.js");
+var SafeStateChangeMixin = require('./common/SafeStateChangeMixin.js');
+var Timeline = require('./profile/Timeline.js');
+var Followings = require('./profile/Followings.js');
+var Mentions = require('./profile/Mentions.js');
 
 
 App = React.createClass({

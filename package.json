@@ -13,7 +13,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "jsx jsx js && browserify js/App.js -o build/app-bundle.js"
+    "build": "jsx jsx build-buffer && browserify build-buffer/App.js -o build/app-bundle.js"
   },
   "repository": {
     "type": "git",

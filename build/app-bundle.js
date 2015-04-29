@@ -29,13 +29,13 @@ var React = require('react');
 var Router = require('react-router');
 var { Route, DefaultRoute, RouteHandler, Link } = Router;
 
-var Home = require("./Home.js");
-var Profile = require("./Profile.js");
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var Timeline = require('./Timeline.js');
-var Followings = require('./Followings.js');
-var Mentions = require('./Mentions.js');
+var Home = require("./home/Home.js");
+var Profile = require("./profile/Profile.js");
+var SetIntervalMixin = require("./common/SetIntervalMixin.js");
+var SafeStateChangeMixin = require('./common/SafeStateChangeMixin.js');
+var Timeline = require('./profile/Timeline.js');
+var Followings = require('./profile/Followings.js');
+var Mentions = require('./profile/Mentions.js');
 
 
 App = React.createClass({displayName: "App",
@@ -230,7 +230,7 @@ window.onscroll = function(ev) {
     window.dispatchEvent(event);
   }
 };
-},{"./Followings.js":3,"./Home.js":4,"./Mentions.js":5,"./Profile.js":10,"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"./Timeline.js":15,"react":287,"react-bootstrap":67,"react-router":100}],2:[function(require,module,exports){
+},{"./common/SafeStateChangeMixin.js":7,"./common/SetIntervalMixin.js":8,"./home/Home.js":10,"./profile/Followings.js":12,"./profile/Mentions.js":13,"./profile/Profile.js":14,"./profile/Timeline.js":15,"react":287,"react-bootstrap":67,"react-router":100}],2:[function(require,module,exports){
 module.exports = EventListenerMixin = function (eventtype) {
   
   return {
@@ -245,16 +245,156 @@ module.exports = EventListenerMixin = function (eventtype) {
 }
 },{}],3:[function(require,module,exports){
 
-var React = require('react/addons');
+var ReactBootstrap = require('react-bootstrap')
+  , Grid = ReactBootstrap.Grid
+  , Col = ReactBootstrap.Col
+  , Row = ReactBootstrap.Row
+  , ListGroupItem = ReactBootstrap.ListGroupItem
+  , ListGroup = ReactBootstrap.ListGroup
+  , Nav = ReactBootstrap.Nav
+  , NavItem = ReactBootstrap.NavItem
+  , Button = ReactBootstrap.Button
+  , ButtonGroup = ReactBootstrap.ButtonGroup
+  , Glyphicon = ReactBootstrap.Glyphicon
 
-var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+var React = require('react');
 
-var MiniProfile = require("./MiniProfile.js");
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var StreamMixin = require("./StreamMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var EventListenerMixin = require('./EventListenerMixin.js');
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var ProfileMixin = require('../common/ProfileMixin.js');
 
+module.exports = MiniProfile = React.createClass({displayName: "MiniProfile",
+  mixins: [SetIntervalMixin,SafeStateChangeMixin,ProfileMixin],
+  render: function() {
+    return (
+        React.createElement(ListGroupItem, null, 
+            React.createElement(Row, {className: "nomargin"}, 
+              React.createElement(Col, {xs: 2, md: 2, className: "fullytight"}, 
+                React.createElement("a", {href: "#/profile/"+this.props.username}, 
+                  React.createElement("img", {className: "img-responsive", src: this.state.avatar})
+                )
+              ), 
+              React.createElement(Col, {xs: 9, md: 9}, 
+                React.createElement("h5", {className: "nomargin-top"}, 
+                  this.state.fullname, React.createElement("small", null, "   ", '@'+this.props.username)
+                ), 
+                React.createElement("p", null, this.state.bio)
+              ), 
+              React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"})
+            )
+        )
+    );
+  }
+});
+},{"../common/ProfileMixin.js":6,"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"react":287,"react-bootstrap":67}],4:[function(require,module,exports){
+
+var ReactBootstrap = require('react-bootstrap')
+  , Grid = ReactBootstrap.Grid
+  , Col = ReactBootstrap.Col
+  , Row = ReactBootstrap.Row
+  , ListGroupItem = ReactBootstrap.ListGroupItem
+
+var React = require('react');
+
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+
+module.exports = Post = React.createClass({displayName: "Post",
+  mixins: [SetIntervalMixin,SafeStateChangeMixin],
+  getInitialState: function() {
+    return {
+      avatar: "img/genericPerson.png", 
+      fullname: "", 
+      retwistingUser: this.props.post.retwistingUser,
+      timeAgo: ""
+    };
+  },
+  updateTimeAgo: function() {
+    var secondsAgo = Date.now()/1000-this.props.post.timestamp;
+
+    var newTimeAgo = "";
+
+    if (secondsAgo<45) {newTimeAgo="1m"}
+    else if (secondsAgo<45*60) {newTimeAgo=Math.round(secondsAgo/60)+"m"}
+    else if (secondsAgo<18*60*60) {newTimeAgo=Math.round(secondsAgo/60/60)+"h"}
+    else if (secondsAgo<26*24*60*60) {newTimeAgo=Math.round(secondsAgo/24/60/60)+"d"}
+    else if (secondsAgo<9*30.5*24*60*60) {newTimeAgo=Math.round(secondsAgo/30.5/24/60/60)+"mo"}
+    else  {newTimeAgo=Math.round(secondsAgo/365/24/60/60)+"y"}
+
+    this.setStateSafe({timeAgo: newTimeAgo});
+
+  },
+  componentDidMount: function () {
+    var thisComponent = this;
+
+    //console.log(this.props.post.username+":post"+this.props.post.id);
+    Twister.getUser(this.props.post.username).doAvatar(function(avatar){
+      if (avatar.getUrl()) {
+        thisComponent.setStateSafe({avatar: avatar.getUrl()});  
+      } 
+    });
+    
+    Twister.getUser(this.props.post.username).doProfile(function(profile){
+      thisComponent.setStateSafe({fullname: profile.getField("fullname")});  
+    });
+
+    if (this.props.post.isRetwist) {
+      Twister.getUser(this.props.post.retwistingUser).doProfile(function(profile){
+        thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
+      });
+    }
+
+    this.updateTimeAgo();
+
+    this.setInterval(this.updateTimeAgo,60000);
+    
+  },
+  render: function() {
+    var post = this.props.post;
+    return (
+      React.createElement(ListGroupItem, null, 
+          React.createElement(Row, {className: "nomargin"}, 
+            React.createElement(Col, {xs: 2, md: 2, className: "fullytight"}, 
+              React.createElement("a", {href: "#/profile/"+this.props.post.username}, 
+                React.createElement("img", {className: "img-responsive", src: this.state.avatar})
+              )
+            ), 
+            React.createElement(Col, {xs: 9, md: 9}, 
+              React.createElement("strong", null, this.state.fullname), " ", 
+              post.content
+            ), 
+            React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"}, this.state.timeAgo)
+          ), 
+          React.createElement(Row, {className: "nomargin"}, 
+            React.createElement(Col, {xs: 6, md: 6, className: "fullytight"}, 
+        post.isRetwist && React.createElement("small", null, React.createElement("span", {className: "glyphicon glyphicon-retweet", "aria-hidden": "true"}), " ", React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
+          
+            ), 
+            React.createElement(Col, {xs: 6, md: 6, className: "fullytight text-align-right"}, React.createElement("small", null, React.createElement("em", null, "test")))
+          )
+
+      )
+    );
+  }
+});
+
+/*
+<div className="post-avatar">
+                    <img src={this.state.avatar}/>
+                </div>
+                <div className="post-bulk">
+                    <div className="post-username">
+                        <span className="post-fullname">{this.state.fullname} </span>
+                        @{post.username} - {post.id}
+                        
+                    </div>
+                    <div className="post-timestamp">{post.timestamp}</div>
+                    <div className="post-content">{post.content}</div>
+                </div>
+                <hr/>
+                
+                */
+},{"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"react":287,"react-bootstrap":67}],5:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
@@ -265,77 +405,246 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Button = ReactBootstrap.Button
 
-module.exports = Home = React.createClass({displayName: "Home",
-    
-  mixins: [SetIntervalMixin,SafeStateChangeMixin],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-  getInitialState: function() {
-    return {
-      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
-      followings: []
-    };
-  },
-  updateFollowings: function(outdatedLimit) {
+var React = require('react/addons');
 
-    thisComponent=this;
-    
-    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-    Twister.getUser(this.state.username).doFollowings(function(followings){
-      
-      thisComponent.setStateSafe(function(state){
-      
-        var newfollowings = [];
-        
-        for(var i in followings){
-            newfollowings.push(followings[i].getUsername());
-        }
-        
-        state.followings = newfollowings;
-        
-        return state;
-        
-      });
+var Post = require("../common/Post.js");
 
-    },{outdatedLimit: outdatedLimit});
-
-    
-  },
-  componentDidMount: function() {
-
-    this.updateFollowings(this.props.pollInterval*2);
-
-    this.setInterval(this.updateFollowings, this.props.pollInterval*1000);
-      
-  },
+module.exports = Postboard = React.createClass({displayName: "Postboard",
   render: function() {
-    
-    var thisComponent = this;
-    
-    var profiles = this.state.followings.map(function(username, index) {
+    var posts = this.props.data.map(function(post, index) {
       return (
-        React.createElement(MiniProfile, {username: username, key: "miniprofile:"+username, pollIntervalProfile: thisComponent.props.pollIntervalProfile})
+        React.createElement(Post, {post: post, key: post.postid})
       );
     });
+    
     return (
       React.createElement(ListGroup, {fill: true}, 
+        this.props.header, 
         React.createElement(ReactCSSTransitionGroup, {transitionName: "item"}, 
-          profiles
+          posts
         )
       )
     );
   }
 }); 
-},{"./EventListenerMixin.js":2,"./MiniProfile.js":6,"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"./StreamMixin.js":14,"react-bootstrap":67,"react/addons":115}],4:[function(require,module,exports){
+},{"../common/Post.js":4,"react-bootstrap":67,"react/addons":115}],6:[function(require,module,exports){
+module.exports = ProfileMixin = {
+  getInitialState: function() {
+    
+    var username = this.props.username;
+    
+    if (!username) {
+    
+      username = (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount);
+      
+    }
+    
+    var state = {
+      username: username,
+      avatar: "img/genericPerson.png", 
+      fullname: "", 
+      bio: "", 
+      location: "", 
+      url: ""
+    };
+    
+    var profile = Twister.getUser(username).getProfile();
+    
+    if (profile.inCache()) {
+    
+      state.fullname = profile.getField("fullname");
+      state.bio = profile.getField("bio");
+      state.location = profile.getField("location");
+      state.url = profile.getField("url");
+    
+    }
+    
+    var avatar = Twister.getUser(username).getAvatar();
+    
+    if (avatar.inCache()) {
+    
+      state.avatar = avatar.getUrl();
+    
+    }
+    
+    return state;
+    
+    
+  },
+  updateProfile: function () {
+    
+    var thisComponent = this;
+
+    Twister.getUser(this.state.username).doAvatar(function(avatar){
+      if (avatar.getUrl()) {
+        thisComponent.setStateSafe({avatar: avatar.getUrl()});  
+      }
+    });
+    
+    Twister.getUser(this.state.username).doProfile(function(profile){
+      thisComponent.setStateSafe({
+        fullname: profile.getField("fullname"),
+        bio: profile.getField("bio"),
+        location: profile.getField("location"),
+        url: profile.getField("url"),
+      });  
+    });
+  
+  },
+  componentDidMount: function () {
+    
+    this.updateProfile();
+    
+    this.setInterval(this.updateProfile,this.props.pollIntervalProfile*1000);
+    
+  }
+};
+},{}],7:[function(require,module,exports){
+function isValidLifeCycleForReplaceState(instance) {
+  // See function validateLifeCycleOnReplaceState(instance) in
+  // ReactCompositeComponent.js
+  var result = true;
+
+  //result &= ReactCurrentOwner.current == null;
+  //result &= __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' || __REACT_DEVTOOLS_GLOBAL_HOOK__._reactRuntime.CurrentOwner.current == null;
+
+  result &= instance.isMounted();
+
+  return result;
+}
+
+var safeStateChangeMixin = {
+  /**
+   * Calls setState with the provided parameters if it is safe to do so.
+   *
+   * Safe means it will try to do the same checks as setState does
+   * without throwing an exception.
+   * See function validateLifeCycleOnReplaceState(instance) in
+   * ReactCompositeComponent.js
+   *
+   * @param {object} partialState Next partial state to be merged with state.
+   * @param {?function} callback Called after state is updated.
+   * @return {boolean} Whether or not setState is called.
+   * @final
+   * @protected
+   */
+  setStateSafe: function (partialState, callback) {
+    if (isValidLifeCycleForReplaceState(this)) {
+      this.setState(partialState, callback);
+      return true;
+    }
+
+    return false;
+  },
+
+  /**
+   * Calls replaceState with the provided parameters if it safe to do so.
+   *
+   * Safe means it will try to do the same checks as replaceState does
+   * without throwing an exception.
+   * See function validateLifeCycleOnReplaceState(instance) in
+   * ReactCompositeComponent.js
+   *
+   * @param {object} completeState Next state.
+   * @param {?function} callback Called after state is updated.
+   * @return {boolean} Whether or not setState is called.
+   * @final
+   * @protected
+   */
+  replaceStateSafe: function(completeState, callback) {
+    if (isValidLifeCycleForReplaceState(this)) {
+      this.replaceState(completeState, callback);
+      return true;
+    }
+
+    return false;
+  }
+};
+
+module.exports = safeStateChangeMixin;
+},{}],8:[function(require,module,exports){
+module.exports = SetIntervalMixin = {
+  componentWillMount: function() {
+    this.intervals = [];
+  },
+  setInterval: function() {
+    this.intervals.push(setInterval.apply(null, arguments));
+  },
+  componentWillUnmount: function() {
+    this.intervals.map(clearInterval);
+  }
+};
+},{}],9:[function(require,module,exports){
+module.exports = StreamMixin = {
+    
+    addPost: function(post) {
+        
+        var postid = post.getUsername() + ":post" + post.getId();
+        
+        if (!this.state.postIdentifiers[postid]) {
+            
+            this.setStateSafe(function(previousState, currentProps) {
+        
+                previousState.postIdentifiers[postid] = true;
+
+                if (post.isRetwist()){
+                
+                    
+                    var postdata = {
+                        username: post.getRetwistedUser(),
+                        retwistingUser: post.getUsername(),
+                        content: post.getRetwistedContent(),
+                        id: post.getRetwistedId(),
+                        timestamp: post.getTimestamp(),
+                        postid: postid,
+                        isRetwist: true
+                    }
+                    
+                } else {
+                
+                    var postdata = {
+                        username: post.getUsername(),
+                        content: post.getContent(),
+                        id: post.getId(),
+                        timestamp: post.getTimestamp(),
+                        postid: postid,
+                        isRetwist: false
+                        
+                    }
+                    
+                }
+                
+                previousState.data.push(postdata)
+
+                var compare = function (a,b) {
+                  if (a.timestamp < b.timestamp)
+                     return 1;
+                  if (a.timestamp > b.timestamp)
+                    return -1;
+                  return 0;
+                }
+
+                previousState.data.sort(compare);
+
+                return {data: previousState.data, postIdentifiers: previousState.postIdentifiers };
+            });
+            
+        } else {
+            
+            
+        }
+    }
+}
+},{}],10:[function(require,module,exports){
 var React = require('react');
-var Postboard = require("./Postboard.js");
-var NewPostModalButton = require("./NewPostModalButton.js");
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var StreamMixin = require("./StreamMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var EventListenerMixin = require('./EventListenerMixin.js');
+var Postboard = require("../common/Postboard.js");
+var NewPostModalButton = require("../home/NewPostModalButton.js");
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var StreamMixin = require("../common/StreamMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var EventListenerMixin = require('../common/EventListenerMixin.js');
 
 
 var ReactBootstrap = require('react-bootstrap')
@@ -512,103 +821,7 @@ module.exports = Home = React.createClass({displayName: "Home",
       );
   }
 });
-},{"./EventListenerMixin.js":2,"./NewPostModalButton.js":7,"./Postboard.js":9,"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"./StreamMixin.js":14,"react":287,"react-bootstrap":67}],5:[function(require,module,exports){
-var React = require('react');
-var MiniProfile = require("./MiniProfile.js");
-var Postboard = require("./Postboard.js");
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var StreamMixin = require("./StreamMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var EventListenerMixin = require('./EventListenerMixin.js');
-
-
-module.exports = Home = React.createClass({displayName: "Home",
-    
-  mixins: [StreamMixin,SetIntervalMixin,SafeStateChangeMixin],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-  getInitialState: function() {
-    return {
-      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
-      data: [],
-      postIdentifiers: {}
-    };
-  },
-  updateMentions: function(outdatedLimit) {
-
-    thisComponent=this;
-    
-    if (outdatedLimit===undefined) {outdatedLimit=this.props.pollInterval/2;}
-
-    Twister.getUser(this.state.username).doMentions(function(mentions){
-          
-      for(var i in mentions){
-          thisComponent.addPost(mentions[i]);
-      }
-
-    },{outdatedLimit: outdatedLimit});
-
-    
-  },
-  componentDidMount: function() {
-
-    this.updateMentions(this.props.pollInterval*2);
-
-    this.setInterval(this.updateMentions, this.props.pollInterval*1000);
-      
-  },
-  render: function() {
-    return (
-      React.createElement(Postboard, {data: this.state.data, header: ""})
-    );
-  }
-}); 
-},{"./EventListenerMixin.js":2,"./MiniProfile.js":6,"./Postboard.js":9,"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"./StreamMixin.js":14,"react":287}],6:[function(require,module,exports){
-
-var ReactBootstrap = require('react-bootstrap')
-  , Grid = ReactBootstrap.Grid
-  , Col = ReactBootstrap.Col
-  , Row = ReactBootstrap.Row
-  , ListGroupItem = ReactBootstrap.ListGroupItem
-  , ListGroup = ReactBootstrap.ListGroup
-  , Nav = ReactBootstrap.Nav
-  , NavItem = ReactBootstrap.NavItem
-  , Button = ReactBootstrap.Button
-  , ButtonGroup = ReactBootstrap.ButtonGroup
-  , Glyphicon = ReactBootstrap.Glyphicon
-
-var React = require('react');
-
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var ProfileMixin = require('./ProfileMixin.js');
-var Timeline = require('./Timeline.js');
-
-module.exports = MiniProfile = React.createClass({displayName: "MiniProfile",
-  mixins: [SetIntervalMixin,SafeStateChangeMixin,ProfileMixin],
-  render: function() {
-    return (
-        React.createElement(ListGroupItem, null, 
-            React.createElement(Row, {className: "nomargin"}, 
-              React.createElement(Col, {xs: 2, md: 2, className: "fullytight"}, 
-                React.createElement("a", {href: "#/profile/"+this.props.username}, 
-                  React.createElement("img", {className: "img-responsive", src: this.state.avatar})
-                )
-              ), 
-              React.createElement(Col, {xs: 9, md: 9}, 
-                React.createElement("h5", {className: "nomargin-top"}, 
-                  this.state.fullname, React.createElement("small", null, "   ", '@'+this.props.username)
-                ), 
-                React.createElement("p", null, this.state.bio)
-              ), 
-              React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"})
-            )
-        )
-    );
-  }
-});
-},{"./ProfileMixin.js":11,"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"./Timeline.js":15,"react":287,"react-bootstrap":67}],7:[function(require,module,exports){
+},{"../common/EventListenerMixin.js":2,"../common/Postboard.js":5,"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"../common/StreamMixin.js":9,"../home/NewPostModalButton.js":11,"react":287,"react-bootstrap":67}],11:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
   , OverlayMixin = ReactBootstrap.OverlayMixin
@@ -620,8 +833,8 @@ var ReactBootstrap = require('react-bootstrap')
 
 var React = require('react');
 
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var SetIntervalMixin = require("./SetIntervalMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 
 module.exports = NewPostModalButton = React.createClass({displayName: "NewPostModalButton",
   mixins: [OverlayMixin],
@@ -686,115 +899,18 @@ module.exports = NewPostModalButton = React.createClass({displayName: "NewPostMo
   
   }
 });
-},{"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"react":287,"react-bootstrap":67}],8:[function(require,module,exports){
+},{"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"react":287,"react-bootstrap":67}],12:[function(require,module,exports){
 
-var ReactBootstrap = require('react-bootstrap')
-  , Grid = ReactBootstrap.Grid
-  , Col = ReactBootstrap.Col
-  , Row = ReactBootstrap.Row
-  , ListGroupItem = ReactBootstrap.ListGroupItem
+var React = require('react/addons');
 
-var React = require('react');
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
+var MiniProfile = require("../common/MiniProfile.js");
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var StreamMixin = require("../common/StreamMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var EventListenerMixin = require('../common/EventListenerMixin.js');
 
-module.exports = Post = React.createClass({displayName: "Post",
-  mixins: [SetIntervalMixin,SafeStateChangeMixin],
-  getInitialState: function() {
-    return {
-      avatar: "img/genericPerson.png", 
-      fullname: "", 
-      retwistingUser: this.props.post.retwistingUser,
-      timeAgo: ""
-    };
-  },
-  updateTimeAgo: function() {
-    var secondsAgo = Date.now()/1000-this.props.post.timestamp;
-
-    var newTimeAgo = "";
-
-    if (secondsAgo<45) {newTimeAgo="1m"}
-    else if (secondsAgo<45*60) {newTimeAgo=Math.round(secondsAgo/60)+"m"}
-    else if (secondsAgo<18*60*60) {newTimeAgo=Math.round(secondsAgo/60/60)+"h"}
-    else if (secondsAgo<26*24*60*60) {newTimeAgo=Math.round(secondsAgo/24/60/60)+"d"}
-    else if (secondsAgo<9*30.5*24*60*60) {newTimeAgo=Math.round(secondsAgo/30.5/24/60/60)+"mo"}
-    else  {newTimeAgo=Math.round(secondsAgo/365/24/60/60)+"y"}
-
-    this.setStateSafe({timeAgo: newTimeAgo});
-
-  },
-  componentDidMount: function () {
-    var thisComponent = this;
-
-    //console.log(this.props.post.username+":post"+this.props.post.id);
-    Twister.getUser(this.props.post.username).doAvatar(function(avatar){
-      if (avatar.getUrl()) {
-        thisComponent.setStateSafe({avatar: avatar.getUrl()});  
-      } 
-    });
-    
-    Twister.getUser(this.props.post.username).doProfile(function(profile){
-      thisComponent.setStateSafe({fullname: profile.getField("fullname")});  
-    });
-
-    if (this.props.post.isRetwist) {
-      Twister.getUser(this.props.post.retwistingUser).doProfile(function(profile){
-        thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
-      });
-    }
-
-    this.updateTimeAgo();
-
-    this.setInterval(this.updateTimeAgo,60000);
-    
-  },
-  render: function() {
-    var post = this.props.post;
-    return (
-      React.createElement(ListGroupItem, null, 
-          React.createElement(Row, {className: "nomargin"}, 
-            React.createElement(Col, {xs: 2, md: 2, className: "fullytight"}, 
-              React.createElement("a", {href: "#/profile/"+this.props.post.username}, 
-                React.createElement("img", {className: "img-responsive", src: this.state.avatar})
-              )
-            ), 
-            React.createElement(Col, {xs: 9, md: 9}, 
-              React.createElement("strong", null, this.state.fullname), " ", 
-              post.content
-            ), 
-            React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"}, this.state.timeAgo)
-          ), 
-          React.createElement(Row, {className: "nomargin"}, 
-            React.createElement(Col, {xs: 6, md: 6, className: "fullytight"}, 
-        post.isRetwist && React.createElement("small", null, React.createElement("span", {className: "glyphicon glyphicon-retweet", "aria-hidden": "true"}), " ", React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
-          
-            ), 
-            React.createElement(Col, {xs: 6, md: 6, className: "fullytight text-align-right"}, React.createElement("small", null, React.createElement("em", null, "test")))
-          )
-
-      )
-    );
-  }
-});
-
-/*
-<div className="post-avatar">
-                    <img src={this.state.avatar}/>
-                </div>
-                <div className="post-bulk">
-                    <div className="post-username">
-                        <span className="post-fullname">{this.state.fullname} </span>
-                        @{post.username} - {post.id}
-                        
-                    </div>
-                    <div className="post-timestamp">{post.timestamp}</div>
-                    <div className="post-content">{post.content}</div>
-                </div>
-                <hr/>
-                
-                */
-},{"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"react":287,"react-bootstrap":67}],9:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
@@ -805,31 +921,122 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Button = ReactBootstrap.Button
 
-var React = require('react/addons');
+module.exports = Home = React.createClass({displayName: "Home",
+    
+  mixins: [SetIntervalMixin,SafeStateChangeMixin],
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  getInitialState: function() {
+    return {
+      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      followings: []
+    };
+  },
+  updateFollowings: function(outdatedLimit) {
 
-var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+    thisComponent=this;
+    
+    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
 
-var Post = require("./Post.js");
+    Twister.getUser(this.state.username).doFollowings(function(followings){
+      
+      thisComponent.setStateSafe(function(state){
+      
+        var newfollowings = [];
+        
+        for(var i in followings){
+            newfollowings.push(followings[i].getUsername());
+        }
+        
+        state.followings = newfollowings;
+        
+        return state;
+        
+      });
 
-module.exports = Postboard = React.createClass({displayName: "Postboard",
+    },{outdatedLimit: outdatedLimit});
+
+    
+  },
+  componentDidMount: function() {
+
+    this.updateFollowings(this.props.pollInterval*2);
+
+    this.setInterval(this.updateFollowings, this.props.pollInterval*1000);
+      
+  },
   render: function() {
-    var posts = this.props.data.map(function(post, index) {
+    
+    var thisComponent = this;
+    
+    var profiles = this.state.followings.map(function(username, index) {
       return (
-        React.createElement(Post, {post: post, key: post.postid})
+        React.createElement(MiniProfile, {username: username, key: "miniprofile:"+username, pollIntervalProfile: thisComponent.props.pollIntervalProfile})
       );
     });
-    
     return (
       React.createElement(ListGroup, {fill: true}, 
-        this.props.header, 
         React.createElement(ReactCSSTransitionGroup, {transitionName: "item"}, 
-          posts
+          profiles
         )
       )
     );
   }
 }); 
-},{"./Post.js":8,"react-bootstrap":67,"react/addons":115}],10:[function(require,module,exports){
+},{"../common/EventListenerMixin.js":2,"../common/MiniProfile.js":3,"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"../common/StreamMixin.js":9,"react-bootstrap":67,"react/addons":115}],13:[function(require,module,exports){
+var React = require('react');
+var MiniProfile = require("../common/MiniProfile.js");
+var Postboard = require("../common/Postboard.js");
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var StreamMixin = require("../common/StreamMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var EventListenerMixin = require('../common/EventListenerMixin.js');
+
+
+module.exports = Home = React.createClass({displayName: "Home",
+    
+  mixins: [StreamMixin,SetIntervalMixin,SafeStateChangeMixin],
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  getInitialState: function() {
+    return {
+      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      data: [],
+      postIdentifiers: {}
+    };
+  },
+  updateMentions: function(outdatedLimit) {
+
+    thisComponent=this;
+    
+    if (outdatedLimit===undefined) {outdatedLimit=this.props.pollInterval/2;}
+
+    Twister.getUser(this.state.username).doMentions(function(mentions){
+          
+      for(var i in mentions){
+          thisComponent.addPost(mentions[i]);
+      }
+
+    },{outdatedLimit: outdatedLimit});
+
+    
+  },
+  componentDidMount: function() {
+
+    this.updateMentions(this.props.pollInterval*2);
+
+    this.setInterval(this.updateMentions, this.props.pollInterval*1000);
+      
+  },
+  render: function() {
+    return (
+      React.createElement(Postboard, {data: this.state.data, header: ""})
+    );
+  }
+}); 
+},{"../common/EventListenerMixin.js":2,"../common/MiniProfile.js":3,"../common/Postboard.js":5,"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"../common/StreamMixin.js":9,"react":287}],14:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
   , Grid = ReactBootstrap.Grid
@@ -847,9 +1054,9 @@ var React = require('react');
 var Router = require('react-router');
 var { Route, DefaultRoute, RouteHandler, Link } = Router;
 
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var ProfileMixin = require('./ProfileMixin.js');
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var ProfileMixin = require('../common/ProfileMixin.js');
 
 module.exports = Post = React.createClass({displayName: "Post",
   mixins: [SetIntervalMixin,SafeStateChangeMixin,ProfileMixin],
@@ -910,222 +1117,13 @@ module.exports = Post = React.createClass({displayName: "Post",
     );
   }
 });
-},{"./ProfileMixin.js":11,"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"react":287,"react-bootstrap":67,"react-router":100}],11:[function(require,module,exports){
-module.exports = ProfileMixin = {
-  getInitialState: function() {
-    
-    var username = this.props.username;
-    
-    if (!username) {
-    
-      username = (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount);
-      
-    }
-    
-    var state = {
-      username: username,
-      avatar: "img/genericPerson.png", 
-      fullname: "", 
-      bio: "", 
-      location: "", 
-      url: ""
-    };
-    
-    var profile = Twister.getUser(username).getProfile();
-    
-    if (profile.inCache()) {
-    
-      state.fullname = profile.getField("fullname");
-      state.bio = profile.getField("bio");
-      state.location = profile.getField("location");
-      state.url = profile.getField("url");
-    
-    }
-    
-    var avatar = Twister.getUser(username).getAvatar();
-    
-    if (avatar.inCache()) {
-    
-      state.avatar = avatar.getUrl();
-    
-    }
-    
-    return state;
-    
-    
-  },
-  updateProfile: function () {
-    
-    var thisComponent = this;
-
-    Twister.getUser(this.state.username).doAvatar(function(avatar){
-      if (avatar.getUrl()) {
-        thisComponent.setStateSafe({avatar: avatar.getUrl()});  
-      }
-    });
-    
-    Twister.getUser(this.state.username).doProfile(function(profile){
-      thisComponent.setStateSafe({
-        fullname: profile.getField("fullname"),
-        bio: profile.getField("bio"),
-        location: profile.getField("location"),
-        url: profile.getField("url"),
-      });  
-    });
-  
-  },
-  componentDidMount: function () {
-    
-    this.updateProfile();
-    
-    this.setInterval(this.updateProfile,this.props.pollIntervalProfile*1000);
-    
-  }
-};
-},{}],12:[function(require,module,exports){
-function isValidLifeCycleForReplaceState(instance) {
-  // See function validateLifeCycleOnReplaceState(instance) in
-  // ReactCompositeComponent.js
-  var result = true;
-
-  //result &= ReactCurrentOwner.current == null;
-  //result &= __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' || __REACT_DEVTOOLS_GLOBAL_HOOK__._reactRuntime.CurrentOwner.current == null;
-
-  result &= instance.isMounted();
-
-  return result;
-}
-
-var safeStateChangeMixin = {
-  /**
-   * Calls setState with the provided parameters if it is safe to do so.
-   *
-   * Safe means it will try to do the same checks as setState does
-   * without throwing an exception.
-   * See function validateLifeCycleOnReplaceState(instance) in
-   * ReactCompositeComponent.js
-   *
-   * @param {object} partialState Next partial state to be merged with state.
-   * @param {?function} callback Called after state is updated.
-   * @return {boolean} Whether or not setState is called.
-   * @final
-   * @protected
-   */
-  setStateSafe: function (partialState, callback) {
-    if (isValidLifeCycleForReplaceState(this)) {
-      this.setState(partialState, callback);
-      return true;
-    }
-
-    return false;
-  },
-
-  /**
-   * Calls replaceState with the provided parameters if it safe to do so.
-   *
-   * Safe means it will try to do the same checks as replaceState does
-   * without throwing an exception.
-   * See function validateLifeCycleOnReplaceState(instance) in
-   * ReactCompositeComponent.js
-   *
-   * @param {object} completeState Next state.
-   * @param {?function} callback Called after state is updated.
-   * @return {boolean} Whether or not setState is called.
-   * @final
-   * @protected
-   */
-  replaceStateSafe: function(completeState, callback) {
-    if (isValidLifeCycleForReplaceState(this)) {
-      this.replaceState(completeState, callback);
-      return true;
-    }
-
-    return false;
-  }
-};
-
-module.exports = safeStateChangeMixin;
-},{}],13:[function(require,module,exports){
-module.exports = SetIntervalMixin = {
-  componentWillMount: function() {
-    this.intervals = [];
-  },
-  setInterval: function() {
-    this.intervals.push(setInterval.apply(null, arguments));
-  },
-  componentWillUnmount: function() {
-    this.intervals.map(clearInterval);
-  }
-};
-},{}],14:[function(require,module,exports){
-module.exports = StreamMixin = {
-    
-    addPost: function(post) {
-        
-        var postid = post.getUsername() + ":post" + post.getId();
-        
-        if (!this.state.postIdentifiers[postid]) {
-            
-            this.setStateSafe(function(previousState, currentProps) {
-        
-                previousState.postIdentifiers[postid] = true;
-
-                if (post.isRetwist()){
-                
-                    
-                    var postdata = {
-                        username: post.getRetwistedUser(),
-                        retwistingUser: post.getUsername(),
-                        content: post.getRetwistedContent(),
-                        id: post.getRetwistedId(),
-                        timestamp: post.getTimestamp(),
-                        postid: postid,
-                        isRetwist: true
-                    }
-                    
-                } else {
-                
-                    var postdata = {
-                        username: post.getUsername(),
-                        content: post.getContent(),
-                        id: post.getId(),
-                        timestamp: post.getTimestamp(),
-                        postid: postid,
-                        isRetwist: false
-                        
-                    }
-                    
-                }
-                
-                previousState.data.push(postdata)
-
-                var compare = function (a,b) {
-                  if (a.timestamp < b.timestamp)
-                     return 1;
-                  if (a.timestamp > b.timestamp)
-                    return -1;
-                  return 0;
-                }
-
-                previousState.data.sort(compare);
-
-                return {data: previousState.data, postIdentifiers: previousState.postIdentifiers };
-            });
-            
-        } else {
-            
-            
-        }
-    }
-}
-},{}],15:[function(require,module,exports){
+},{"../common/ProfileMixin.js":6,"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"react":287,"react-bootstrap":67,"react-router":100}],15:[function(require,module,exports){
 var React = require('react');
-var Postboard = require("./Postboard.js");
-var Timeline = require("./Timeline.js");
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var StreamMixin = require("./StreamMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-var EventListenerMixin = require('./EventListenerMixin.js');
+var Postboard = require("../common/Postboard.js");
+var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var StreamMixin = require("../common/StreamMixin.js");
+var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var EventListenerMixin = require('../common/EventListenerMixin.js');
 
 
 var ReactBootstrap = require('react-bootstrap')
@@ -1137,7 +1135,7 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Button = ReactBootstrap.Button
 
-module.exports = Home = React.createClass({displayName: "Home",
+module.exports = Timeline = React.createClass({displayName: "Timeline",
     
   mixins:[
     StreamMixin,
@@ -1215,7 +1213,7 @@ module.exports = Home = React.createClass({displayName: "Home",
         );
   }
 });
-},{"./EventListenerMixin.js":2,"./Postboard.js":9,"./SafeStateChangeMixin.js":12,"./SetIntervalMixin.js":13,"./StreamMixin.js":14,"./Timeline.js":15,"react":287,"react-bootstrap":67}],16:[function(require,module,exports){
+},{"../common/EventListenerMixin.js":2,"../common/Postboard.js":5,"../common/SafeStateChangeMixin.js":7,"../common/SetIntervalMixin.js":8,"../common/StreamMixin.js":9,"react":287,"react-bootstrap":67}],16:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
