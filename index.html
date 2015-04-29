@@ -16,35 +16,12 @@
         <!-- Latest compiled and minified JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
         
+        <link rel="stylesheet" type="text/css" href="css/paper-theme.css">
         <link rel="stylesheet" type="text/css" href="css/main.css">
-      <script>
-      
-
-      var loadCache = function () {
-
-        Twister.deserializeCache(JSON.parse(localStorage.getItem("twister-cache")));
-
-      };
-
-      var clearCache = function () {
-
-        localStorage.setItem("twister-cache", null);
-
-      };
-        
-        var saveCache = function () {
-        
-          localStorage.setItem("twister-cache", JSON.stringify(Twister.serializeCache()))
-        }
-      </script>
       
     </head>
     <body>
-        <a href="javascript:loadCache()">Load Cache</a>
-        <a href="javascript:saveCache()">Save Cache</a>
-        <a href="javascript:clearCache()">Clear Cache</a>
-        <br/>
-        
+                
         <div id="content" class="container"></div>
         
        <script src="build/app-bundle.js"></script>

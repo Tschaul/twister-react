@@ -1,4 +1,19 @@
+body {
+  overflow-y: scroll;
+}
 
+body.modal-open {
+  overflow-y: scroll;
+  margin: 0;
+}
+
+.modal {
+  overflow: auto;
+}
+
+.link-button-gray {
+  color: #666;
+}
 
 .tight {
   padding-right:0.4em;
@@ -10,44 +25,42 @@
   padding-left:0;
 }
 
-/*
-.col-xs-2 {
-  padding-right:0.4em;
-  padding-left:0.4em;
+.fullytight_all {
+  padding:0;
 }
 
-.col-xs-1 {
-  padding-right:0.4em;
-  padding-left:0.4em;
+.nomargin {
+  margin-right:0;
+  margin-left:0;
 }
 
-.col-xs-10 {
-  padding-right:0.4em;
-  padding-left:0.4em;
+.nomargin-top {
+  margin-top:0;
 }
 
-.col-xs-9 {
-  padding-right:0.4em;
-  padding-left:0.4em;
+.text-align-right {
+  text-align: right;
 }
-
-.col-xs-11 {
-  padding-right:0.4em;
-  padding-left:0.4em;
-}
-
-.col-xs-12 {
-  padding-right:0.4em;
-  padding-left:0.4em;
-  padding-top:0.2em;
-}
-
-.list-group-item {
-  padding-right:0.4em;
-  padding-left:0.4em;
-}
-*/
 
 .img-responsive {
   width: 100%;
 }
+
+.item-enter {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+
+.item-enter.item-enter-active {
+  opacity: 1;
+}
+
+.item-leave {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+
+.item-leave.item-leave-active {
+  opacity: 0.01;
+}
+

@@ -1,0 +1,106 @@
+
+var ReactBootstrap = require('react-bootstrap')
+  , Grid = ReactBootstrap.Grid
+  , Col = ReactBootstrap.Col
+  , Row = ReactBootstrap.Row
+  , ListGroupItem = ReactBootstrap.ListGroupItem
+  , ListGroup = ReactBootstrap.ListGroup
+  , Nav = ReactBootstrap.Nav
+  , NavItem = ReactBootstrap.NavItem
+  , Button = ReactBootstrap.Button
+  , ButtonGroup = ReactBootstrap.ButtonGroup
+  , Glyphicon = ReactBootstrap.Glyphicon
+
+var React = require('react');
+
+var SetIntervalMixin = require("./SetIntervalMixin.js");
+var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
+var ProfileMixin = require('./ProfileMixin.js');
+var Timeline = require('./Timeline.js');
+var Followings = require('./Followings.js');
+var Mentions = require('./Mentions.js');
+
+module.exports = Post = React.createClass({displayName: "Post",
+  mixins: [SetIntervalMixin,SafeStateChangeMixin,ProfileMixin],
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  render: function() {
+    
+    var routeprefix = "#/profile/"+(this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username+"/" : "active-user/")
+    
+    switch (this.context.router.getCurrentParams().subroute) {
+        case "timeline":
+          var subroute = "timeline"
+          var subcontent = (
+              React.createElement(Timeline, {
+                username: this.state.username, 
+                pollInterval: this.props.pollInterval, 
+                pollIntervalProfile: this.props.pollIntervalProfile}
+              )
+            );
+          break;
+        case "followings":
+          console.log("followings selcted")
+          var subroute = "followings"
+          var subcontent = (
+              React.createElement(Followings, {
+                username: this.state.username, 
+                pollInterval: this.props.pollInterval, 
+                pollIntervalProfile: this.props.pollIntervalProfile}
+              )
+            );
+          break;
+        case "mentions":
+          console.log("mentions selcted")
+          var subroute = "mentions"
+          var subcontent = (
+              React.createElement(Mentions, {
+                username: this.state.username, 
+                pollInterval: this.props.pollInterval, 
+                pollIntervalProfile: this.props.pollIntervalProfile}
+              )
+            );
+          break;
+        default:
+          console.log("default selcted")
+          var subroute = "timeline"
+          var subcontent = (
+              React.createElement(Timeline, {
+                username: this.state.username, 
+                pollInterval: this.props.pollInterval, 
+                pollIntervalProfile: this.props.pollIntervalProfile}
+              )
+            );
+    }
+    
+    var subroute
+    
+    return (
+      React.createElement(ListGroup, {fill: true}, 
+        React.createElement(ListGroupItem, null, 
+            React.createElement(Row, {className: "nomargin"}, 
+              React.createElement(Col, {xs: 3, md: 3, className: "fullytight"}, 
+                React.createElement("img", {className: "img-responsive", src: this.state.avatar})
+              ), 
+              React.createElement(Col, {xs: 8, md: 8}, 
+                React.createElement("h4", {className: "nomargin-top"}, this.state.fullname, React.createElement("small", null, "   ", '@'+this.state.username)), 
+                React.createElement("p", {className: "text-center"}, this.state.location), 
+                React.createElement("p", {className: "text-center"}, this.state.bio), 
+                React.createElement("p", {className: "text-center"}, React.createElement("a", {href: this.state.url}, this.state.url))
+              ), 
+              React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"})
+            )
+        ), 
+        React.createElement(ListGroupItem, {className: "fullytight_all"}, 
+          React.createElement(ButtonGroup, {justified: true}, 
+            React.createElement(Button, {href: routeprefix+"timeline", bsStyle: subroute=="timeline" ? "primary" : "default"}, React.createElement(Glyphicon, {glyph: "list"})), 
+            React.createElement(Button, {href: routeprefix+"followings", bsStyle: subroute=="followings" ? "primary" : "default"}, React.createElement(Glyphicon, {glyph: "eye-open"})), 
+            React.createElement(Button, {href: routeprefix+"mentions", bsStyle: subroute=="mentions" ? "primary" : "default"}, React.createElement(Glyphicon, {glyph: "comment"}))
+          )
+        ), 
+        subcontent
+      )
+    );
+  }
+});

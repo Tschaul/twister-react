@@ -1,172 +1,96 @@
+var React = require('react');
+var Postboard = require("./Postboard.js");
+var Timeline = require("./Timeline.js");
+var SetIntervalMixin = require("./SetIntervalMixin.js");
+var StreamMixin = require("./StreamMixin.js");
+var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
+var EventListenerMixin = require('./EventListenerMixin.js');
+
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
   , Nav = ReactBootstrap.Nav
   , ListGroup = ReactBootstrap.ListGroup
+  , ListGroupItem = ReactBootstrap.ListGroupItem
   , Panel = ReactBootstrap.Panel
+  , Glyphicon = ReactBootstrap.Glyphicon
+  , Button = ReactBootstrap.Button
 
-
-var React = require('react');
-
-var Postboard = require("./Postboard.js");
-var SetIntervalMixin = require("./SetIntervalMixin.js");
-var StreamMixin = require("./StreamMixin.js");
-var SafeStateChangeMixin = require('./SafeStateChangeMixin.js');
-
-var EventListenerMixin = require('./EventListenerMixin.js')
-
-module.exports = Timeline = React.createClass({
+module.exports = Home = React.createClass({
     
-    mixins: [StreamMixin,SetIntervalMixin,SafeStateChangeMixin,EventListenerMixin('scrolledtobottom')],
-    contextTypes: {
-      router: React.PropTypes.func
-    },
-    verifyPost: function (post) {
-        
-        var verified = false;
+  mixins:[
+    StreamMixin,
+    SetIntervalMixin,
+    SafeStateChangeMixin,
+    EventListenerMixin('scrolledtobottom'),
+    EventListenerMixin('newpostbyuser')
+  ],
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  getInitialState: function() {
+    return {
+      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      data: [], 
+      postIdentifiers: {},
+      postCount: 30
+    };
+  },
+  updatePosts: function(outdatedLimit) {
 
-        for (var i = 0; i<this.state.usernames.length; i++) {
+    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
 
-            if (post.getUsername()==this.state.usernames[i]) { verified = true }
+    var thisComponent = this;
+    var thisUsername = this.state.username;
 
-        }
-
-        return verified;
-            
-    },
-    getInitialState: function() {
-        return {
-            data: [], 
-            postIdentifiers: {}, 
-            usernames: [], 
-            timelineUser: [], 
-            postrange: ( Date.now()/1000 - 12*60*60 ),
-            min_posts: 30
-        };
-    },
-    addUser: function(username) {
-        
-        
-        var thisComponent = this;
-
-        this.setStateSafe(function(previousState, currentProps){
-
-            previousState.usernames.push(username);
-
-            return previousState;
-
-        },function(){
-
-            Twister.getUser(username).doLatestPostsUntil(function(post){
-                if (post.getTimestamp()<thisComponent.state.postrange) {
-                    return false
-                } else {
-                    thisComponent.addPost(post)
-                }
-            },{outdatedLimit: 60*60*24});
-
-        });
-        
-    },
-    removeUser: function(username) {
-        
-        this.setStateSafe(function(previousState, currentProps){
-            
-            var newusers = [];
-            
-            for (var i = 0; i<previousState.usernames.length; i++) {
-                if (previousState.usernames[i]!=username) {
-                    newusers.push(previousState.usernames[i]);
-                }
-            }
-            
-            previousState.usernames = newusers;
-            
-            var newdata = [];
-            
-            for (var i = 0; i<previousState.data.length; i++) {
-                if (previousState.data[i].username!=username) {
-                    newusers.push(previousState.data[i]);
-                } else {
-                    previousState.postIdentifiers[previousState.data[i].postid]=false;
-                }
-            }
-            
-            previousState.data = newdata;
-            
-            return previousState;
-            
-        });
-    },
-    updatePosts: function(outdatedLimit) {
-		
-        if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
-      
-        for (var i = 0; i<this.state.usernames.length; i++) {
-        
-            var thisComponent = this;
-            var thisUsername = this.state.usernames[i];
-			
-            Twister.getUser(thisUsername).doLatestPostsUntil(function(post){
-            
-                if (post!==null) {
-					if(post.getTimestamp()<thisComponent.state.postrange) {
-						return false;
-					} else {
-                    	thisComponent.addPost(post); 
-					}
-                } else {
-                    thisComponent.removeUser(thisUsername);
-					return false;
-                }
-            
-            },{outdatedLimit: outdatedLimit});
-            
-        }
-    },
-    componentDidMount: function() {
-                        
-        var thisComponent = this;
-        
-        var username=this.context.router.getCurrentParams().timelineUser;
-        
-        Twister.getAccount(username).activateTorrents(function(){
-        
-            Twister.getUser(username).doFollowings(function(followings){
-
-                for(var i in followings){
-
-                    
-                    thisComponent.addUser(followings[i].getUsername());
-                    
-
-                }
-              
-                thisComponent.updatePosts(thisComponent.props.pollInterval);
-
-            });
-        
-        });
-      
-        this.setInterval(this.updatePosts, this.props.pollInterval*1000);
-        
-    },
-    onscrolledtobottom: function () {
+    var count = 0;
     
-      this.setStateSafe(function(previousState, currentProps){
-        previousState.postrange -= 6*60*60;
-        return previousState;
-      },function(){
-        this.updatePosts(2*this.props.pollInterval);
-      });
+    Twister.getUser(this.state.username).doLatestPostsUntil(function(post){
+
+      //console.log(count)
       
-    },
-    render: function() {
-        return (
-          <div>
-            <h3>{'Timeline of '+this.context.router.getCurrentParams().timelineUser}</h3>
-            <Postboard data={this.state.data}/>
-            </div>
+      if (post!==null) {
+        if(count++>=thisComponent.state.postCount) {
+          return false;
+        } else {
+          thisComponent.addPost(post);
+        }
+      } else {
+        return false;
+      }
+
+    },{outdatedLimit: outdatedLimit});
+
+  },
+  componentDidMount: function() {
+
+      this.updatePosts(2*this.props.pollInterval);
+      this.setInterval(this.updatePosts, this.props.pollInterval*1000);
+      
+      console.log(this.props.pollInterval)
+  },
+  onscrolledtobottom: function () {
+
+    this.setStateSafe(function(previousState, currentProps){
+      previousState.postrange += 10;
+      return previousState;
+    },function(){
+      this.updatePosts(2*this.props.pollInterval);
+    });
+
+  },
+  onnewpostbyuser: function (event) {
+    
+    //alert("got event")
+    
+    if(this.state.username==event.post.getUsername()) {
+       this.addPost(event.post);
+    }
+    
+  },
+  render: function() {
+      return (
+          <Postboard data={this.state.data} header=""/>
         );
   }
 });

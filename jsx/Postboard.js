@@ -3,9 +3,14 @@ var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
   , Nav = ReactBootstrap.Nav
   , ListGroup = ReactBootstrap.ListGroup
+  , ListGroupItem = ReactBootstrap.ListGroupItem
   , Panel = ReactBootstrap.Panel
+  , Glyphicon = ReactBootstrap.Glyphicon
+  , Button = ReactBootstrap.Button
 
-var React = require('react');
+var React = require('react/addons');
+
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Post = require("./Post.js");
 
@@ -16,9 +21,13 @@ module.exports = Postboard = React.createClass({
         <Post post={post} key={post.postid} />
       );
     });
+    
     return (
       <ListGroup fill>
-        {posts}
+        {this.props.header}
+        <ReactCSSTransitionGroup transitionName="item">
+          {posts}
+        </ReactCSSTransitionGroup>
       </ListGroup>
     );
   }
