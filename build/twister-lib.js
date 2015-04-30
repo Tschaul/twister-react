@@ -31901,19 +31901,19 @@ TwisterPubKey.prototype.verifySignature = function (message_ori, signature_ori, 
 
         message = bencode.encode(message);
 
-        signature = new Buffer(signature, 'hex');
-
         try {
-
+            signature = new Buffer(signature, 'hex');
+          try {
             var retVal = Bitcoin.Message.verify(thisPubKey.getAddress(), signature, message, twister_network);
-
-        } catch(e) {
-
+          } catch(e) {
             var retVal = false;	
-
-            thisResource._handleError({message:message});
-
+            thisResource._handleError({message:"verification went sideways"});
+          }
+        } catch(e) {
+          var retVal = false;	
+          thisResource._handleError({message:"signature is malformed"})
         }
+
 
         var compTime = Date.now()-startTime;
 

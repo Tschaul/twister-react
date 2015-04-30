@@ -4,6 +4,7 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var StreamMixin = require("../common/StreamMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var EventListenerMixin = require('../common/EventListenerMixin.js');
+var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
@@ -17,6 +18,7 @@ var ReactBootstrap = require('react-bootstrap')
 module.exports = Timeline = React.createClass({
     
   mixins:[
+    AppSettingsMixin,
     StreamMixin,
     SetIntervalMixin,
     SafeStateChangeMixin,
@@ -38,7 +40,7 @@ module.exports = Timeline = React.createClass({
       
     //console.log(this.state.username+":post"+this.state.postid)
     
-    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
+    if (!outdatedLimit) {outdatedLimit=this.state.appSettings.pollInterval/2;}
 
     var thisComponent = this;
     var thisUsername = this.state.username;
@@ -75,8 +77,8 @@ module.exports = Timeline = React.createClass({
   },
   componentDidMount: function() {
 
-    this.updatePosts(2*this.props.pollInterval);
-    this.setInterval(this.updatePosts, this.props.pollInterval*1000);
+    this.updatePosts(2*this.state.appSettings.pollInterval);
+    this.setInterval(this.updatePosts, this.state.appSettings.pollInterval*1000);
 
   },
   onnewpostbyuser: function (event) {

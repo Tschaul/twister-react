@@ -702,7 +702,11 @@ module.exports = SetIntervalMixin = {
     this.intervals = [];
   },
   setInterval: function() {
-    this.intervals.push(setInterval.apply(null, arguments));
+    if (arguments[1]) {
+      this.intervals.push(setInterval.apply(null, arguments));
+    } else {
+      console.log("setInterval requested with malformed interval argument");
+    }
   },
   componentWillUnmount: function() {
     this.intervals.map(clearInterval);
@@ -1055,6 +1059,7 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var StreamMixin = require("../common/StreamMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var EventListenerMixin = require('../common/EventListenerMixin.js');
+var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
@@ -1068,6 +1073,7 @@ var ReactBootstrap = require('react-bootstrap')
 module.exports = Timeline = React.createClass({displayName: "Timeline",
     
   mixins:[
+    AppSettingsMixin,
     StreamMixin,
     SetIntervalMixin,
     SafeStateChangeMixin,
@@ -1089,7 +1095,7 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
       
     //console.log(this.state.username+":post"+this.state.postid)
     
-    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
+    if (!outdatedLimit) {outdatedLimit=this.state.appSettings.pollInterval/2;}
 
     var thisComponent = this;
     var thisUsername = this.state.username;
@@ -1126,8 +1132,8 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
   },
   componentDidMount: function() {
 
-    this.updatePosts(2*this.props.pollInterval);
-    this.setInterval(this.updatePosts, this.props.pollInterval*1000);
+    this.updatePosts(2*this.state.appSettings.pollInterval);
+    this.setInterval(this.updatePosts, this.state.appSettings.pollInterval*1000);
 
   },
   onnewpostbyuser: function (event) {
@@ -1147,7 +1153,7 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
         );
   }
 });
-},{"../common/EventListenerMixin.js":3,"../common/Postboard.js":6,"../common/SafeStateChangeMixin.js":9,"../common/SetIntervalMixin.js":10,"../common/StreamMixin.js":11,"react":291,"react-bootstrap":71}],15:[function(require,module,exports){
+},{"../common/AppSettingsMixin.js":2,"../common/EventListenerMixin.js":3,"../common/Postboard.js":6,"../common/SafeStateChangeMixin.js":9,"../common/SetIntervalMixin.js":10,"../common/StreamMixin.js":11,"react":291,"react-bootstrap":71}],15:[function(require,module,exports){
 var React = require('react');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
