@@ -4,6 +4,7 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var StreamMixin = require("../common/StreamMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var EventListenerMixin = require('../common/EventListenerMixin.js');
+var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 
 var ReactBootstrap = require('react-bootstrap')
@@ -21,6 +22,7 @@ module.exports = Timeline = React.createClass({
     StreamMixin,
     SetIntervalMixin,
     SafeStateChangeMixin,
+    AppSettingsMixin,
     EventListenerMixin('scrolledtobottom'),
     EventListenerMixin('newpostbyuser')
   ],
@@ -32,12 +34,15 @@ module.exports = Timeline = React.createClass({
       username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
       data: [], 
       postIdentifiers: {},
-      postCount: 30
+      postCount: 30,
+      loading: true
     };
   },
   updatePosts: function(outdatedLimit) {
 
-    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
+      //console.log("updating " + this.state.username)
+      
+    if (!outdatedLimit) {outdatedLimit=this.state.appSettings.pollInterval/2;}
 
     var thisComponent = this;
     var thisUsername = this.state.username;
@@ -46,7 +51,9 @@ module.exports = Timeline = React.createClass({
     
     Twister.getUser(this.state.username).doLatestPostsUntil(function(post){
 
-      //console.log(count)
+      //console.log("updating "+count);
+      
+      thisComponent.setStateSafe({loading: false});
       
       if (post!==null) {
         if(count++>=thisComponent.state.postCount) {
@@ -63,10 +70,9 @@ module.exports = Timeline = React.createClass({
   },
   componentDidMount: function() {
 
-      this.updatePosts(2*this.props.pollInterval);
-      this.setInterval(this.updatePosts, this.props.pollInterval*1000);
+      this.updatePosts(2*this.state.appSettings.pollInterval);
+      this.setInterval(this.updatePosts, this.state.appSettings.pollInterval*1000);
       
-      console.log(this.props.pollInterval)
   },
   onscrolledtobottom: function () {
 
@@ -74,7 +80,7 @@ module.exports = Timeline = React.createClass({
       previousState.postrange += 10;
       return previousState;
     },function(){
-      this.updatePosts(2*this.props.pollInterval);
+      this.updatePosts(2*this.state.appSettings.pollInterval);
     });
 
   },
@@ -89,7 +95,7 @@ module.exports = Timeline = React.createClass({
   },
   render: function() {
       return (
-          <Postboard data={this.state.data} header=""/>
+          <Postboard data={this.state.data} loading={this.state.loading}/>
         );
   }
 });

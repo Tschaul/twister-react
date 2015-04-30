@@ -5,6 +5,7 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var StreamMixin = require("../common/StreamMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var EventListenerMixin = require('../common/EventListenerMixin.js');
+var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 
 var ReactBootstrap = require('react-bootstrap')
@@ -19,6 +20,7 @@ var ReactBootstrap = require('react-bootstrap')
 module.exports = Home = React.createClass({
     
   mixins: [
+    AppSettingsMixin,
     StreamMixin,
     SetIntervalMixin,
     SafeStateChangeMixin,
@@ -34,7 +36,8 @@ module.exports = Home = React.createClass({
       postIdentifiers: {}, 
       usernames: [], 
       postrange: ( Date.now()/1000 - 12*60*60 ),
-      min_posts: 30
+      min_posts: 30,
+      loading: true
     };
   },
   addUser: function(username) {
@@ -61,7 +64,7 @@ module.exports = Home = React.createClass({
           return false;
         }
 
-      },{outdatedLimit: 2*thisComponent.props.pollInterval});
+      },{outdatedLimit: 2*thisComponent.state.appSettings.pollInterval});
     
     });
 
@@ -98,7 +101,7 @@ module.exports = Home = React.createClass({
   },
   updatePosts: function(outdatedLimit) {
 
-    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
+    if (!outdatedLimit) {outdatedLimit=this.state.appSettings.pollInterval/2;}
 
     for (var i = 0; i<this.state.usernames.length; i++) {
 
@@ -127,7 +130,7 @@ module.exports = Home = React.createClass({
 
     if (this.props.activeAccount) {
       
-      console.log("active account is "+this.props.activeAccount)
+      //console.log("active account is "+this.props.activeAccount)
     
       var thisComponent = this;
       
@@ -141,12 +144,14 @@ module.exports = Home = React.createClass({
           thisComponent.addUser(followings[i].getUsername());
           //console.log(followings[i].getUsername())
         }
+        
+        thisComponent.setStateSafe({loading: false});
 
-        //thisComponent.updatePosts(thisComponent.props.pollInterval);
+        //thisComponent.updatePosts(thisComponent.state.appSettings.pollInterval);
 
       });
 
-      this.setInterval(this.updatePosts, this.props.pollInterval*1000);
+      this.setInterval(this.updatePosts, this.state.appSettings.pollInterval*1000);
       
     } else {console.log("active account is null")}
 
@@ -157,7 +162,7 @@ module.exports = Home = React.createClass({
       previousState.postrange -= 6*60*60;
       return previousState;
     },function(){
-      this.updatePosts(2*this.props.pollInterval);
+      this.updatePosts(2*this.state.appSettings.pollInterval);
     });
 
   },
@@ -177,7 +182,7 @@ module.exports = Home = React.createClass({
             Home
             <NewPostModalButton activeAccount={this.props.activeAccount}/>
           </ListGroupItem>
-        }/>
+        } loading={this.state.loading}/>
       );
   }
 });

@@ -36,6 +36,18 @@ module.exports = StreamMixin = {
                     }
                     
                 }
+              
+                if (post.isReply()) {
+                  
+                  postdata.isReply = true;
+                  postdata.replyUser = post.getReplyUser();
+                  postdata.replyId = post.getReplyId();
+                  
+                } else {
+                  
+                  postdata.isReply = false;
+                  
+                }
                 
                 previousState.data.push(postdata)
 

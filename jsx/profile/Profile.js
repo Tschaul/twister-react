@@ -33,7 +33,7 @@ module.exports = Post = React.createClass({
       if (key.indexOf("active")>-1) {key+="/"+this.props.activeAccount;}
       var id = JSON.stringify(router.getCurrentParams());
       if (id) { key += id; }
-      console.log(key);
+      //console.log(key);
       return key;
     } else {return "none"}
   },
@@ -43,7 +43,7 @@ module.exports = Post = React.createClass({
     
     var subroute = this.context.router.getCurrentRoutes()[2].name
     
-    console.log(this.context.router.getCurrentRoutes());
+    //console.log(this.context.router.getCurrentRoutes());
         
     return (
       <ListGroup fill>
@@ -69,8 +69,6 @@ module.exports = Post = React.createClass({
           </ButtonGroup>
         </ListGroupItem>
         <RouteHandler 
-          pollInterval={this.props.pollInterval} 
-          pollIntervalProfile={this.props.pollIntervalProfile} 
           activeAccount={this.props.activeAccount} 
           key={this.getHandlerKey()}
         />

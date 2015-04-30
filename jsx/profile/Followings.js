@@ -4,10 +4,12 @@ var React = require('react/addons');
 var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var MiniProfile = require("../common/MiniProfile.js");
+var ProfileBoard = require("../common/ProfileBoard.js");
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var StreamMixin = require("../common/StreamMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var EventListenerMixin = require('../common/EventListenerMixin.js');
+var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 
 var ReactBootstrap = require('react-bootstrap')
@@ -19,23 +21,24 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Button = ReactBootstrap.Button
 
-module.exports = Home = React.createClass({
+module.exports = Followings = React.createClass({
     
-  mixins: [SetIntervalMixin,SafeStateChangeMixin],
+  mixins: [AppSettingsMixin,SetIntervalMixin,SafeStateChangeMixin],
   contextTypes: {
     router: React.PropTypes.func
   },
   getInitialState: function() {
     return {
       username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
-      followings: []
+      followings: [],
+      loading: true
     };
   },
   updateFollowings: function(outdatedLimit) {
 
     thisComponent=this;
     
-    if (!outdatedLimit) {outdatedLimit=this.props.pollInterval/2;}
+    if (!outdatedLimit) {outdatedLimit=this.state.appSettings.pollInterval/2;}
 
     Twister.getUser(this.state.username).doFollowings(function(followings){
       
@@ -48,10 +51,13 @@ module.exports = Home = React.createClass({
         }
         
         state.followings = newfollowings;
+        state.loading = false;
         
         return state;
         
       });
+      
+      
 
     },{outdatedLimit: outdatedLimit});
 
@@ -59,26 +65,20 @@ module.exports = Home = React.createClass({
   },
   componentDidMount: function() {
 
-    this.updateFollowings(this.props.pollInterval*2);
+    this.updateFollowings(this.state.appSettings.pollInterval*2);
 
-    this.setInterval(this.updateFollowings, this.props.pollInterval*1000);
+    this.setInterval(this.updateFollowings, this.state.appSettings.pollInterval*1000);
       
   },
   render: function() {
     
-    var thisComponent = this;
-    
-    var profiles = this.state.followings.map(function(username, index) {
-      return (
-        <MiniProfile username={username} key={"miniprofile:"+username} pollIntervalProfile={thisComponent.props.pollIntervalProfile}/>
-      );
-    });
     return (
-      <ListGroup fill>
-        <ReactCSSTransitionGroup transitionName="item">
-          {profiles}
-        </ReactCSSTransitionGroup>
-      </ListGroup>
+      <ProfileBoard 
+        loading={this.state.loading} 
+        data={this.state.followings} 
+      />
     );
+    
   }
+  
 }); 

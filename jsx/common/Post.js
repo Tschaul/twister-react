@@ -4,6 +4,9 @@ var ReactBootstrap = require('react-bootstrap')
   , Col = ReactBootstrap.Col
   , Row = ReactBootstrap.Row
   , ListGroupItem = ReactBootstrap.ListGroupItem
+  , Glyphicon = ReactBootstrap.Glyphicon
+  , OverlayTrigger = ReactBootstrap.OverlayTrigger
+  , Tooltip = ReactBootstrap.Tooltip
 
 var React = require('react');
 
@@ -62,6 +65,19 @@ module.exports = Post = React.createClass({
   },
   render: function() {
     var post = this.props.post;
+    
+    if (post.isReply) {
+      var conversationLink = (
+        <OverlayTrigger placement='left' overlay={
+          <Tooltip>View Conversation</Tooltip>
+        }>
+      <small><a href={"#/conversation/"+post.replyUser+"/"+post.replyId} className="link-button-gray"><Glyphicon glyph="comment"/></a></small>
+    </OverlayTrigger>
+      );
+    } else {
+      var conversationLink = (<span/>);
+    }
+    
     return (
       <ListGroupItem>
           <Row className="nomargin">
@@ -78,10 +94,10 @@ module.exports = Post = React.createClass({
           </Row>
           <Row className="nomargin">
             <Col xs={6} md={6} className="fullytight">
-        {post.isRetwist && <small><span className="glyphicon glyphicon-retweet" aria-hidden="true"></span> <em> &nbsp;retwisted by {this.state.retwistingUser}</em></small>
+        {post.isRetwist && <small><Glyphicon glyph="retweet" aria-hidden="true"/><em> &nbsp;retwisted by {this.state.retwistingUser}</em></small>
           }
             </Col>
-            <Col xs={6} md={6} className="fullytight text-align-right"><small><em>test</em></small></Col>
+            <Col xs={6} md={6} className="fullytight text-align-right">{conversationLink}</Col>
           </Row>
 
       </ListGroupItem>

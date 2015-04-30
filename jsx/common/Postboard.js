@@ -22,9 +22,18 @@ module.exports = Postboard = React.createClass({
       );
     });
     
+    if (this.props.loading) {
+      var spinner = (
+        <ListGroupItem><p className="text-center"><img src="img/bouncing_ball.gif"/></p></ListGroupItem>
+      );
+    } else { 
+      var spinner = (<span/>);
+    }
+    
     return (
       <ListGroup fill>
         {this.props.header}
+        {spinner}
         <ReactCSSTransitionGroup transitionName="item">
           {posts}
         </ReactCSSTransitionGroup>

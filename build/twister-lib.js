@@ -30595,17 +30595,7 @@ Twister._signatureVerificationsInProgress = 0;
 
 //default query settings:
 Twister._outdatedLimit = 90;
-Twister._querySettingsByType = {
-    
-    outdatedLimit: {
-        pubkey: 60*60,
-        profile: 60*60,
-        avatar: 60*60,
-        torrent: 60*60,
-        followings: 60*60
-    }
-    
-};
+Twister._querySettingsByType = {};
 Twister._logfunc = function(){};
 Twister._host = "";
 Twister._timeout = 20000;
@@ -31685,6 +31675,8 @@ TwisterPromotedPosts.prototype._verifyAndCachePost =  function (payload,cbfunc) 
         }
         
         if (cbfunc && signatureVerification=="none") {
+          
+            newpost._verified = true;
             
             cbfunc(newpost);
 
@@ -32302,6 +32294,8 @@ TwisterResource.prototype.dhtget = function (args,cbfunc) {
             
             Twister._activeDHTQueries--;
             
+            thisResource._log("dhtger restul: "+JSON.stringify(res));
+          
             if (res[0]) {
 				
 				var signatureVerification = thisResource.getQuerySetting("signatureVerification");
@@ -32337,7 +32331,7 @@ TwisterResource.prototype.dhtget = function (args,cbfunc) {
                     });
                     
                 } else { 
-                  
+                  thisResource._verified = true;
                   thisResource._log("no signature verification needed");
                   cbfunc(res); 
                 }
@@ -32595,7 +32589,7 @@ TwisterStream.prototype._queryAndDo = function (cbfunc) {
 
             thisResource.dhtget([thisResource._name, "status", "s"], function (result) {
 
-                    //console.log(result[0].p.v);
+                    thisResource._log("result from dhtget: "+JSON.stringify(result));
               
                     if (result[0]) {
 
@@ -32636,7 +32630,7 @@ TwisterStream.prototype._verifyAndCachePost =  function (payload,cbfunc) {
 
     //console.log(payloadUser+":post"+newid);
     
-    if( payloadUser==thisResource._name && !( newid in thisResource._posts) ) {
+    if( !( newid in thisResource._posts) ) {
 
 		var signatureVerification = thisResource.getQuerySetting("signatureVerification");
 		
@@ -32654,11 +32648,22 @@ TwisterStream.prototype._verifyAndCachePost =  function (payload,cbfunc) {
         
         if (cbfunc && signatureVerification=="none") {
             
+            thisResource._log("no signature verifcation needed");
+          
+            newpost._verified = true;
+          
             cbfunc(newpost);
+          
 
         } else {
         
-			if (cbfunc && signatureVerification=="background") { cbfunc(newpost); }
+			if (cbfunc && signatureVerification=="background") { 
+              
+              thisResource._log("issuing signature verification in background");
+              
+              cbfunc(newpost); 
+            
+            }
 			
 			Twister.getUser(thisResource._name)._doPubKey(function(pubkey){
 
@@ -32683,8 +32688,8 @@ TwisterStream.prototype._verifyAndCachePost =  function (payload,cbfunc) {
 				
 		}
  
-    } else {
-    
+    } else if(cbfunc) {
+      cbfunc(thisResource._posts[newid]);
     }
 
 }

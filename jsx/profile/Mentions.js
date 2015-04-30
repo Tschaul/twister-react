@@ -5,11 +5,12 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var StreamMixin = require("../common/StreamMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var EventListenerMixin = require('../common/EventListenerMixin.js');
+var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 
-module.exports = Home = React.createClass({
+module.exports = Mentions = React.createClass({
     
-  mixins: [StreamMixin,SetIntervalMixin,SafeStateChangeMixin],
+  mixins: [StreamMixin,AppSettingsMixin,SetIntervalMixin,SafeStateChangeMixin],
   contextTypes: {
     router: React.PropTypes.func
   },
@@ -17,20 +18,23 @@ module.exports = Home = React.createClass({
     return {
       username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
       data: [],
-      postIdentifiers: {}
+      postIdentifiers: {},
+      loading: true
     };
   },
   updateMentions: function(outdatedLimit) {
 
     thisComponent=this;
     
-    if (outdatedLimit===undefined) {outdatedLimit=this.props.pollInterval/2;}
+    if (outdatedLimit===undefined) {outdatedLimit=this.state.appSettings.pollInterval/2;}
 
     Twister.getUser(this.state.username).doMentions(function(mentions){
           
       for(var i in mentions){
           thisComponent.addPost(mentions[i]);
       }
+      
+      thisComponent.setStateSafe({loading: false});
 
     },{outdatedLimit: outdatedLimit});
 
@@ -38,14 +42,14 @@ module.exports = Home = React.createClass({
   },
   componentDidMount: function() {
 
-    this.updateMentions(this.props.pollInterval*2);
+    this.updateMentions(this.state.appSettings.pollInterval*2);
 
-    this.setInterval(this.updateMentions, this.props.pollInterval*1000);
+    this.setInterval(this.updateMentions, this.state.appSettings.pollInterval*1000);
       
   },
   render: function() {
     return (
-      <Postboard data={this.state.data} header=""/>
+      <Postboard data={this.state.data} loading={this.state.loading}/>
     );
   }
 }); 

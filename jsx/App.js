@@ -35,11 +35,13 @@ var SafeStateChangeMixin = require('./common/SafeStateChangeMixin.js');
 var Timeline = require('./profile/Timeline.js');
 var Followings = require('./profile/Followings.js');
 var Mentions = require('./profile/Mentions.js');
-
+var Conversation = require('./other/Conversation.js');
+var Settings = require('./other/Settings.js');
+var AppSettingsMixin = require('./common/AppSettingsMixin.js');
 
 App = React.createClass({
     
-  mixins: [SetIntervalMixin,SafeStateChangeMixin],
+  mixins: [AppSettingsMixin,SetIntervalMixin,SafeStateChangeMixin],
   
   contextTypes: {
     router: React.PropTypes.func
@@ -54,7 +56,7 @@ App = React.createClass({
       if (key=="home" || key=="profile-active" || key=="accountProfileMore") {key=key+"/"+this.state.activeAccount;}
       var id = JSON.stringify(router.getCurrentParams());
       if (id) { key += id; }
-      console.log(key);
+      //console.log(key);
       return key;
     } else {return "none"}
   },
@@ -69,7 +71,7 @@ App = React.createClass({
   
   switchAccount: function (newaccoutname) {
     
-    console.log(newaccoutname);
+    //console.log(newaccoutname);
     
     var thisComponent = this;
     
@@ -91,9 +93,6 @@ App = React.createClass({
     
     state.activeAccount = localStorage.getItem("twister-react-activeAccount")
     
-    state.pollInterval = 60;
-    state.pollIntervalProfile = 60*60;
-    
     state.accounts = Twister.getAccounts();
     
     //console.log(state);
@@ -108,9 +107,22 @@ App = React.createClass({
     if (this.state.accounts.length==0) {
 
       Twister.init({
-        host: 'http://user:pwd@localhost:28332',
-        logfunc: function(log){console.log(log)}
+        host: this.state.appSettings.host,
+        logfunc: function(log){console.log(log)},
+        outdatedLimit: this.state.appSettings.pollInterval,
+        querySettingsByType: {
+          
+          outdatedLimit: {
+              pubkey: this.state.appSettings.pollIntervalProfile,
+              profile: this.state.appSettings.pollIntervalProfile,
+              avatar: this.state.appSettings.pollIntervalProfile,
+              torrent: this.state.appSettings.pollIntervalProfile,
+              followings: this.state.appSettings.pollIntervalProfile
+          }
+          
+        }
       });
+      
       Twister.loadServerAccounts(function(){
         
         thisComponent.setStateSafe(function(state){
@@ -125,8 +137,11 @@ App = React.createClass({
           thisComponent.switchAccount(thisComponent.state.activeAccount);
         });
       });
+      
     } else {
+      
       this.switchAccount(this.state.activeAccount);
+      
     }
 
     this.setInterval(this.saveCache,300000);
@@ -181,8 +196,6 @@ App = React.createClass({
             </ButtonGroup>
             <br/>
             <RouteHandler 
-              pollInterval={this.state.pollInterval} 
-              pollIntervalProfile={this.state.pollIntervalProfile} 
               activeAccount={this.state.activeAccount} 
               key={this.getHandlerKey()}
             />
@@ -208,6 +221,8 @@ var routes = (
       <Route name="profile-mentions" path="mentions" handler={Mentions} />
       <DefaultRoute name="profile-timeline-default" handler={Timeline} />
     </Route>
+    <Route name="conversation" path="/conversation/:username/:postid" handler={Conversation}/>
+    <Route name="settings" path="/settings" handler={Settings}/>
     <DefaultRoute name="home" handler={Home} />
   </Route>
 );

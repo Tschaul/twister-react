@@ -1,4 +1,8 @@
+
+var AppSettingsMixin = require('../common/AppSettingsMixin.js');
+
 module.exports = ProfileMixin = {
+  mixins: [AppSettingsMixin],
   getInitialState: function() {
     
     var username = this.props.username;
@@ -65,7 +69,7 @@ module.exports = ProfileMixin = {
     
     this.updateProfile();
     
-    this.setInterval(this.updateProfile,this.props.pollIntervalProfile*1000);
+    this.setInterval(this.updateProfile,this.state.appSettings.pollIntervalProfile*1000);
     
   }
 };
