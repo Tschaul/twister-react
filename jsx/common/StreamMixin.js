@@ -1,72 +1,42 @@
 module.exports = StreamMixin = {
     
-    addPost: function(post) {
-        
-        var postid = post.getUsername() + ":post" + post.getId();
-        
-        if (!this.state.postIdentifiers[postid]) {
-            
-            this.setStateSafe(function(previousState, currentProps) {
-        
-                previousState.postIdentifiers[postid] = true;
+  addPost: function(post) {
 
-                if (post.isRetwist()){
-                
-                    
-                    var postdata = {
-                        username: post.getRetwistedUser(),
-                        retwistingUser: post.getUsername(),
-                        content: post.getRetwistedContent(),
-                        id: post.getRetwistedId(),
-                        timestamp: post.getTimestamp(),
-                        postid: postid,
-                        isRetwist: true
-                    }
-                    
-                } else {
-                
-                    var postdata = {
-                        username: post.getUsername(),
-                        content: post.getContent(),
-                        id: post.getId(),
-                        timestamp: post.getTimestamp(),
-                        postid: postid,
-                        isRetwist: false
-                        
-                    }
-                    
-                }
-              
-                if (post.isReply()) {
-                  
-                  postdata.isReply = true;
-                  postdata.replyUser = post.getReplyUser();
-                  postdata.replyId = post.getReplyId();
-                  
-                } else {
-                  
-                  postdata.isReply = false;
-                  
-                }
-                
-                previousState.data.push(postdata)
+    var postid = post.getUsername() + ":post" + post.getId();
 
-                var compare = function (a,b) {
-                  if (a.timestamp < b.timestamp)
-                     return 1;
-                  if (a.timestamp > b.timestamp)
-                    return -1;
-                  return 0;
-                }
+    if (!this.state.postIdentifiers[postid]) {
 
-                previousState.data.sort(compare);
+      this.setStateSafe(function(previousState, currentProps) {
 
-                return {data: previousState.data, postIdentifiers: previousState.postIdentifiers };
-            });
-            
-        } else {
-            
-            
+        previousState.postIdentifiers[postid] = true;
+
+        var postdata = {
+            username: post.getUsername(),
+            id: post.getId(),
+            timestamp: post.getTimestamp(),
+            postid: postid
         }
+
+        previousState.data.push(postdata)
+
+        var compare = function (a,b) {
+          if (a.timestamp < b.timestamp)
+             return 1;
+          if (a.timestamp > b.timestamp)
+            return -1;
+          return 0;
+        }
+
+        previousState.data.sort(compare);
+
+        return {data: previousState.data, postIdentifiers: previousState.postIdentifiers };
+      });
+
+    } else {
+
+
     }
+    
+  }
+  
 }

@@ -34,6 +34,7 @@ module.exports = Home = React.createClass({
     newsettings.pollIntervalProfile = $(this.getDOMNode()).find(".settings-pollIntervalProfile").val();
     newsettings.ignoredUsers = $(this.getDOMNode()).find(".settings-ignoredUsers").val();
     newsettings.host = $(this.getDOMNode()).find(".settings-host").val();
+    newsettings.logging = $(this.getDOMNode()).find(".settings-logging").attr('checked');
     
     console.log(newsettings)
     

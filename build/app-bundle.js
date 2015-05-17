@@ -86,65 +86,22 @@ App = React.createClass({displayName: "App",
   
   getInitialState: function () {
     
-    Twister.deserializeCache(JSON.parse(localStorage.getItem("twister-cache")));
-    
-    //this.clearCache();
-    
     var state={};
     
     state.activeAccount = localStorage.getItem("twister-react-activeAccount")
     
     state.accounts = Twister.getAccounts();
     
+    if (!state.activeAccount) { state.activeAccount=state.accounts[0]; }
+    
     //console.log(state);
   
     return state;
+    
   },
   
   componentDidMount: function () {
     
-    var thisComponent = this;
-    
-    if (this.state.accounts.length==0) {
-
-      Twister.init({
-        host: this.state.appSettings.host,
-        logfunc: function(log){console.log(log)},
-        outdatedLimit: this.state.appSettings.pollInterval,
-        querySettingsByType: {
-          
-          outdatedLimit: {
-              pubkey: this.state.appSettings.pollIntervalProfile,
-              profile: this.state.appSettings.pollIntervalProfile,
-              avatar: this.state.appSettings.pollIntervalProfile,
-              torrent: this.state.appSettings.pollIntervalProfile,
-              followings: this.state.appSettings.pollIntervalProfile
-          }
-          
-        }
-      });
-      
-      Twister.loadServerAccounts(function(){
-        
-        thisComponent.setStateSafe(function(state){
-          
-          state.accounts = Twister.getAccounts();
-          //console.log(state.accounts);
-          state.activeAccount = state.accounts[0];
-          
-          return state;
-          
-        },function(){
-          thisComponent.switchAccount(thisComponent.state.activeAccount);
-        });
-      });
-      
-    } else {
-      
-      this.switchAccount(this.state.activeAccount);
-      
-    }
-
     this.setInterval(this.saveCache,300000);
 
   },
@@ -229,12 +186,84 @@ var routes = (
 );
 
 
+initializeApp = function () {
     
-Router.run(routes, function (Handler) {
-  React.render(React.createElement(Handler, null), document.getElementById('content'));
-});
+  Router.run(routes, function (Handler) {
+    React.render(React.createElement(Handler, null), document.getElementById('content'));
+  });
    
+}
 
+Twister.deserializeCache(JSON.parse(localStorage.getItem("twister-cache")));
+
+Twister.setup({logfunc: function(log){console.log(log)}})
+
+var accounts = Twister.getAccounts();
+
+if (accounts.length==0) {
+
+  if (!localStorage.getItem("twister-react-settings")) {
+
+    var appSettings = {
+
+      pollInterval:60,
+      pollIntervalProfile: 3600,
+      ignoredUsers: "nobody",
+      host: "http://user:pwd@localhost:28332"
+
+    };
+
+  } else {
+
+    var appSettings = JSON.parse(localStorage.getItem("twister-react-settings"));
+
+  }
+  
+  Twister.setup({
+    host: appSettings.host,
+    //logfunc: function(log){console.log(log)},
+    outdatedLimit: appSettings.pollInterval,
+    querySettingsByType: {
+
+      outdatedLimit: {
+          pubkey: appSettings.pollIntervalProfile,
+          profile: appSettings.pollIntervalProfile,
+          avatar: appSettings.pollIntervalProfile,
+          torrent: appSettings.pollIntervalProfile,
+          followings: appSettings.pollIntervalProfile
+      }
+
+    }
+  });
+
+  Twister.loadServerAccounts(function(){
+
+    var activeAccount =  localStorage.getItem("twister-react-activeAccount");
+    
+    var accounts = Twister.getAccounts();
+    
+    if (!activeAccount) {
+    
+      activeAccount = accounts[0];
+      localStorage.setItem("twister-react-activeAccount",activeAccount);
+      
+    }
+    
+    console.log("active account defaulted to "+activeAccount)
+    
+    Twister.getAccount(activeAccount).activateTorrents(function(){
+      
+      initializeApp();
+      
+    });
+      
+  });
+
+} else {
+
+  initializeApp();
+      
+}
 
 ////// INIT EVENTLISTENERS ON WINDOW
 
@@ -361,11 +390,12 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 module.exports = Post = React.createClass({displayName: "Post",
   mixins: [SetIntervalMixin,SafeStateChangeMixin],
   getInitialState: function() {
+    
     return {
       avatar: "img/genericPerson.png", 
-      fullname: "", 
-      retwistingUser: this.props.post.retwistingUser,
-      timeAgo: ""
+      fullname: "",
+      timeAgo: "",
+      retwistingUser: this.props.post.username
     };
   },
   updateTimeAgo: function() {
@@ -384,24 +414,31 @@ module.exports = Post = React.createClass({displayName: "Post",
 
   },
   componentDidMount: function () {
+    
     var thisComponent = this;
 
+    var post = Twister.getUser(this.props.post.username).getPost(this.props.post.id);
+    
+    if (post.isRetwist()) {
+      
+      post.getUser().doProfile(function(profile){
+        thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
+      });
+      
+      post=post.getRetwistedPost();
+      
+    }
+      
     //console.log(this.props.post.username+":post"+this.props.post.id);
-    Twister.getUser(this.props.post.username).doAvatar(function(avatar){
+    post.getUser().doAvatar(function(avatar){
       if (avatar.getUrl()) {
         thisComponent.setStateSafe({avatar: avatar.getUrl()});  
       } 
     });
     
-    Twister.getUser(this.props.post.username).doProfile(function(profile){
+    post.getUser().doProfile(function(profile){
       thisComponent.setStateSafe({fullname: profile.getField("fullname")});  
     });
-
-    if (this.props.post.isRetwist) {
-      Twister.getUser(this.props.post.retwistingUser).doProfile(function(profile){
-        thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
-      });
-    }
 
     this.updateTimeAgo();
 
@@ -409,14 +446,22 @@ module.exports = Post = React.createClass({displayName: "Post",
     
   },
   render: function() {
-    var post = this.props.post;
     
-    if (post.isReply) {
+    var post = Twister.getUser(this.props.post.username).getPost(this.props.post.id);
+    var retwist = false;
+    
+    if (post.isRetwist()) {
+      retwist = true;
+      post=post.getRetwistedPost();
+      
+    }
+    
+    if (post.isReply()) {
       var conversationLink = (
         React.createElement(OverlayTrigger, {placement: "left", overlay: 
           React.createElement(Tooltip, null, "View Conversation")
         }, 
-      React.createElement("small", null, React.createElement("a", {href: "#/conversation/"+post.replyUser+"/"+post.replyId, className: "link-button-gray"}, React.createElement(Glyphicon, {glyph: "comment"})))
+      React.createElement("small", null, React.createElement("a", {href: "#/conversation/"+post.getUsername()+"/"+post.getId(), className: "link-button-gray"}, React.createElement(Glyphicon, {glyph: "comment"})))
     )
       );
     } else {
@@ -427,19 +472,19 @@ module.exports = Post = React.createClass({displayName: "Post",
       React.createElement(ListGroupItem, null, 
           React.createElement(Row, {className: "nomargin"}, 
             React.createElement(Col, {xs: 2, md: 2, className: "fullytight"}, 
-              React.createElement("a", {href: "#/profile/"+this.props.post.username}, 
+              React.createElement("a", {href: "#/profile/"+post.getUsername()}, 
                 React.createElement("img", {className: "img-responsive", src: this.state.avatar})
               )
             ), 
             React.createElement(Col, {xs: 9, md: 9}, 
               React.createElement("strong", null, this.state.fullname), " ", 
-              post.content
+              post.getContent()
             ), 
             React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"}, this.state.timeAgo)
           ), 
           React.createElement(Row, {className: "nomargin"}, 
             React.createElement(Col, {xs: 6, md: 6, className: "fullytight"}, 
-        post.isRetwist && React.createElement("small", null, React.createElement(Glyphicon, {glyph: "retweet", "aria-hidden": "true"}), React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
+        retwist && React.createElement("small", null, React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
           
             ), 
             React.createElement(Col, {xs: 6, md: 6, className: "fullytight text-align-right"}, conversationLink)
@@ -715,75 +760,45 @@ module.exports = SetIntervalMixin = {
 },{}],11:[function(require,module,exports){
 module.exports = StreamMixin = {
     
-    addPost: function(post) {
-        
-        var postid = post.getUsername() + ":post" + post.getId();
-        
-        if (!this.state.postIdentifiers[postid]) {
-            
-            this.setStateSafe(function(previousState, currentProps) {
-        
-                previousState.postIdentifiers[postid] = true;
+  addPost: function(post) {
 
-                if (post.isRetwist()){
-                
-                    
-                    var postdata = {
-                        username: post.getRetwistedUser(),
-                        retwistingUser: post.getUsername(),
-                        content: post.getRetwistedContent(),
-                        id: post.getRetwistedId(),
-                        timestamp: post.getTimestamp(),
-                        postid: postid,
-                        isRetwist: true
-                    }
-                    
-                } else {
-                
-                    var postdata = {
-                        username: post.getUsername(),
-                        content: post.getContent(),
-                        id: post.getId(),
-                        timestamp: post.getTimestamp(),
-                        postid: postid,
-                        isRetwist: false
-                        
-                    }
-                    
-                }
-              
-                if (post.isReply()) {
-                  
-                  postdata.isReply = true;
-                  postdata.replyUser = post.getReplyUser();
-                  postdata.replyId = post.getReplyId();
-                  
-                } else {
-                  
-                  postdata.isReply = false;
-                  
-                }
-                
-                previousState.data.push(postdata)
+    var postid = post.getUsername() + ":post" + post.getId();
 
-                var compare = function (a,b) {
-                  if (a.timestamp < b.timestamp)
-                     return 1;
-                  if (a.timestamp > b.timestamp)
-                    return -1;
-                  return 0;
-                }
+    if (!this.state.postIdentifiers[postid]) {
 
-                previousState.data.sort(compare);
+      this.setStateSafe(function(previousState, currentProps) {
 
-                return {data: previousState.data, postIdentifiers: previousState.postIdentifiers };
-            });
-            
-        } else {
-            
-            
+        previousState.postIdentifiers[postid] = true;
+
+        var postdata = {
+            username: post.getUsername(),
+            id: post.getId(),
+            timestamp: post.getTimestamp(),
+            postid: postid
         }
+
+        previousState.data.push(postdata)
+
+        var compare = function (a,b) {
+          if (a.timestamp < b.timestamp)
+             return 1;
+          if (a.timestamp > b.timestamp)
+            return -1;
+          return 0;
+        }
+
+        previousState.data.sort(compare);
+
+        return {data: previousState.data, postIdentifiers: previousState.postIdentifiers };
+      });
+
+    } else {
+
+
     }
+    
+  }
+  
 }
 },{}],12:[function(require,module,exports){
 var React = require('react');
@@ -840,19 +855,18 @@ module.exports = Home = React.createClass({displayName: "Home",
     
       Twister.getUser(username).doLatestPostsUntil(function(post){
         
-        if (post!==null) {
-          if(post.getTimestamp()<thisComponent.state.postrange) {
-            return false;
-          } else {
-            thisComponent.addPost(post);
-            //console.log("adding post",post.getUsername(),post.getId())
-          }
-        } else {
-          thisComponent.removeUser(thisUsername);
+        if(post.getTimestamp()<thisComponent.state.postrange) {
           return false;
+        } else {
+          thisComponent.addPost(post);
         }
 
-      },{outdatedLimit: 2*thisComponent.state.appSettings.pollInterval});
+      },{
+        outdatedLimit: 2*thisComponent.state.appSettings.pollInterval,
+        errorfunc: function(error){
+          if (error.code==32052) { thisComponent.removeUser(this._name); }
+        }
+      });
     
     });
 
@@ -875,7 +889,7 @@ module.exports = Home = React.createClass({displayName: "Home",
 
       for (var i = 0; i<previousState.data.length; i++) {
         if (previousState.data[i].username!=username) {
-          newusers.push(previousState.data[i]);
+          newdata.push(previousState.data[i]);
         } else {
           previousState.postIdentifiers[previousState.data[i].postid]=false;
         }
@@ -898,19 +912,18 @@ module.exports = Home = React.createClass({displayName: "Home",
 
       Twister.getUser(thisUsername).doLatestPostsUntil(function(post){
         
-        if (post!==null) {
-          if(post.getTimestamp()<thisComponent.state.postrange) {
-            return false;
-          } else {
-            thisComponent.addPost(post);
-            //console.log("adding post",post.getUsername(),post.getId())
-          }
-        } else {
-          thisComponent.removeUser(thisUsername);
+        if(post.getTimestamp()<thisComponent.state.postrange) {
           return false;
+        } else {
+          thisComponent.addPost(post);
         }
 
-      },{outdatedLimit: outdatedLimit});
+      },{
+        outdatedLimit: 2*thisComponent.state.appSettings.pollInterval,
+        errorfunc: function(error){
+          if (error.code==32052) { thisComponent.removeUser(this._name); }
+        }
+      });
 
     }
   },
@@ -1102,15 +1115,17 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
 
     var goUpConversation = function (post) {
       
-      thisComponent.addPost(post);
         
-      thisComponent.setStateSafe({loading: false});
       
       if (post.isReply()) {
 
         post.doPostRepliedTo(goUpConversation);
 
       } else {
+        
+        thisComponent.addPost(post);
+        
+        thisComponent.setStateSafe({loading: false});
 
         post.doReplies(doRepliesRecursive);
 
@@ -1122,7 +1137,7 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
       for (var i in replies) {
         replies[i].doReplies(doRepliesRecursive);
         thisComponent.addPost(replies[i]);
-        console.log(replies[i].getContent())
+        //console.log(replies[i].getContent())
       }
 
     };
@@ -1190,6 +1205,7 @@ module.exports = Home = React.createClass({displayName: "Home",
     newsettings.pollIntervalProfile = $(this.getDOMNode()).find(".settings-pollIntervalProfile").val();
     newsettings.ignoredUsers = $(this.getDOMNode()).find(".settings-ignoredUsers").val();
     newsettings.host = $(this.getDOMNode()).find(".settings-host").val();
+    newsettings.logging = $(this.getDOMNode()).find(".settings-logging").attr('checked');
     
     console.log(newsettings)
     

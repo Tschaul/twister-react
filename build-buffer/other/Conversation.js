@@ -47,15 +47,17 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
 
     var goUpConversation = function (post) {
       
-      thisComponent.addPost(post);
         
-      thisComponent.setStateSafe({loading: false});
       
       if (post.isReply()) {
 
         post.doPostRepliedTo(goUpConversation);
 
       } else {
+        
+        thisComponent.addPost(post);
+        
+        thisComponent.setStateSafe({loading: false});
 
         post.doReplies(doRepliesRecursive);
 
@@ -67,7 +69,7 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
       for (var i in replies) {
         replies[i].doReplies(doRepliesRecursive);
         thisComponent.addPost(replies[i]);
-        console.log(replies[i].getContent())
+        //console.log(replies[i].getContent())
       }
 
     };

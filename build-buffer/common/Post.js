@@ -16,11 +16,12 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 module.exports = Post = React.createClass({displayName: "Post",
   mixins: [SetIntervalMixin,SafeStateChangeMixin],
   getInitialState: function() {
+    
     return {
       avatar: "img/genericPerson.png", 
-      fullname: "", 
-      retwistingUser: this.props.post.retwistingUser,
-      timeAgo: ""
+      fullname: "",
+      timeAgo: "",
+      retwistingUser: this.props.post.username
     };
   },
   updateTimeAgo: function() {
@@ -39,24 +40,31 @@ module.exports = Post = React.createClass({displayName: "Post",
 
   },
   componentDidMount: function () {
+    
     var thisComponent = this;
 
+    var post = Twister.getUser(this.props.post.username).getPost(this.props.post.id);
+    
+    if (post.isRetwist()) {
+      
+      post.getUser().doProfile(function(profile){
+        thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
+      });
+      
+      post=post.getRetwistedPost();
+      
+    }
+      
     //console.log(this.props.post.username+":post"+this.props.post.id);
-    Twister.getUser(this.props.post.username).doAvatar(function(avatar){
+    post.getUser().doAvatar(function(avatar){
       if (avatar.getUrl()) {
         thisComponent.setStateSafe({avatar: avatar.getUrl()});  
       } 
     });
     
-    Twister.getUser(this.props.post.username).doProfile(function(profile){
+    post.getUser().doProfile(function(profile){
       thisComponent.setStateSafe({fullname: profile.getField("fullname")});  
     });
-
-    if (this.props.post.isRetwist) {
-      Twister.getUser(this.props.post.retwistingUser).doProfile(function(profile){
-        thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
-      });
-    }
 
     this.updateTimeAgo();
 
@@ -64,14 +72,22 @@ module.exports = Post = React.createClass({displayName: "Post",
     
   },
   render: function() {
-    var post = this.props.post;
     
-    if (post.isReply) {
+    var post = Twister.getUser(this.props.post.username).getPost(this.props.post.id);
+    var retwist = false;
+    
+    if (post.isRetwist()) {
+      retwist = true;
+      post=post.getRetwistedPost();
+      
+    }
+    
+    if (post.isReply()) {
       var conversationLink = (
         React.createElement(OverlayTrigger, {placement: "left", overlay: 
           React.createElement(Tooltip, null, "View Conversation")
         }, 
-      React.createElement("small", null, React.createElement("a", {href: "#/conversation/"+post.replyUser+"/"+post.replyId, className: "link-button-gray"}, React.createElement(Glyphicon, {glyph: "comment"})))
+      React.createElement("small", null, React.createElement("a", {href: "#/conversation/"+post.getUsername()+"/"+post.getId(), className: "link-button-gray"}, React.createElement(Glyphicon, {glyph: "comment"})))
     )
       );
     } else {
@@ -82,19 +98,19 @@ module.exports = Post = React.createClass({displayName: "Post",
       React.createElement(ListGroupItem, null, 
           React.createElement(Row, {className: "nomargin"}, 
             React.createElement(Col, {xs: 2, md: 2, className: "fullytight"}, 
-              React.createElement("a", {href: "#/profile/"+this.props.post.username}, 
+              React.createElement("a", {href: "#/profile/"+post.getUsername()}, 
                 React.createElement("img", {className: "img-responsive", src: this.state.avatar})
               )
             ), 
             React.createElement(Col, {xs: 9, md: 9}, 
               React.createElement("strong", null, this.state.fullname), " ", 
-              post.content
+              post.getContent()
             ), 
             React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"}, this.state.timeAgo)
           ), 
           React.createElement(Row, {className: "nomargin"}, 
             React.createElement(Col, {xs: 6, md: 6, className: "fullytight"}, 
-        post.isRetwist && React.createElement("small", null, React.createElement(Glyphicon, {glyph: "retweet", "aria-hidden": "true"}), React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
+        retwist && React.createElement("small", null, React.createElement("em", null, "  retwisted by ", this.state.retwistingUser))
           
             ), 
             React.createElement(Col, {xs: 6, md: 6, className: "fullytight text-align-right"}, conversationLink)

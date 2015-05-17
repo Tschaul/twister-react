@@ -85,65 +85,22 @@ App = React.createClass({displayName: "App",
   
   getInitialState: function () {
     
-    Twister.deserializeCache(JSON.parse(localStorage.getItem("twister-cache")));
-    
-    //this.clearCache();
-    
     var state={};
     
     state.activeAccount = localStorage.getItem("twister-react-activeAccount")
     
     state.accounts = Twister.getAccounts();
     
+    if (!state.activeAccount) { state.activeAccount=state.accounts[0]; }
+    
     //console.log(state);
   
     return state;
+    
   },
   
   componentDidMount: function () {
     
-    var thisComponent = this;
-    
-    if (this.state.accounts.length==0) {
-
-      Twister.init({
-        host: this.state.appSettings.host,
-        logfunc: function(log){console.log(log)},
-        outdatedLimit: this.state.appSettings.pollInterval,
-        querySettingsByType: {
-          
-          outdatedLimit: {
-              pubkey: this.state.appSettings.pollIntervalProfile,
-              profile: this.state.appSettings.pollIntervalProfile,
-              avatar: this.state.appSettings.pollIntervalProfile,
-              torrent: this.state.appSettings.pollIntervalProfile,
-              followings: this.state.appSettings.pollIntervalProfile
-          }
-          
-        }
-      });
-      
-      Twister.loadServerAccounts(function(){
-        
-        thisComponent.setStateSafe(function(state){
-          
-          state.accounts = Twister.getAccounts();
-          //console.log(state.accounts);
-          state.activeAccount = state.accounts[0];
-          
-          return state;
-          
-        },function(){
-          thisComponent.switchAccount(thisComponent.state.activeAccount);
-        });
-      });
-      
-    } else {
-      
-      this.switchAccount(this.state.activeAccount);
-      
-    }
-
     this.setInterval(this.saveCache,300000);
 
   },
@@ -228,12 +185,84 @@ var routes = (
 );
 
 
+initializeApp = function () {
     
-Router.run(routes, function (Handler) {
-  React.render(React.createElement(Handler, null), document.getElementById('content'));
-});
+  Router.run(routes, function (Handler) {
+    React.render(React.createElement(Handler, null), document.getElementById('content'));
+  });
    
+}
 
+Twister.deserializeCache(JSON.parse(localStorage.getItem("twister-cache")));
+
+Twister.setup({logfunc: function(log){console.log(log)}})
+
+var accounts = Twister.getAccounts();
+
+if (accounts.length==0) {
+
+  if (!localStorage.getItem("twister-react-settings")) {
+
+    var appSettings = {
+
+      pollInterval:60,
+      pollIntervalProfile: 3600,
+      ignoredUsers: "nobody",
+      host: "http://user:pwd@localhost:28332"
+
+    };
+
+  } else {
+
+    var appSettings = JSON.parse(localStorage.getItem("twister-react-settings"));
+
+  }
+  
+  Twister.setup({
+    host: appSettings.host,
+    //logfunc: function(log){console.log(log)},
+    outdatedLimit: appSettings.pollInterval,
+    querySettingsByType: {
+
+      outdatedLimit: {
+          pubkey: appSettings.pollIntervalProfile,
+          profile: appSettings.pollIntervalProfile,
+          avatar: appSettings.pollIntervalProfile,
+          torrent: appSettings.pollIntervalProfile,
+          followings: appSettings.pollIntervalProfile
+      }
+
+    }
+  });
+
+  Twister.loadServerAccounts(function(){
+
+    var activeAccount =  localStorage.getItem("twister-react-activeAccount");
+    
+    var accounts = Twister.getAccounts();
+    
+    if (!activeAccount) {
+    
+      activeAccount = accounts[0];
+      localStorage.setItem("twister-react-activeAccount",activeAccount);
+      
+    }
+    
+    console.log("active account defaulted to "+activeAccount)
+    
+    Twister.getAccount(activeAccount).activateTorrents(function(){
+      
+      initializeApp();
+      
+    });
+      
+  });
+
+} else {
+
+  initializeApp();
+      
+}
 
 ////// INIT EVENTLISTENERS ON WINDOW
 

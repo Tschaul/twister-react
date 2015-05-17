@@ -52,19 +52,18 @@ module.exports = Home = React.createClass({
     
       Twister.getUser(username).doLatestPostsUntil(function(post){
         
-        if (post!==null) {
-          if(post.getTimestamp()<thisComponent.state.postrange) {
-            return false;
-          } else {
-            thisComponent.addPost(post);
-            //console.log("adding post",post.getUsername(),post.getId())
-          }
-        } else {
-          thisComponent.removeUser(thisUsername);
+        if(post.getTimestamp()<thisComponent.state.postrange) {
           return false;
+        } else {
+          thisComponent.addPost(post);
         }
 
-      },{outdatedLimit: 2*thisComponent.state.appSettings.pollInterval});
+      },{
+        outdatedLimit: 2*thisComponent.state.appSettings.pollInterval,
+        errorfunc: function(error){
+          if (error.code==32052) { thisComponent.removeUser(this._name); }
+        }
+      });
     
     });
 
@@ -87,7 +86,7 @@ module.exports = Home = React.createClass({
 
       for (var i = 0; i<previousState.data.length; i++) {
         if (previousState.data[i].username!=username) {
-          newusers.push(previousState.data[i]);
+          newdata.push(previousState.data[i]);
         } else {
           previousState.postIdentifiers[previousState.data[i].postid]=false;
         }
@@ -110,19 +109,18 @@ module.exports = Home = React.createClass({
 
       Twister.getUser(thisUsername).doLatestPostsUntil(function(post){
         
-        if (post!==null) {
-          if(post.getTimestamp()<thisComponent.state.postrange) {
-            return false;
-          } else {
-            thisComponent.addPost(post);
-            //console.log("adding post",post.getUsername(),post.getId())
-          }
-        } else {
-          thisComponent.removeUser(thisUsername);
+        if(post.getTimestamp()<thisComponent.state.postrange) {
           return false;
+        } else {
+          thisComponent.addPost(post);
         }
 
-      },{outdatedLimit: outdatedLimit});
+      },{
+        outdatedLimit: 2*thisComponent.state.appSettings.pollInterval,
+        errorfunc: function(error){
+          if (error.code==32052) { thisComponent.removeUser(this._name); }
+        }
+      });
 
     }
   },
