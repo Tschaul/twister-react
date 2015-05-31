@@ -64,3 +64,19 @@ body.modal-open {
   opacity: 0.01;
 }
 
+.mention {
+  color: red;
+}
+
+.hashtag {
+  color: green;
+}
+
+.url {
+  color: blue;
+}
+
+.email {
+  color: coral;
+}
+

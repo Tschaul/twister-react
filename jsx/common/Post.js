@@ -12,6 +12,7 @@ var React = require('react');
 
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
+var PostContent = require('../common/PostContent.js');
 
 module.exports = Post = React.createClass({
   mixins: [SetIntervalMixin,SafeStateChangeMixin],
@@ -104,7 +105,7 @@ module.exports = Post = React.createClass({
             </Col>
             <Col xs={9} md={9}>
               <strong>{this.state.fullname}</strong>&nbsp;
-              {post.getContent()}
+              <PostContent content={post.getContent()}/>
             </Col>
             <Col xs={1} md={1} className="fullytight text-align-right">{this.state.timeAgo}</Col>
           </Row>

@@ -197,7 +197,7 @@ initializeApp = function () {
 
 Twister.deserializeCache(JSON.parse(localStorage.getItem("twister-cache")));
 
-Twister.setup({logfunc: function(log){console.log(log)}})
+//Twister.setup({logfunc: function(log){console.log(log)}})
 
 var accounts = Twister.getAccounts();
 

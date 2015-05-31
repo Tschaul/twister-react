@@ -31151,6 +31151,44 @@ Twister.trimCache = function (timestamp) {
 
 }
 
+Twister._activeQueryIds = {};
+
+Twister.raiseQueryId = function (id) {
+
+  if (id) {
+    if(!Twister._activeQueryIds[id]){
+      Twister._activeQueryIds[id]={func:null,count:1};
+    }else{
+      Twister._activeQueryIds[id].count++;
+    }
+  }
+
+}
+
+Twister.bumpQueryId = function (id) {
+    
+  if (id) {
+    Twister._activeQueryIds[id].count--;
+    if (Twister._activeQueryIds[id].count==0) {
+      if (Twister._activeQueryIds[id].func) { 
+        Twister._activeQueryIds[id].func(); 
+      }
+      delete Twister._activeQueryIds[id];
+    }
+  }
+  
+}
+
+Twister.onQueryComplete = function (id, cbfunc){
+  
+  if(!Twister._activeQueryIds[id]){
+    Twister._activeQueryIds[id]={func:cbfunc,count:0};
+  }else{
+    Twister._activeQueryIds[id].func=cbfunc;
+  }
+
+}
+
 module.exports = Twister;
 
 },{"./ServerWallet/TwisterAccount.js":139,"./TwisterHashtag.js":145,"./TwisterPromotedPosts.js":149,"./TwisterResource.js":152,"./TwisterUser.js":155}],143:[function(require,module,exports){
@@ -32594,6 +32632,36 @@ TwisterResource.prototype.inCache = function () {
     return (this._lastUpdate>0);
 }
 
+TwisterResource.prototype._wrapPromise = function (context,handler,cbfunc,querySettings) {
+  
+  if ( typeof cbfunc != "function" ) {
+    
+    querySettings = cbfunc;
+    
+    cbfunc = null;
+    
+  }
+  
+  if (!querySettings){ querySettings = {}; }
+
+  
+  if (querySettings["errorfunc"]) { 
+    var errorfuncFromQuerySettings = querySettings["errorfunc"];
+  } else {
+    var errorfuncFromQuerySettings = null;
+  }
+  delete  querySettings["errorfunc"];
+  
+  return new Promise ( function ( resolve, reject ) {
+    
+    querySettings["errorfunc"]=reject;
+    
+    handler.call(context,resolve,querySettings);
+    
+  } ).then(cbfunc,errorfuncFromQuerySettings);
+  
+}
+
 /**
  * Checks whether cached resource is outdated and invokes an update if needed. Calls cbfunc on the resource when done.
  * @function
@@ -32602,6 +32670,8 @@ TwisterResource.prototype.inCache = function () {
  */
 TwisterResource.prototype._checkQueryAndDo = function (cbfunc,querySettings) {
     
+  
+  
     if (querySettings===undefined) {querySettings={};} 
     //else {console.log(querySettings)}
     
@@ -32611,8 +32681,9 @@ TwisterResource.prototype._checkQueryAndDo = function (cbfunc,querySettings) {
         
     if (!thisResource._updateInProgress) {
         
-        thisResource._activeQuerySettings = querySettings;
+        thisResource._activeQuerySettings = JSON.parse(JSON.stringify(querySettings));
         thisResource._updateInProgress = true;
+        Twister.raiseQueryId(thisResource._activeQuerySettings["queryId"]);
 
         var outdatedTimestamp = 0;
       
@@ -32624,17 +32695,19 @@ TwisterResource.prototype._checkQueryAndDo = function (cbfunc,querySettings) {
             
             thisResource._log("resource present in cache");
           
+            Twister.bumpQueryId(thisResource._activeQuerySettings["queryId"]);
             thisResource._activeQuerySettings = {};
             thisResource._updateInProgress = false;
 
         } else {
+              
+            thisResource._log("resource not in cache. querying");
             
             thisResource._queryAndDo(function(newresource){
                 
                 thisResource._do(cbfunc);
-              
-                thisResource._log("resource not in cache. querying");
                 
+                Twister.bumpQueryId(thisResource._activeQuerySettings["queryId"]);
                 thisResource._activeQuerySettings = {};
                 thisResource._updateInProgress = false;
             
@@ -32654,6 +32727,7 @@ TwisterResource.prototype._checkQueryAndDo = function (cbfunc,querySettings) {
         
     }
 
+  
 } 
 
 /**
@@ -32709,9 +32783,10 @@ TwisterResource.prototype.setQuerySettings = function (settings) {
 TwisterResource.prototype._handleError = function (error) {
     
     this._updateInProgress = false;
-	
     this.getQuerySetting("errorfunc").call(this,error);
-    
+    Twister.bumpQueryId(this._activeQuerySettings["queryId"]);
+    this._activeQuerySettings={};
+  
 }
 
 TwisterResource.prototype._log = function (log) {
@@ -32763,18 +32838,45 @@ TwisterResource.prototype.RPC = function (method, params, resultFunc, errorFunc)
         }, function(error, response, body) {
             
             if (error) { 
-				
-				error.message = "Host not reachable (http error).";
-				
-				thisResource._handleError(error)
+				                
+                thisResource._handleError({
+                    message: "Host not reachable.",
+                    data: error.code,
+                    code: 32090                    
+                  })
 			
 			} else {
-                var res = JSON.parse(body);
-                if (res.error) {
+              
+              if (response.statusCode<200 || response.statusCode>299) {
+                    
+                  thisResource._handleError({
+                    message: "Request was not processed successfully (http error: "+response.statusCode+").",
+                    data: response.statusCode,
+                    code: 32091                    
+                  })
+                  
+              } else {
+              
+                try {
+                  
+                  var res = JSON.parse(body);
+                  
+                  if (res.error) {
                     thisResource._handleError(res.error);
-                } else {
+                  } else {
                     resultFunc(res.result);
+                  }
+                  
+                } catch (err) {
+
+                  thisResource._handleError({
+                    message: "An error occurred while parsing the JSON response body.",
+                    code: 32092
+                  })
+
                 }
+
+              } 
                 
             }
             
@@ -33405,6 +33507,8 @@ var TwisterFollowings = require('./TwisterFollowings.js');
 var TwisterPubKey = require('./TwisterPubKey.js');
 var TwisterStream = require('./TwisterStream.js');
 var TwisterMentions = require('./TwisterMentions.js');
+var TwisterResource = require('./TwisterResource.js');
+var inherits = require('inherits');
 
 /**
  * Describes a user in {@ Twister}. Allows for accessing all public onformation about this user.
@@ -33427,6 +33531,8 @@ function TwisterUser(name,scope) {
     this._mentions = new TwisterMentions(name,scope);
 
 }
+
+inherits(TwisterUser,TwisterResource);
 
 module.exports = TwisterUser;
 
@@ -33505,7 +33611,11 @@ TwisterUser.prototype._doPubKey = function (cbfunc, querySettings) {
 }
 
 TwisterUser.prototype.doProfile = function (cbfunc, querySettings) {
-    this._profile._checkQueryAndDo(cbfunc, querySettings);
+    return this._wrapPromise(
+      this._profile,
+      this._profile._checkQueryAndDo,
+      cbfunc,
+      querySettings);
 };
 
 TwisterUser.prototype.getProfile = function () {
@@ -33513,7 +33623,11 @@ TwisterUser.prototype.getProfile = function () {
 };
 
 TwisterUser.prototype.doAvatar = function (cbfunc, querySettings) {
-    this._avatar._checkQueryAndDo(cbfunc, querySettings);
+    return this._wrapPromise(
+      this._avatar,
+      this._avatar._checkQueryAndDo,
+      cbfunc, 
+      querySettings);
 };
 
 TwisterUser.prototype.getAvatar = function () {
@@ -33521,7 +33635,11 @@ TwisterUser.prototype.getAvatar = function () {
 };
 
 TwisterUser.prototype.doFollowings = function (cbfunc, querySettings) {
-    this._followings._checkQueryAndDo(cbfunc, querySettings);
+    return this._wrapPromise(
+      this._followings,
+      this._followings._checkQueryAndDo,
+      cbfunc, 
+      querySettings);
 };
 
 TwisterUser.prototype.getFollowings = function () {
@@ -33529,11 +33647,25 @@ TwisterUser.prototype.getFollowings = function () {
 };
 
 TwisterUser.prototype.doStatus = function (cbfunc, querySettings) {
-    this._stream._checkQueryAndDo(cbfunc, querySettings);
+    return this._wrapPromise(
+      this._stream,
+      this._stream._checkQueryAndDo,
+      cbfunc, 
+      querySettings);
 };
 
 TwisterUser.prototype.doPost = function (id, cbfunc, querySettings) {
-    this._stream._doPost(id, cbfunc, querySettings);
+  
+  var thisStream = this._stream;
+  
+  return this._wrapPromise(
+    thisStream,
+    function(cb,qs){
+      thisStream._doPost(id, cb, qs);
+    },
+    cbfunc,
+    querySettings);
+  
 }
 
 
@@ -33547,7 +33679,11 @@ TwisterUser.prototype.getPost = function (id) {
 
 TwisterUser.prototype.doMentions = function (cbfunc, querySettings) {
 
-    this._mentions._checkQueryAndDo(cbfunc);
+    return this._wrapPromise(
+      this._mentions,
+      this._mentions._checkQueryAndDo,
+      cbfunc,
+      querySettings);
 
 }
 
@@ -33560,7 +33696,7 @@ TwisterUser.prototype.doLatestPostsUntil = function (cbfunc, querySettings) {
     this._stream._doUntil(cbfunc, querySettings);
 
 }
-},{"./TwisterAvatar.js":143,"./TwisterFollowings.js":144,"./TwisterMentions.js":146,"./TwisterProfile.js":148,"./TwisterPubKey.js":150,"./TwisterStream.js":154}],156:[function(require,module,exports){
+},{"./TwisterAvatar.js":143,"./TwisterFollowings.js":144,"./TwisterMentions.js":146,"./TwisterProfile.js":148,"./TwisterPubKey.js":150,"./TwisterResource.js":152,"./TwisterStream.js":154,"inherits":52}],156:[function(require,module,exports){
 
 },{}],157:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
