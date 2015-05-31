@@ -1265,8 +1265,8 @@ module.exports = NewPostModalButton = React.createClass({displayName: "NewPostMo
       React.createElement(Modal, {bsStyle: "primary", title: React.createElement(Glyphicon, {glyph: "pencil"}), onRequestHide: this.handleToggle}, 
         React.createElement("div", {className: "modal-body"}, 
           React.createElement("form", {onSubmit: this.handleNewPost}, 
-            React.createElement(Input, {type: "textarea", label: "Text Area", placeholder: "textarea"}), 
-            React.createElement(Input, {type: "submit", value: "Submit button", "data-dismiss": "modal"})
+            React.createElement(Input, {type: "textarea", label: "Write Something", placeholder: "textarea"}), 
+            React.createElement(Input, {type: "submit", value: "Submit Post", "data-dismiss": "modal"})
           )
         )
       )

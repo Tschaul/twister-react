@@ -66,8 +66,8 @@ module.exports = NewPostModalButton = React.createClass({
       <Modal bsStyle='primary' title={<Glyphicon glyph='pencil'/>} onRequestHide={this.handleToggle}>
         <div className='modal-body'>
           <form onSubmit={this.handleNewPost}>
-            <Input type='textarea' label='Text Area' placeholder='textarea'/>
-            <Input type='submit' value='Submit button' data-dismiss="modal" />
+            <Input type='textarea' label='Write Something' placeholder='textarea'/>
+            <Input type='submit' value='Submit Post' data-dismiss="modal" />
           </form>
         </div>
       </Modal>
