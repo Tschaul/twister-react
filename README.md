@@ -27,7 +27,7 @@ The new post modal
 
 ![Alt text](/screenshots/profile.png?raw=true "Profile")
 
-The profile page on the posts tag
+The profile page on the posts tab
 
 ![Alt text](/screenshots/following.png?raw=true "Following")
 
