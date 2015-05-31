@@ -654,7 +654,7 @@ module.exports = Post = React.createClass({displayName: "Post",
           }*/
       }
 
-      output.push({type:"text",raw:(msg.substr(0, index))});
+      output.push({type:"text",raw:msg});
       msg = "";
       
     }
