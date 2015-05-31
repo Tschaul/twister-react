@@ -1,5 +1,19 @@
 # twister-react
-proxy-based Twister client written with react-js
+A drop in replacement for [twister-html](https://github.com/miguelfreitas/twister-html) written in [React](https://facebook.github.io/react/) using [Bootstrap](http://getbootstrap.com/) with the [paper theme](https://bootswatch.com/paper/).
+
+The main purpose of this project is to test the underlying Twister library [twister-lib-js](https://github.com/tschaul/twister-lib-js).
+
+
+## Missing Features			
+
+* Retwisting
+* Replying
+* Hashtag browsing
+* User Search
+* Trending Hashtags
+* Profile Editing
+* Direct Messages
+* Import/Create Account
 
 ## Screenshots
 
