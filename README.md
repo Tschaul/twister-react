@@ -1,5 +1,5 @@
 # twister-react
-A drop in replacement for [twister-html](https://github.com/miguelfreitas/twister-html) written in [React](https://facebook.github.io/react/) using [Bootstrap](http://getbootstrap.com/) with the [paper theme](https://bootswatch.com/paper/).
+A drop-in-replacement for [twister-html](https://github.com/miguelfreitas/twister-html) written in [React](https://facebook.github.io/react/) using [Bootstrap](http://getbootstrap.com/) with the [paper theme](https://bootswatch.com/paper/).
 
 The main purpose of this project is to test the underlying Twister library [twister-lib-js](https://github.com/tschaul/twister-lib-js).
 
