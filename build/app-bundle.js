@@ -565,6 +565,8 @@ module.exports = Post = React.createClass({displayName: "Post",
   },
   parseContent: function( msg ) {
   
+    //return [{type:"text",raw:msg}];
+    
     var output = [];
   
     var tmp;
@@ -578,7 +580,7 @@ module.exports = Post = React.createClass({displayName: "Post",
     var reEmail = new RegExp(strEmailRegexp);
     var reSplitCounter = new RegExp(strSplitCounterR);
     
-    msg = this.escapeHtmlEntities(msg);
+    //msg = this.escapeHtmlEntities(msg);
 
     while( msg != undefined && msg.length ) {
         
@@ -654,7 +656,7 @@ module.exports = Post = React.createClass({displayName: "Post",
           }*/
       }
 
-      output.push({type:"text",raw:msg});
+      output.push({type:"text",raw:this.reverseHtmlEntities(msg)});
       msg = "";
       
     }
