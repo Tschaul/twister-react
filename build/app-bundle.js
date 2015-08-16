@@ -1564,7 +1564,7 @@ module.exports = Conversation = React.createClass({displayName: "Conversation",
     
     //alert("got event")
     
-    this.updatePosts(-1);
+    this.updatePosts(0);
     
   },
   render: function() {
@@ -1573,7 +1573,7 @@ module.exports = Conversation = React.createClass({displayName: "Conversation",
           React.createElement(ListGroupItem, null, 
             "Conversation"
           ), 
-        data: this.state.data, loading: this.state.loading})
+        data: this.state.data, loading: this.state.loading, activeAccount: this.props.activeAccount})
         );
   }
 });
@@ -1654,7 +1654,7 @@ module.exports = Hashtag = React.createClass({displayName: "Hashtag",
           React.createElement(ListGroupItem, null, 
             "Hashtag"
           ), 
-        data: this.state.data, loading: this.state.loading})
+        data: this.state.data, loading: this.state.loading, activeAccount: this.props.activeAccount})
         );
   }
 });

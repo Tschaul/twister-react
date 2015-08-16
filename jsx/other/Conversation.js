@@ -87,7 +87,7 @@ module.exports = Conversation = React.createClass({
     
     //alert("got event")
     
-    this.updatePosts(-1);
+    this.updatePosts(0);
     
   },
   render: function() {
@@ -96,7 +96,7 @@ module.exports = Conversation = React.createClass({
           <ListGroupItem>
             Conversation
           </ListGroupItem>
-        } data={this.state.data} loading={this.state.loading}/>
+        } data={this.state.data} loading={this.state.loading} activeAccount={this.props.activeAccount}/>
         );
   }
 });

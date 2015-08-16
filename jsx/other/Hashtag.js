@@ -74,7 +74,7 @@ module.exports = Hashtag = React.createClass({
           <ListGroupItem>
             Hashtag
           </ListGroupItem>
-        } data={this.state.data} loading={this.state.loading}/>
+        } data={this.state.data} loading={this.state.loading} activeAccount={this.props.activeAccount}/>
         );
   }
 });
