@@ -108,6 +108,16 @@ module.exports = Post = React.createClass({
     } else {
       var replyLink = (<span/>);
     }
+                                           
+    
+    var retwistLink = <OverlayTrigger placement='left' overlay={
+        <Tooltip>Retwist</Tooltip>
+      }>
+        <small>
+          <RetwistModalButton retwistUsername={post.getUsername()} retwistPostId={post.getId()} activeAccount={this.props.activeAccount} originalMsg={post.getContent()} retwistUserFullname={this.state.fullname}/>
+        </small>
+      </OverlayTrigger>
+    
     
     return (
       <ListGroupItem>
@@ -128,11 +138,14 @@ module.exports = Post = React.createClass({
         {retwist && <small><em> &nbsp;retwisted by {this.state.retwistingUser}</em></small>
           }
             </Col>
-            <Col xs={5} md={5} className="fullytight text-align-right">
+            <Col xs={4} md={4} className="fullytight text-align-right">
+              {conversationLink}
+            </Col>
+            <Col xs={1} md={1} className="fullytight text-align-right">
               {replyLink}
             </Col>
             <Col xs={1} md={1} className="fullytight text-align-right">
-              {conversationLink}
+              {retwistLink}
             </Col>
           </Row>
 
