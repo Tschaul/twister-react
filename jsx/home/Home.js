@@ -180,7 +180,7 @@ module.exports = Home = React.createClass({
             Home
             <NewPostModalButton activeAccount={this.props.activeAccount}/>
           </ListGroupItem>
-        } loading={this.state.loading}/>
+        } loading={this.state.loading} activeAccount={this.props.activeAccount}/>
       );
   }
 });

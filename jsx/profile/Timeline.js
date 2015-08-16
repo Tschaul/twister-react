@@ -88,14 +88,14 @@ module.exports = Timeline = React.createClass({
     
     //alert("got event")
     
-    if(this.state.username==event.post.getUsername()) {
-       this.addPost(event.post);
+    if(this.state.username==event.detail.getUsername()) {
+       this.addPost(event.detail);
     }
     
   },
   render: function() {
       return (
-          <Postboard data={this.state.data} loading={this.state.loading}/>
+          <Postboard data={this.state.data} loading={this.state.loading} activeAccount={this.props.activeAccount}/>
         );
   }
 });

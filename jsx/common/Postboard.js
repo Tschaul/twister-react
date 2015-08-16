@@ -16,9 +16,12 @@ var Post = require("../common/Post.js");
 
 module.exports = Postboard = React.createClass({
   render: function() {
+    
+    var activeAccount = this.props.activeAccount;
+    
     var posts = this.props.data.map(function(post, index) {
       return (
-        <Post post={post} key={post.postid} />
+        <Post post={post} key={post.postid} activeAccount={activeAccount}/>
       );
     });
     

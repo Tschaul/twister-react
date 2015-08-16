@@ -13,6 +13,7 @@ var React = require('react');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var PostContent = require('../common/PostContent.js');
+var ReplyModalButton = require('../common/ReplyModalButton.js');
 
 module.exports = Post = React.createClass({
   mixins: [SetIntervalMixin,SafeStateChangeMixin],
@@ -94,6 +95,19 @@ module.exports = Post = React.createClass({
     } else {
       var conversationLink = (<span/>);
     }
+                                          
+                                          
+    if (!post.isRetwist()) {
+      var replyLink = <OverlayTrigger placement='left' overlay={
+          <Tooltip>Reply</Tooltip>
+        }>
+          <small>
+            <ReplyModalButton replyUsername={post.getUsername()} replyPostId={post.getId()} activeAccount={this.props.activeAccount} originalMsg={post.getContent()} replyUserFullname={this.state.fullname}/>
+          </small>
+        </OverlayTrigger>
+    } else {
+      var replyLink = (<span/>);
+    }
     
     return (
       <ListGroupItem>
@@ -114,7 +128,12 @@ module.exports = Post = React.createClass({
         {retwist && <small><em> &nbsp;retwisted by {this.state.retwistingUser}</em></small>
           }
             </Col>
-            <Col xs={6} md={6} className="fullytight text-align-right">{conversationLink}</Col>
+            <Col xs={5} md={5} className="fullytight text-align-right">
+              {replyLink}
+            </Col>
+            <Col xs={1} md={1} className="fullytight text-align-right">
+              {conversationLink}
+            </Col>
           </Row>
 
       </ListGroupItem>
