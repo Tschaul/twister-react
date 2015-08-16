@@ -6,8 +6,6 @@ The main purpose of this project is to test the underlying Twister library [twis
 
 ## Missing Features			
 
-* Retwisting
-* Replying
 * User Search
 * Trending Hashtags
 * Profile Editing
