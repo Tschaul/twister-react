@@ -36,6 +36,7 @@ var Timeline = require('./profile/Timeline.js');
 var Followings = require('./profile/Followings.js');
 var Mentions = require('./profile/Mentions.js');
 var Conversation = require('./other/Conversation.js');
+var Hashtag = require('./other/Hashtag.js');
 var Settings = require('./other/Settings.js');
 var AppSettingsMixin = require('./common/AppSettingsMixin.js');
 
@@ -181,6 +182,7 @@ var routes = (
       <DefaultRoute name="profile-timeline-default" handler={Timeline} />
     </Route>
     <Route name="conversation" path="/conversation/:username/:postid" handler={Conversation}/>
+    <Route name="hashtag" path="/hashtag/:hashtag" handler={Hashtag}/>
     <Route name="settings" path="/settings" handler={Settings}/>
     <DefaultRoute name="home" handler={Home} />
   </Route>

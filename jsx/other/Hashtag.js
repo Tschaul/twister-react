@@ -15,7 +15,7 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Button = ReactBootstrap.Button
 
-module.exports = Conversation = React.createClass({
+module.exports = Hashtag = React.createClass({
     
   mixins:[
     AppSettingsMixin,
@@ -29,8 +29,7 @@ module.exports = Conversation = React.createClass({
   },
   getInitialState: function() {
     return {
-      username: this.context.router.getCurrentParams().username,
-      postid: parseInt(this.context.router.getCurrentParams().postid),
+      hashtag: this.context.router.getCurrentParams().hashtag,
       data: [], 
       postIdentifiers: {},
       loading: true
@@ -43,38 +42,17 @@ module.exports = Conversation = React.createClass({
     if (!outdatedLimit) {outdatedLimit=this.state.appSettings.pollInterval/2;}
 
     var thisComponent = this;
-    var thisUsername = this.state.username;
-
-    var goUpConversation = function (post) {
+    
+    Twister.doHashtagPosts(this.state.hashtag,function(posts){
+    
+      thisComponent.setStateSafe({loading: false});
       
-        
-      
-      if (post.isReply()) {
-
-        post.doPostRepliedTo(goUpConversation);
-
-      } else {
-        
-        thisComponent.addPost(post);
-        
-        thisComponent.setStateSafe({loading: false});
-
-        post.doReplies(doRepliesRecursive);
-
+      for (var i in posts) {
+        thisComponent.addPost(posts[i]);
+        //console.log(posts[i].getContent())
       }
-    }
-
-    var doRepliesRecursive = function (replies) {
-
-      for (var i in replies) {
-        replies[i].doReplies(doRepliesRecursive);
-        thisComponent.addPost(replies[i]);
-        //console.log(replies[i].getContent())
-      }
-
-    };
-
-    Twister.getUser(this.state.username).doPost(this.state.postid,goUpConversation,{outdatedLimit: outdatedLimit, logfunc: function(log){console.log(log)}});
+    
+    },{outdatedLimit: outdatedLimit, logfunc: function(log){console.log(log)}});
 
   },
   componentDidMount: function() {
@@ -94,7 +72,7 @@ module.exports = Conversation = React.createClass({
       return (
           <Postboard header={
           <ListGroupItem>
-            Conversation
+            Hashtag
           </ListGroupItem>
         } data={this.state.data} loading={this.state.loading}/>
         );

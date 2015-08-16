@@ -162,7 +162,7 @@ module.exports = Post = React.createClass({
             )
         case "hashtag":
           return (
-            <span key={index} className="text-muted">{item.raw}</span>
+            <a key={index} className="text-muted" href={"#/hashtag/"+item.raw.substr(1)}>{item.raw}</a>
             )
         case "url":
           return (
