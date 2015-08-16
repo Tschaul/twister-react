@@ -14,6 +14,7 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var PostContent = require('../common/PostContent.js');
 var ReplyModalButton = require('../common/ReplyModalButton.js');
+var RetwistModalButton = require('../common/RetwistModalButton.js');
 
 module.exports = Post = React.createClass({
   mixins: [SetIntervalMixin,SafeStateChangeMixin],
