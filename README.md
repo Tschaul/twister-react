@@ -8,7 +8,6 @@ The main purpose of this project is to test the underlying Twister library [twis
 
 * Retwisting
 * Replying
-* Hashtag browsing
 * User Search
 * Trending Hashtags
 * Profile Editing
