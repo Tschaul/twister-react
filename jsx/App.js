@@ -239,7 +239,7 @@ if (accounts.length==0) {
     }
   });
 
-  Twister.loadServerAccounts(function(){
+  Twister.importClientSideAccount("pampalulu","L12kz6tabDN6VmPes1rfEpiznztPF6vgkHp8UZVBgZadxzebHhAp",function(){
 
     var activeAccount =  localStorage.getItem("twister-react-activeAccount");
     
