@@ -225,8 +225,9 @@ if (accounts.length==0) {
   
   Twister.setup({
     host: appSettings.host,
-    //logfunc: function(log){console.log(log)},
+    logfunc: function(log){console.log(log)},
     outdatedLimit: appSettings.pollInterval,
+    walletType: "client",
     querySettingsByType: {
 
       outdatedLimit: {
@@ -255,6 +256,8 @@ if (accounts.length==0) {
     
     console.log("active account defaulted to "+activeAccount)
     
+    console.log(Twister.getAccount(activeAccount))
+    
     Twister.getAccount(activeAccount).activateTorrents(function(){
       
       initializeApp();
@@ -265,7 +268,25 @@ if (accounts.length==0) {
 
 } else {
 
-  initializeApp();
+  var activeAccount =  localStorage.getItem("twister-react-activeAccount");
+    
+  var accounts = Twister.getAccounts();
+
+  if (!activeAccount) {
+
+    activeAccount = accounts[0];
+    localStorage.setItem("twister-react-activeAccount",activeAccount);
+
+  }
+
+  console.log("active account defaulted to "+activeAccount)
+    console.log(Twister.getAccount(activeAccount))
+
+  Twister.getAccount(activeAccount).activateTorrents(function(){
+
+    initializeApp();
+
+  });
       
 }
 

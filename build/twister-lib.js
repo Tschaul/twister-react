@@ -29633,6 +29633,8 @@ TwisterAccount.prototype.inflate = function (flatData) {
         this._torrents[flatData.torrents[i].name]=newuser;
 
     }
+  
+    this._privkey.inflate(flatData.privkey);
 
 }
 
@@ -29875,15 +29877,14 @@ TwisterAccount.prototype.updateAvatar = function (newdata,cbfunc) {
 TwisterAccount.prototype.post = function (msg,cbfunc) {
   
   var post = {msg:msg};
-  
-  this._signAndPublish(post,function(){
-    Twister.getUser(thisAccount._name).doStatus(cbfunc,{outdatedLimit: 0});
-  });
+    
+  this._signAndPublish(post,cbfunc);
 
 }
 
 TwisterAccount.prototype.reply = function (replyusername,replyid,msg,cbfunc) {
   
+  var thisAccount = this;
   
   var post = {
     msg:msg,
@@ -29893,7 +29894,12 @@ TwisterAccount.prototype.reply = function (replyusername,replyid,msg,cbfunc) {
     }
   };
   
-  this._signAndPublish(post,function(v){
+  this._signAndPublish(post,function(newpost){
+    
+    var v = {
+      rt: newpost._data,
+      sig_rt: newpost._signature
+    }
     
     thisAccount._dhtput(
       replyusername,
@@ -29902,7 +29908,8 @@ TwisterAccount.prototype.reply = function (replyusername,replyid,msg,cbfunc) {
       v,
       0,
       function(result){
-        Twister.getUser(thisAccount._name).doStatus(cbfunc,{outdatedLimit: 0});
+        Twister.getUser(replyusername)._stream._posts[replyid]._replies._data[newpost.getUsername()+":post"+newpost.getId()]=true; 
+        cbfunc(newpost);
       },
       function(error){
         thisAccount._handleError(error);
@@ -29927,8 +29934,13 @@ TwisterAccount.prototype.retwist = function (rtusername,rtid,cbfunc) {
     }
     
     
-    this._signAndPublish(post,function(v){
+    thisAccount._signAndPublish(post,function(newpost){
     
+      var v = {
+        rt: newpost._data,
+        sig_rt: newpost._signature
+      }
+      
       thisAccount._dhtput(
         rtusername,
         "rts"+rtid,
@@ -29936,7 +29948,8 @@ TwisterAccount.prototype.retwist = function (rtusername,rtid,cbfunc) {
         v,
         0,
         function(result){
-          Twister.getUser(thisAccount._name).doStatus(cbfunc,{outdatedLimit: 0});
+          Twister.getUser(rtusername)._stream._posts[rtid]._retwists._data[newpost.getUsername()+":post"+newpost.getId()]=true;  
+          cbfunc(newpost);
         },
         function(error){
           thisAccount._handleError(error);
@@ -29996,7 +30009,7 @@ TwisterAccount.prototype._signAndPublish = function(post_ori,cbfunc){
   var post = JSON.parse(JSON.stringify(post_ori));
   
   if ("sig_rt" in post) {
-      post.sig_rt = new Buffer(message.sig_rt, 'hex');
+      post.sig_rt = new Buffer(post.sig_rt, 'hex');
   }
   
   var thisAccount = this;
@@ -30009,7 +30022,10 @@ TwisterAccount.prototype._signAndPublish = function(post_ori,cbfunc){
   
     thisAccount.RPC("getinfo",[],function(info){
 
-      Twister.getUser(thisAccount._name).doStatus(function(status){
+      Twister.getUser(thisAccount._name).doStatus(function(status){  
+        
+        //console.log("new post msg after",status)
+
         
         post.height = info.blocks-1;
         post.n = thisAccount._name;
@@ -30017,18 +30033,28 @@ TwisterAccount.prototype._signAndPublish = function(post_ori,cbfunc){
         post.lastk = status.getId();
         post.time = Math.round(Date.now()/1000);
         
+        //console.log("new post will be",post)
+        
         thisAccount._privkey.sign(post,function(sig){
           
           var v = {
-            sig_userpost:sig,
+            sig_userpost: sig,
             userpost: post
           };
+          
+          //console.log("publishing new post ",v);
           
           var message = bencode.encode(v);
           
           thisAccount.RPC("newpostraw",[thisAccount._name,newid,message.toString("hex")],function(){
             
-            thisAccount._publishPostOnDht(v,cbfunc);
+            thisAccount._publishPostOnDht(v,function(){
+              
+              console.log("going to verify ",v)
+              
+              Twister.getUser(thisAccount._name)._stream._verifyAndCachePost(v,cbfunc);
+              
+            });
                         
           },function(error){
             thisAccount._handleError(error);
@@ -30036,7 +30062,7 @@ TwisterAccount.prototype._signAndPublish = function(post_ori,cbfunc){
           
         });
         
-      },{outdatedLimit: 0});
+      });
 
     },function(error){
       thisAccount._handleError(error);
@@ -30067,6 +30093,8 @@ TwisterAccount.prototype._dhtput = function(username,resource,sorm,value,seq,cbf
         v: value
       };
     
+    console.log("dhtputraw",p)
+    
     thisAccount._privkey.sign(p,function(sig){
       
         var dhtentry = {
@@ -30078,7 +30106,7 @@ TwisterAccount.prototype._dhtput = function(username,resource,sorm,value,seq,cbf
         var message = bencode.encode(dhtentry);
         
         thisAccount.RPC("dhtputraw",[message.toString("hex")],function(){
-          
+          cbfunc();
         },function(error){
           thisAccount._handleError(error);
         });
@@ -30097,8 +30125,12 @@ TwisterAccount.prototype._publishPostOnDht = function(v,cbfunc){
   
   var thisAccount = this;
   
-  var querId = v.sig_userpost.toString();
+  var querId = v.sig_userpost.toString("hex");
   
+  Twister.onQueryComplete(querId,function(){
+    cbfunc(v);
+  });
+
   Twister.raiseQueryId(querId);
         
   thisAccount._dhtput(
@@ -30148,6 +30180,8 @@ TwisterAccount.prototype._publishPostOnDht = function(v,cbfunc){
           v,
           0,
           function(result){
+            //console.log(Twister.getHashtag(item.raw))
+            Twister.getHashtag(item.raw)._data[v.userpost.n+":post"+v.userpost.k]=true;
             Twister.bumpQueryId(querId);
           },
           function(error){
@@ -30169,6 +30203,7 @@ TwisterAccount.prototype._publishPostOnDht = function(v,cbfunc){
           v,
           0,
           function(result){
+            Twister.getUser(item.raw)._mentions._data[v.userpost.n+":post"+v.userpost.k]=true;
             Twister.bumpQueryId(querId);
           },
           function(error){
@@ -30180,9 +30215,6 @@ TwisterAccount.prototype._publishPostOnDht = function(v,cbfunc){
       
     });
         
-    Twister.onQueryComplete(querId,function(){
-      cbfunc(v);
-    });
     
   }
   
@@ -30622,7 +30654,9 @@ module.exports = TwisterPrivKey;
 TwisterPrivKey.prototype.inflate = function (flatData) {
 
     TwisterResource.prototype.inflate.call(this,flatData);
-    
+
+    console.log("inflating privkey",flatData);
+  
     if (this._data) {
     
         this._btcKey = Bitcoin.ECPair.fromWIF(this._data,twister_network);
@@ -30718,17 +30752,17 @@ TwisterPrivKey.prototype.sign = function (message_ori, cbfunc) {
   var message = JSON.parse(JSON.stringify(message_ori));
 
   if ("v" in message && (typeof message.v)=="object"){ 
-    if("sig_userpost" in message.v) {
+    if("sig_userpost" in message.v && !Buffer.isBuffer(message.v.sig_userpost)) {
       message.v.sig_userpost = new Buffer(message.v.sig_userpost, 'hex');
     }
     if ("userpost" in message.v) { 
-      if ("sig_rt" in message.v.userpost) {
+      if ("sig_rt" in message.v.userpost && !Buffer.isBuffer(message.v.userpost.sig_rt)) {
         message.v.userpost.sig_rt = new Buffer(message.v.userpost.sig_rt, 'hex');
       }
     }
   }
 
-  if ("sig_rt" in message) {
+  if ("sig_rt" in message && !Buffer.isBuffer(message.sig_rt)) {
     message.sig_rt = new Buffer(message.sig_rt, 'hex');
   }
 
@@ -30744,12 +30778,14 @@ TwisterPrivKey.prototype.sign = function (message_ori, cbfunc) {
 
     try {
       var retVal = Bitcoin.message.sign(keyPair,message ,twister_network);
+      cbfunc(retVal)
     } catch(e) {
-      var retVal = false;	
-      thisResource._log("post signing went sideways");
+      //console.log(e)
+      thisResource._handleError({
+        code: 123,
+        message:"post signing went sideways"
+      });
     }
-
-    cbfunc(retVal)
 
   },0);
 
@@ -30971,7 +31007,7 @@ TwisterTorrent.prototype._queryAndDo = function (cbfunc) {
       }
       
     }
-
+    
     thisTorrent.RPC("getlasthave", [ "guest", torrentlist ], function(res) {
 
       if (thisTorrent._name in res) { 
@@ -31183,6 +31219,8 @@ TwisterTorrent.prototype._checkForUpdatesUsingGetLastHave = function (cbfunc) {
 
         }
 
+        thisTorrent._log("comparing latest id for ",username,resTorrent._latestId,Twister.getUser(username)._stream._latestId);
+        
         if (resTorrent._latestId==Twister.getUser(username)._stream._latestId) {
 
           Twister.getUser(username)._stream._lastUpdate=Date.now()/1000;
@@ -31190,6 +31228,9 @@ TwisterTorrent.prototype._checkForUpdatesUsingGetLastHave = function (cbfunc) {
 
         } else {
 
+          
+          thisTorrent._log("found outdated user ",username);
+          
           outdatedUsers.push({username:username});
 
         }
@@ -32437,7 +32478,10 @@ Twister.deserializeCache = function (flatData) {
         
         if (Twister._walletType=="server") {
             var TwisterAccount = require('./ServerWallet/TwisterAccount.js');
-        } else {
+        } 
+        if (Twister._walletType=="client") {
+            var TwisterAccount = require('./ClientWallet/TwisterAccount.js');
+        }else {
             Twister._handleError({
               message: "Unsupported wallet type.",
               code: 32080
@@ -32501,6 +32545,8 @@ Twister._activeQueryIds = {};
 
 Twister.raiseQueryId = function (id) {
 
+  console.log("raise id ",id)
+  
   if (id) {
     if(!Twister._activeQueryIds[id]){
       Twister._activeQueryIds[id]={func:null,count:1};
@@ -32513,6 +32559,8 @@ Twister.raiseQueryId = function (id) {
 
 Twister.bumpQueryId = function (id) {
     
+  console.log("bump id ",id)
+  
   if (id) {
     Twister._activeQueryIds[id].count--;
     if (Twister._activeQueryIds[id].count==0) {
@@ -32526,6 +32574,8 @@ Twister.bumpQueryId = function (id) {
 }
 
 Twister.onQueryComplete = function (id, cbfunc){
+  
+  console.log("complete id ",id)
   
   if(!Twister._activeQueryIds[id]){
     Twister._activeQueryIds[id]={func:cbfunc,count:0};
@@ -32662,7 +32712,7 @@ TwisterFollowings.prototype._queryAndDo = function (cbfunc) {
   
   var thisStream = Twister.getUser(this._name)._stream;
   
-  if (thisStream._activeTorrentUser && thisStream._activeTorrentUser==this._name) {
+  if (thisStream._activeTorrentUser && thisStream._activeTorrentUser==this._name && Twister._wallet[this._name]._wallettype=="server") {
     
     thisResource._log("using getfollowing rpc method")
     
@@ -33663,7 +33713,7 @@ TwisterPubKey.prototype.inflate = function (flatData) {
     
     if (this._data) {
     
-        this._btcKey = Bitcoin.ECPubKey.fromHex(this._data);
+        this._btcKey = Bitcoin.ECPair.fromPublicKeyBuffer(new Buffer(this._data,"hex"),twister_network);
     
     }
 
@@ -33999,7 +34049,7 @@ TwisterResource.prototype._checkQueryAndDo = function (cbfunc,querySettings) {
         
         thisResource._activeQuerySettings = JSON.parse(JSON.stringify(querySettings));
         thisResource._updateInProgress = true;
-        Twister.raiseQueryId(thisResource._activeQuerySettings["queryId"]);
+        if(thisResource._activeQuerySettings["queryId"]) Twister.raiseQueryId(thisResource._activeQuerySettings["queryId"]);
 
         var outdatedTimestamp = 0;
       
@@ -34011,7 +34061,7 @@ TwisterResource.prototype._checkQueryAndDo = function (cbfunc,querySettings) {
             
             thisResource._log("resource present in cache");
           
-            Twister.bumpQueryId(thisResource._activeQuerySettings["queryId"]);
+            if(thisResource._activeQuerySettings["queryId"]) Twister.bumpQueryId(thisResource._activeQuerySettings["queryId"]);
             thisResource._activeQuerySettings = {};
             thisResource._updateInProgress = false;
 
@@ -34023,7 +34073,7 @@ TwisterResource.prototype._checkQueryAndDo = function (cbfunc,querySettings) {
                 
                 thisResource._do(cbfunc);
                 
-                Twister.bumpQueryId(thisResource._activeQuerySettings["queryId"]);
+                if(thisResource._activeQuerySettings["queryId"]) Twister.bumpQueryId(thisResource._activeQuerySettings["queryId"]);
                 thisResource._activeQuerySettings = {};
                 thisResource._updateInProgress = false;
             
@@ -34099,7 +34149,7 @@ TwisterResource.prototype._handleError = function (error) {
     
     this._updateInProgress = false;
     this.getQuerySetting("errorfunc").call(this,error);
-    Twister.bumpQueryId(this._activeQuerySettings["queryId"]);
+    if(this._activeQuerySettings["queryId"])  Twister.bumpQueryId(this._activeQuerySettings["queryId"]);
     this._activeQuerySettings={};
   
 }
