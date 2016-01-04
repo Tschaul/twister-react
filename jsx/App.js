@@ -26,7 +26,7 @@ var ReactBootstrap = require('react-bootstrap')
 
 var React = require('react');
 var Router = require('react-router');
-var { Route, DefaultRoute, RouteHandler, Link } = Router;
+var Route = Router.Route; var DefaultRoute = Router.DefaultRoute; var RouteHandler = Router.RouteHandler; var Link = Router.Link;
 
 var Home = require("./home/Home.js");
 var Profile = require("./profile/Profile.js");
@@ -50,7 +50,7 @@ App = React.createClass({
 
   getHandlerKey: function () {
     var childDepth = 1; // assuming App is top-level route
-    var { router } = this.context;
+    var router = this.context.router
     //console.log(router.getCurrentParams())
     if ( router.getCurrentRoutes()[childDepth] ) {
       var key = router.getCurrentRoutes()[childDepth].name;
