@@ -87,7 +87,7 @@ module.exports = Conversation = React.createClass({
     
     //alert("got event")
     
-    this.updatePosts(0);
+    this.updatePosts();
     
   },
   render: function() {

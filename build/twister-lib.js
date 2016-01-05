@@ -30052,6 +30052,14 @@ TwisterAccount.prototype._signAndPublish = function(post_ori,cbfunc){
               
               console.log("going to verify ",v)
               
+              v.sig_userpost = v.sig_userpost.toString("hex");
+              
+              if ("sig_rt" in v.userpost) {
+                v.userpost.sig_rt = v.userpost.sig_rt.toString("hex");
+              }
+              
+              thisTorrent._latestId = newid;
+              
               Twister.getUser(thisAccount._name)._stream._verifyAndCachePost(v,cbfunc);
               
             });

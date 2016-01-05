@@ -1585,7 +1585,7 @@ module.exports = Conversation = React.createClass({displayName: "Conversation",
     
     //alert("got event")
     
-    this.updatePosts(0);
+    this.updatePosts();
     
   },
   render: function() {
@@ -1666,7 +1666,7 @@ module.exports = Hashtag = React.createClass({displayName: "Hashtag",
     
     //alert("got event")
     
-    this.updatePosts(-1);
+    this.updatePosts();
     
   },
   render: function() {
@@ -2064,7 +2064,7 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
     //alert("got event")
     
     if(this.state.username==event.detail.getUsername()) {
-       this.addPost(event.detail);
+       this.updatePosts();
     }
     
   },

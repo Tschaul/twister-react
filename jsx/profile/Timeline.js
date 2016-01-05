@@ -89,7 +89,7 @@ module.exports = Timeline = React.createClass({
     //alert("got event")
     
     if(this.state.username==event.detail.getUsername()) {
-       this.addPost(event.detail);
+       this.updatePosts();
     }
     
   },

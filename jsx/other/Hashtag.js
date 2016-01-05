@@ -65,7 +65,7 @@ module.exports = Hashtag = React.createClass({
     
     //alert("got event")
     
-    this.updatePosts(-1);
+    this.updatePosts();
     
   },
   render: function() {
