@@ -19,6 +19,8 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var ProfileMixin = require('../common/ProfileMixin.js');
 
+var FollowButton = require('../common/FollowButton.js');
+
 module.exports = Post = React.createClass({
   mixins: [SetIntervalMixin,SafeStateChangeMixin,ProfileMixin],
   contextTypes: {
@@ -51,6 +53,8 @@ module.exports = Post = React.createClass({
             <Row className="nomargin">
               <Col xs={3} md={3} className="fullytight">
                 <img className="img-responsive" src={this.state.avatar}/>
+                <br/>
+                <FollowButton activeAccount={this.props.activeAccount} username={this.state.username}/>
               </Col>
               <Col xs={8} md={8}>
                 <h4 className="nomargin-top">{this.state.fullname}<small> &nbsp; {'@'+this.state.username}</small></h4>

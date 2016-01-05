@@ -29667,9 +29667,7 @@ TwisterAccount.prototype.activateTorrents = function (cbfunc,querySettings) {
         })
       
         usernames.push(thisAccount._name);
-      
-        console.log(usernames)
-        
+              
         thisAccount.RPC("follow", [ "guest", usernames ], function(res) {
         
           for (var k in usernames) {
@@ -29696,46 +29694,152 @@ TwisterAccount.prototype.activateTorrents = function (cbfunc,querySettings) {
 
 }
 
+TwisterAccount.prototype.activateTorrent = function (username,cbfunc,querySettings) {
+
+	var Twister = this._scope;
+    
+    var thisAccount = this;
+
+    thisAccount.RPC("follow", [ "guest", [username] ], function(res) {
+
+      var resTorrent = thisAccount.getTorrent(username);
+
+      resTorrent.activate();
+
+      thisAccount._log("torrent for "+username+" activated");
+
+      if(cbfunc) cbfunc();
+
+    }, function(ret) {
+
+        thisAccount._handleError(ret);
+
+    })
+        
+
+}
+
 TwisterAccount.prototype.unfollow = function (username,cbfunc) {
   
-  /*var thisAccount = this;
+  var thisAccount = this;
     
   var Twister = this._scope;
 
-  thisAccount.RPC("unfollow",[
+  Twister.getUser(this._name).doFollowings(function(fols){
     
-      thisAccount._name,
-      [username]
+    var newfollowings = fols.map(function(fol){
+      return fol.getUsername();
+    }).filter(function(name){
+      return name!=username;
+    })
     
-  ],function(result){
-
-    Twister.getUser(thisAccount._name).doFollowings(cbfunc,{outdatedLimit: 0});
+    var oldRevisionNumers = Twister.getUser(thisAccount._name)._followings._revisionNumber;
     
-  },function(error){
-      TwisterAccount._handleError(error);
-  });*/
+    thisAccount.updateFollowing(newfollowings,oldRevisionNumers,cbfunc)
+    
+  },{outdatedLimit: 0})
 
 }
 
 TwisterAccount.prototype.follow = function (username,cbfunc) {
   
-  /*var thisAccount = this;
+  var thisAccount = this;
     
   var Twister = this._scope;
 
-  thisAccount.RPC("follow",[
+  Twister.getUser(this._name).doFollowings(function(fols){
     
-      thisAccount._name,
-      [username]
+    var newfollowings = fols.map(function(fol){
+      return fol.getUsername();
+    });
+        
+    if(newfollowings.indexOf(username)<0){
+      newfollowings.push(username);
+    }
     
-  ],function(result){
+    //console.log(newfollowings);
     
-    Twister.getUser(thisAccount._name).doFollowings(cbfunc,{outdatedLimit: 0});
+    var oldRevisionNumers = Twister.getUser(thisAccount._name)._followings._revisionNumber;
     
-  },function(error){
-    thisAccount._handleError(error);
-  });*/
+    console.log("oldrev:",oldRevisionNumers)
+    
+    thisAccount.updateFollowing(newfollowings,oldRevisionNumers,cbfunc)
+    
+  },{outdatedLimit: 0})
 
+}
+
+TwisterAccount.prototype.updateFollowing = function (newfollowings,oldRevsionNumbers,cbfunc) {
+  
+  var newfollowings = JSON.parse(JSON.stringify(newfollowings));
+  var newfollowings_ori = JSON.parse(JSON.stringify(newfollowings));
+  var oldRevsionNumbers = JSON.parse(JSON.stringify(oldRevsionNumbers));
+  
+  var thisAccount = this;
+  
+  var Twister = this._scope;
+  
+  var currentCounter = 1;
+
+  var newRevNumbers = {};
+  
+  var putTilEmpty = function (cbfunc) {
+
+      thisAccount.dhtget([thisAccount._name, "following"+currentCounter, "s"],
+
+          function (result) {
+
+              if ((result[0] && result[0].p.v[0])||newfollowings.length) {
+
+                var charcount = 0;
+                
+                var folsforthisresource = [];
+                
+                while(newfollowings.length && charcount<4000){
+                  
+                  var nextfol = newfollowings.shift();
+                  
+                  charcount += nextfol.length + 3;
+                  
+                  folsforthisresource.push(nextfol);
+                  
+                }
+                
+                var seq = oldRevsionNumbers[currentCounter] ? oldRevsionNumbers[currentCounter]+1 : 1 ;
+                
+                thisAccount._dhtput(
+                  thisAccount._name,
+                  "following"+currentCounter,
+                  "s",
+                  folsforthisresource,
+                  seq,
+                  function(result){
+
+                    newRevNumbers[currentCounter]=seq;
+                    currentCounter++;
+                    putTilEmpty(cbfunc)
+
+                },function(error){
+                  thisAccount._handleError(error);
+                });
+                  
+              } else {
+
+                  Twister.getUser(thisAccount._name)._followings._data = newfollowings_ori;
+                  Twister.getUser(thisAccount._name)._followings._revisionNumber = newRevNumbers;
+                  Twister.getUser(thisAccount._name)._followings._do(cbfunc);
+
+              }
+
+          }
+
+      ); 
+
+  };  
+
+  putTilEmpty(cbfunc);
+  
+  
 }
 
 TwisterAccount.prototype.updateProfile = function (newdata,cbfunc) {
@@ -29759,7 +29863,7 @@ TwisterAccount.prototype.updateProfile = function (newdata,cbfunc) {
 
         var newprofile = new TwisterProfile(thisAccount._name,Twister);
         newprofile._data = newdata;
-        cbfunc(newprofile);
+        if(cbfunc) cbfunc(newprofile);
 
       },function(error){
         thisAccount._handleError(error);
@@ -29810,7 +29914,7 @@ TwisterAccount.prototype.updateProfileFields = function (newdata,cbfunc) {
           
           var newprofile = new TwisterProfile(thisAccount._name,Twister);
           newprofile._data = olddata;
-          cbfunc(newprofile);
+          if(cbfunc) cbfunc(newprofile);
         
         },function(error){
           thisAccount._handleError(error);
@@ -29852,7 +29956,7 @@ TwisterAccount.prototype.updateAvatar = function (newdata,cbfunc) {
           
           var newprofile = new TwisterAvatar(thisAccount._name,Twister);
           newprofile._data = newdata;
-          cbfunc(newprofile);
+          if(cbfunc) cbfunc(newprofile);
 		
 		},function(error){
           thisAccount._handleError(error);
@@ -29909,7 +30013,7 @@ TwisterAccount.prototype.reply = function (replyusername,replyid,msg,cbfunc) {
       0,
       function(result){
         Twister.getUser(replyusername)._stream._posts[replyid]._replies._data[newpost.getUsername()+":post"+newpost.getId()]=true; 
-        cbfunc(newpost);
+        if(cbfunc) cbfunc(newpost);
       },
       function(error){
         thisAccount._handleError(error);
@@ -29949,7 +30053,7 @@ TwisterAccount.prototype.retwist = function (rtusername,rtid,cbfunc) {
         0,
         function(result){
           Twister.getUser(rtusername)._stream._posts[rtid]._retwists._data[newpost.getUsername()+":post"+newpost.getId()]=true;  
-          cbfunc(newpost);
+          if(cbfunc) cbfunc(newpost);
         },
         function(error){
           thisAccount._handleError(error);
@@ -30114,7 +30218,7 @@ TwisterAccount.prototype._dhtput = function(username,resource,sorm,value,seq,cbf
         var message = bencode.encode(dhtentry);
         
         thisAccount.RPC("dhtputraw",[message.toString("hex")],function(){
-          cbfunc();
+          if(cbfunc) cbfunc();
         },function(error){
           thisAccount._handleError(error);
         });
@@ -30136,7 +30240,7 @@ TwisterAccount.prototype._publishPostOnDht = function(v,cbfunc){
   var querId = v.sig_userpost.toString("hex");
   
   Twister.onQueryComplete(querId,function(){
-    cbfunc(v);
+    if(cbfunc) cbfunc(v);
   });
 
   Twister.raiseQueryId(querId);
@@ -32689,6 +32793,7 @@ var TwisterFollowings = function (name,scope) {
     
     TwisterResource.call(this,name,scope);
     this._type = "followings";
+    this._revisionNumber = {};
     
 }
 
@@ -32760,6 +32865,8 @@ TwisterFollowings.prototype._queryAndDo = function (cbfunc) {
 
                     }
 
+                    thisResource._revisionNumber[currentCounter]=result[0].p.seq;
+                  
                     currentCounter++;
                     requestTilEmpty(cbfunc)
 
