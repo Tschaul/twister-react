@@ -20,9 +20,15 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var ProfileMixin = require('../common/ProfileMixin.js');
 
 var FollowButton = require('../common/FollowButton.js');
+var EditProfileModalButton = require('../profile/EditProfileModalButton.js');
+var EditAvatarModalButton = require('../profile/EditAvatarModalButton.js');
 
 module.exports = Post = React.createClass({
-  mixins: [SetIntervalMixin,SafeStateChangeMixin,ProfileMixin],
+  mixins: [
+    SetIntervalMixin,
+    SafeStateChangeMixin,
+    ProfileMixin
+  ],
   contextTypes: {
     router: React.PropTypes.func
   },
@@ -54,6 +60,11 @@ module.exports = Post = React.createClass({
               <Col xs={3} md={3} className="fullytight">
                 <img className="img-responsive" src={this.state.avatar}/>
                 <br/>
+                <EditAvatarModalButton 
+                  activeAccount={this.props.activeAccount} 
+                  username={this.state.username}
+                  avatar={this.state.avatar}
+                />
                 <FollowButton activeAccount={this.props.activeAccount} username={this.state.username}/>
               </Col>
               <Col xs={8} md={8}>
@@ -61,6 +72,14 @@ module.exports = Post = React.createClass({
                 <p className="text-center">{this.state.location}</p>
                 <p className="text-center">{this.state.bio}</p>
                 <p className="text-center"><a href={this.state.url}>{this.state.url}</a></p>
+                <EditProfileModalButton 
+                  activeAccount={this.props.activeAccount} 
+                  username={this.state.username}
+                  fullname={this.state.fullname}
+                  location={this.state.location}
+                  bio={this.state.bio}
+                  url={this.state.url}
+                />
               </Col>
               <Col xs={1} md={1} className="fullytight text-align-right"></Col>
             </Row>

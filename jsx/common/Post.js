@@ -15,12 +15,45 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var PostContent = require('../common/PostContent.js');
 var ReplyModalButton = require('../common/ReplyModalButton.js');
 var RetwistModalButton = require('../common/RetwistModalButton.js');
+var EventListenerMixin = require('../common/EventListenerMixin.js');
 
 module.exports = Post = React.createClass({
-  mixins: [SetIntervalMixin,SafeStateChangeMixin],
+  mixins: [
+    SetIntervalMixin,
+    SafeStateChangeMixin,
+    EventListenerMixin('profileupdatebyuser'),
+    EventListenerMixin('avatarupdatebyuser')
+  ],
+  onprofileupdatebyuser: function(event){
+    //console.log("catched event",this.state.username,event.detail)
+    var profile =event.detail;
+    if(profile.getUsername()==this.props.post.username){
+      this.setState(function(state){
+        state.fullname = profile.getField("fullname");
+        return state;
+      })
+    }
+    if(profile.getUsername()==this.state.retwistingUsername){
+      this.setState(function(state){
+        state.retwistingUserFullname = profile.getField("fullname");
+        return state;
+      })
+    }
+  },
+  onavatarupdatebyuser: function(event){
+    //console.log("catched event",this.state.username,event.detail)
+    var avatar =event.detail;
+    if(avatar.getUsername()==this.state.username){
+      this.setState(function(state){
+        state.avatar = avatar.getUrl();
+        return state;
+      })
+    }
+  },
   getInitialState: function() {
     
     return {
+      username: this.props.post.username,
       avatar: "img/genericPerson.png", 
       fullname: "",
       timeAgo: "",
@@ -51,7 +84,10 @@ module.exports = Post = React.createClass({
     if (post.isRetwist()) {
       
       post.getUser().doProfile(function(profile){
-        thisComponent.setStateSafe({retwistingUser: profile.getField("fullname")});  
+        thisComponent.setStateSafe({
+          retwistingUsername: profile.getUsername(),
+          retwistingUserFullname: profile.getField("fullname")
+        });  
       });
       
       post=post.getRetwistedPost();
@@ -136,7 +172,7 @@ module.exports = Post = React.createClass({
           </Row>
           <Row className="nomargin">
             <Col xs={6} md={6} className="fullytight">
-        {retwist && <small><em> &nbsp;retwisted by {this.state.retwistingUser}</em></small>
+        {retwist && <small><em> &nbsp;retwisted by {this.state.retwistingUserFullname}</em></small>
           }
             </Col>
             <Col xs={4} md={4} className="fullytight text-align-right">

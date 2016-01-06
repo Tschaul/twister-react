@@ -29859,15 +29859,14 @@ TwisterAccount.prototype.updateProfile = function (newdata,cbfunc) {
         profile._revisionNumber+1,
         function(result){
 
-        var TwisterProfile = require("../TwisterProfile.js");
+          var newprofile = Twister.getUser(thisAccount._name)._profile;
+          newprofile._data = newdata;
+          if(cbfunc) cbfunc(newprofile);
 
-        var newprofile = new TwisterProfile(thisAccount._name,Twister);
-        newprofile._data = newdata;
-        if(cbfunc) cbfunc(newprofile);
-
-      },function(error){
-        thisAccount._handleError(error);
-      });
+        },function(error){
+          thisAccount._handleError(error);
+        }
+      );
 	
 	},{errorfunc:function(error){
     
@@ -29879,6 +29878,8 @@ TwisterAccount.prototype.updateProfile = function (newdata,cbfunc) {
         
         thisAccount.updateProfileFields(newdata,cbfunc);
         
+      }else{
+        thisAccount._handleError(error);
       }
       
     }})
@@ -29903,22 +29904,21 @@ TwisterAccount.prototype.updateProfileFields = function (newdata,cbfunc) {
       }
       
       thisAccount._dhtput(
-          thisAccount._name,
-          "profile",
-          "s",
-          olddata,
-          profile._revisionNumber+1,
-          function(result){
-          
-          var TwisterProfile = require("../TwisterProfile.js");
-          
-          var newprofile = new TwisterProfile(thisAccount._name,Twister);
+        thisAccount._name,
+        "profile",
+        "s",
+        olddata,
+        profile._revisionNumber+1,
+        function(result){
+
+          var newprofile = Twister.getUser(thisAccount._name)._profile;
           newprofile._data = olddata;
           if(cbfunc) cbfunc(newprofile);
-        
+
         },function(error){
           thisAccount._handleError(error);
-      });
+        }
+      );
 	
     },{errorfunc:function(error){
     
@@ -29930,6 +29930,8 @@ TwisterAccount.prototype.updateProfileFields = function (newdata,cbfunc) {
         
         thisAccount.updateProfileFields(newdata,cbfunc);
         
+      }else{
+        thisAccount._handleError(error);
       }
       
     }})
@@ -29952,12 +29954,10 @@ TwisterAccount.prototype.updateAvatar = function (newdata,cbfunc) {
           avatar._revisionNumber+1,
           function(result){
           
-          var TwisterAvatar = require("../TwisterAvatar.js");
-          
-          var newprofile = new TwisterAvatar(thisAccount._name,Twister);
-          newprofile._data = newdata;
-          if(cbfunc) cbfunc(newprofile);
-		
+          var newavatar = Twister.getUser(thisAccount._name)._avatar;
+          newavatar._data = newdata;
+          if(cbfunc) cbfunc(newavatar);
+            
 		},function(error){
           thisAccount._handleError(error);
 		});
@@ -30342,7 +30342,7 @@ TwisterAccount.prototype._publishPostOnDht = function(v,cbfunc){
                   
                   
 }).call(this,require("buffer").Buffer)
-},{"../TwisterAvatar.js":148,"../TwisterProfile.js":153,"../TwisterResource.js":157,"./TwisterContentParser.js":140,"./TwisterDirectMessages.js":141,"./TwisterPrivKey.js":142,"./TwisterTorrent.js":143,"bencode":1,"buffer":177,"inherits":52}],140:[function(require,module,exports){
+},{"../TwisterResource.js":157,"./TwisterContentParser.js":140,"./TwisterDirectMessages.js":141,"./TwisterPrivKey.js":142,"./TwisterTorrent.js":143,"bencode":1,"buffer":177,"inherits":52}],140:[function(require,module,exports){
 module.exports = {
   extractUsername: function(s) {
       var username = "";
@@ -32778,6 +32778,16 @@ TwisterAvatar.prototype._queryAndDo = function (cbfunc) {
 TwisterAvatar.prototype.getUrl = function () {
 
     return this._data;
+    
+}
+
+/** @function
+ * @name getUsername 
+ * @description return the username of the owner of the avatar
+ */
+TwisterAvatar.prototype.getUsername = function () {
+
+    return this._name;
     
 }
 },{"./TwisterAvatar.js":148,"./TwisterResource.js":157,"inherits":52}],149:[function(require,module,exports){

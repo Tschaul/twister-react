@@ -13,6 +13,7 @@ body.modal-open {
 
 .link-button-gray {
   color: #666;
+  cursor: pointer;
 }
 
 .tight {

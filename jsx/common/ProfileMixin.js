@@ -1,8 +1,36 @@
 
 var AppSettingsMixin = require('../common/AppSettingsMixin.js');
+var EventListenerMixin = require('../common/EventListenerMixin.js');
 
 module.exports = ProfileMixin = {
-  mixins: [AppSettingsMixin],
+  mixins: [
+    AppSettingsMixin,
+    EventListenerMixin('profileupdatebyuser'),
+    EventListenerMixin('avatarupdatebyuser'),
+  ],
+  onprofileupdatebyuser: function(event){
+    //console.log("catched event",this.state.username,event.detail)
+    var profile =event.detail;
+    if(profile.getUsername()==this.state.username){
+      this.setState(function(state){
+        state.fullname = profile.getField("fullname");
+        state.bio = profile.getField("bio");
+        state.location = profile.getField("location");
+        state.url = profile.getField("url");
+        return state;
+      })
+    }
+  },
+  onavatarupdatebyuser: function(event){
+    //console.log("catched event",this.state.username,event.detail)
+    var avatar =event.detail;
+    if(avatar.getUsername()==this.state.username){
+      this.setState(function(state){
+        state.avatar = avatar.getUrl();
+        return state;
+      })
+    }
+  },
   getInitialState: function() {
     
     var username = this.props.username;
