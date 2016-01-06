@@ -165,14 +165,14 @@ module.exports = Post = React.createClass({
               </a>
             </Col>
             <Col xs={9} md={9}>
-              <strong>{this.state.fullname}</strong>&nbsp;
+              <strong>{this.state.fullname}</strong>
               <PostContent content={post.getContent()}/>
             </Col>
             <Col xs={1} md={1} className="fullytight text-align-right">{this.state.timeAgo}</Col>
           </Row>
           <Row className="nomargin">
             <Col xs={6} md={6} className="fullytight">
-        {retwist && <small><em> &nbsp;retwisted by {this.state.retwistingUserFullname}</em></small>
+        {retwist && <small><em>retwisted by {this.state.retwistingUserFullname}</em></small>
           }
             </Col>
             <Col xs={4} md={4} className="fullytight text-align-right">

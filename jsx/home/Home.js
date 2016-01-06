@@ -151,7 +151,10 @@ module.exports = Home = React.createClass({
 
       this.setInterval(this.updatePosts, this.state.appSettings.pollInterval*1000);
       
-    } else {console.log("active account is null")}
+    } else {
+      window.location.hash="#/settings";
+      console.log("active account is null")
+    }
 
   },
   onscrolledtobottom: function () {

@@ -68,7 +68,7 @@ module.exports = Post = React.createClass({
                 <FollowButton activeAccount={this.props.activeAccount} username={this.state.username}/>
               </Col>
               <Col xs={8} md={8}>
-                <h4 className="nomargin-top">{this.state.fullname}<small> &nbsp; {'@'+this.state.username}</small></h4>
+                <h4 className="nomargin-top">{this.state.fullname}<small> {'@'+this.state.username}</small></h4>
                 <p className="text-center">{this.state.location}</p>
                 <p className="text-center">{this.state.bio}</p>
                 <p className="text-center"><a href={this.state.url}>{this.state.url}</a></p>

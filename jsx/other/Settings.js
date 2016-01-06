@@ -4,6 +4,7 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var EventListenerMixin = require('../common/EventListenerMixin.js');
 var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
+var ImportAccountModalButton = require('../other/ImportAccountModalButton.js');
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
@@ -65,6 +66,7 @@ module.exports = Home = React.createClass({
                 wrapperClassName='col-xs-8' className="settings-host"/>
               <Input type='submit' value='Save' wrapperClassName='col-xs-offset-10 col-xs-2'/>
             </form>
+            <ImportAccountModalButton/>
           </ListGroupItem>
         </ListGroup>
       );

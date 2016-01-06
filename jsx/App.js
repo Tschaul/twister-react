@@ -42,7 +42,11 @@ var AppSettingsMixin = require('./common/AppSettingsMixin.js');
 
 App = React.createClass({
     
-  mixins: [AppSettingsMixin,SetIntervalMixin,SafeStateChangeMixin],
+  mixins: [
+    AppSettingsMixin,
+    SetIntervalMixin,
+    SafeStateChangeMixin,
+    EventListenerMixin('newaccountbyuser')],
   
   contextTypes: {
     router: React.PropTypes.func
@@ -83,6 +87,18 @@ App = React.createClass({
         localStorage.setItem("twister-react-activeAccount", newaccoutname);
       });
     });
+    
+  },
+  
+  onnewaccountbyuser: function(event) {
+    
+    this.saveCache();
+    
+    if(!this.activeAccount){
+      
+      this.switchAccount(event.detail.getUsername());
+      
+    }
     
   },
   
@@ -212,9 +228,13 @@ if (accounts.length==0) {
       pollInterval:60,
       pollIntervalProfile: 3600,
       ignoredUsers: "nobody",
-      host: "http://user:pwd@localhost:28332"
+      host: "http://tschaul.com:8080"
 
     };
+    
+    console.log(appSettings)
+    
+    localStorage.setItem("twister-react-settings",JSON.stringify(appSettings));
 
   } else {
 
@@ -240,7 +260,9 @@ if (accounts.length==0) {
     }
   });
 
-  Twister.importClientSideAccount("pampalulu","L12kz6tabDN6VmPes1rfEpiznztPF6vgkHp8UZVBgZadxzebHhAp",function(){
+  initializeApp();
+  
+  /*Twister.importClientSideAccount("pampalulu","L12kz6tabDN6VmPes1rfEpiznztPF6vgkHp8UZVBgZadxzebHhAp",function(){
 
     var activeAccount =  localStorage.getItem("twister-react-activeAccount");
     
@@ -264,7 +286,7 @@ if (accounts.length==0) {
     });
       
   });
-
+*/
 } else {
 
   var activeAccount =  localStorage.getItem("twister-react-activeAccount");
@@ -298,3 +320,13 @@ window.onscroll = function(ev) {
     window.dispatchEvent(event);
   }
 };
+
+setInterval(function(){
+  
+  if($("#content").height()<window.innerHeight){
+    var event = new Event('scrolledtobottom');
+    //alert("scrolled to bottom")
+    window.dispatchEvent(event);
+  }
+  
+},1000);
