@@ -1,0 +1,375 @@
+{
+    "Server":
+    {
+        "ssl_key_file": "insert/path/to/your/server-key-file",
+        "ssl_certificate_file": "insert/path/to/your/ssl-certificate",
+        "enable_https": false,
+        
+        "https_port": 443,
+        "http_port": 8080
+    },
+    
+    "RPC": 
+    { 
+        "host": "localhost",
+        "port": 28332,
+        "user": "user",
+        "password": "pwd"
+    },
+
+    "CallLimits":
+    [
+        {
+            "name": "getbestblockhash",
+            "maxPerMinute": null,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getinfo",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "listwalletusers",
+            "maxPerMinute": null,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getblock",
+            "maxPerMinute": null,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "dhtget",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "listusernamespartial",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "gettrendinghashtags",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "stop",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getblockcount",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getconnectioncount",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getpeerinfo",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "addnode",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "adddnsseed",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getaddednodeinfo",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getdifficulty",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getgenerate",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "setgenerate",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "gethashespersec",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getmininginfo",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "createwalletuser",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "backupwallet",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "walletpassphrase",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "walletpassphrasechange",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "walletlock",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "encryptwallet",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getrawmempool",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getblockhash",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "gettransaction",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "listtransactions",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "signmessage",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "verifymessage",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getwork",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getblocktemplate",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "submitblock",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "listsinceblock",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "dumpprivkey",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "dumppubkey",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "testvector",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "dumpwallet",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "importprivkey",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "importwallet",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getrawtransaction",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "createrawtransaction",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "decoderawtransaction",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "sendrawtransaction",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "sendnewusertransaction",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "verifychain",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getlastsoftcheckpoint",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "dhtput",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "dhtputraw",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "newpostmsg",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "newpostraw",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "newdirectmsg",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "newrtmsg",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getposts",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "getdirectmsgs",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getmentions",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "setspammsg",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getspammsg",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "follow",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "unfollow",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getfollowing",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getlasthave",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "getnumpieces",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "rescandirectmsgs",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "recheckusertorrent",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "getspamposts",
+            "maxPerMinute": 999,
+            "maxPerMinutePerIP": 999
+        },
+        {
+            "name": "torrentstatus",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        },
+        {
+            "name": "search",
+            "maxPerMinute": 0,
+            "maxPerMinutePerIP": null
+        }
+    ],
+    
+    "LogAsAttackThreshold":
+    {
+        "callsOverLimits": 30,
+        "invalidRequests": 30,
+        "forbiddenCalls": 30
+    }
+}
