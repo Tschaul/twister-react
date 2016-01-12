@@ -247,6 +247,7 @@ if (accounts.length==0) {
     host: appSettings.host,
     logfunc: function(log){console.log(log)},
     outdatedLimit: appSettings.pollInterval,
+    signatureVerification: "none",
     walletType: "client",
     querySettingsByType: {
 
@@ -263,31 +264,6 @@ if (accounts.length==0) {
 
   initializeApp();
   
-  /*Twister.importClientSideAccount("pampalulu","L12kz6tabDN6VmPes1rfEpiznztPF6vgkHp8UZVBgZadxzebHhAp",function(){
-
-    var activeAccount =  localStorage.getItem("twister-react-activeAccount");
-    
-    var accounts = Twister.getAccounts();
-    
-    if (!activeAccount) {
-    
-      activeAccount = accounts[0];
-      localStorage.setItem("twister-react-activeAccount",activeAccount);
-      
-    }
-    
-    console.log("active account defaulted to "+activeAccount)
-    
-    console.log(Twister.getAccount(activeAccount))
-    
-    Twister.getAccount(activeAccount).activateTorrents(function(){
-      
-      initializeApp();
-      
-    });
-      
-  });
-*/
 } else {
 
   var activeAccount =  localStorage.getItem("twister-react-activeAccount");
@@ -566,7 +542,9 @@ module.exports = Post = React.createClass({displayName: "Post",
       avatar: "img/genericPerson.png", 
       fullname: "",
       timeAgo: "",
-      retwistingUser: this.props.post.username
+      retwistingUsername: this.props.post.username,
+      retwistingUserFullname: "",
+      retwistingUserAvatar: "img/genericPerson.png",
     };
   },
   updateTimeAgo: function() {
@@ -599,6 +577,12 @@ module.exports = Post = React.createClass({displayName: "Post",
         });  
       });
       
+      post.getUser().doAvatar(function(avatar){
+        thisComponent.setStateSafe({
+          retwistingUserAvatar: avatar.getUrl()
+        });  
+      });
+      
       post=post.getRetwistedPost();
       
     }
@@ -623,11 +607,16 @@ module.exports = Post = React.createClass({displayName: "Post",
     
     var post = Twister.getUser(this.props.post.username).getPost(this.props.post.id);
     var retwist = false;
+    var retwistWithComment = false;
+    var comment = "";
     
     if (post.isRetwist()) {
       retwist = true;
+      if(post.isRetwistWithComment()){
+        retwistWithComment=true;
+        comment =  post.getContent();
+      }
       post=post.getRetwistedPost();
-      
     }
     
     if (post.isReply()) {
@@ -667,24 +656,32 @@ module.exports = Post = React.createClass({displayName: "Post",
     
     return (
       React.createElement(ListGroupItem, null, 
-          React.createElement(Row, {className: "nomargin"}, 
-            React.createElement(Col, {xs: 2, md: 2, className: "fullytight"}, 
+          React.createElement(Row, {className: "nomargin post-main"}, 
+            React.createElement(Col, {xs: 1, md: 1, className: "fullytight"}, 
               React.createElement("a", {href: "#/profile/"+post.getUsername()}, 
                 React.createElement("img", {className: "img-responsive", src: this.state.avatar})
               )
             ), 
-            React.createElement(Col, {xs: 9, md: 9}, 
-              React.createElement("strong", null, this.state.fullname), 
+            React.createElement(Col, {xs: 11, md: 11}, 
+              React.createElement(Row, null, 
+                React.createElement(Col, {xs: 11, md: 11}, 
+                  React.createElement("strong", null, this.state.fullname)
+                ), 
+                React.createElement(Col, {xs: 1, md: 1, className: "fullytight"}, 
+                  React.createElement("small", null, this.state.timeAgo)
+                )
+              ), 
               React.createElement(PostContent, {content: post.getContent()})
-            ), 
-            React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"}, this.state.timeAgo)
+            )
           ), 
           React.createElement(Row, {className: "nomargin"}, 
-            React.createElement(Col, {xs: 6, md: 6, className: "fullytight"}, 
-        retwist && React.createElement("small", null, React.createElement("em", null, "retwisted by ", this.state.retwistingUserFullname))
-          
+            React.createElement(Col, {xs: 8, md: 8, className: "fullytight"}, 
+              retwist && React.createElement("small", null, React.createElement("em", null, 
+                "retwisted by ", React.createElement("img", {className: "micro-avatar", src: this.state.retwistingUserAvatar}), this.state.retwistingUserFullname, retwistWithComment && ":"
+              ))
+              
             ), 
-            React.createElement(Col, {xs: 4, md: 4, className: "fullytight text-align-right"}, 
+            React.createElement(Col, {xs: 2, md: 2, className: "fullytight text-align-right"}, 
               conversationLink
             ), 
             React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"}, 
@@ -693,8 +690,13 @@ module.exports = Post = React.createClass({displayName: "Post",
             React.createElement(Col, {xs: 1, md: 1, className: "fullytight text-align-right"}, 
               retwistLink
             )
+          ), 
+          retwistWithComment && React.createElement(Row, null, 
+            React.createElement(Col, {xs: 12, md: 12}, 
+              React.createElement("small", null, React.createElement(PostContent, {content: comment}))
+            )
           )
-
+          
       )
     );
   }

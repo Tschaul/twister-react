@@ -57,7 +57,9 @@ module.exports = Post = React.createClass({
       avatar: "img/genericPerson.png", 
       fullname: "",
       timeAgo: "",
-      retwistingUser: this.props.post.username
+      retwistingUsername: this.props.post.username,
+      retwistingUserFullname: "",
+      retwistingUserAvatar: "img/genericPerson.png",
     };
   },
   updateTimeAgo: function() {
@@ -90,6 +92,12 @@ module.exports = Post = React.createClass({
         });  
       });
       
+      post.getUser().doAvatar(function(avatar){
+        thisComponent.setStateSafe({
+          retwistingUserAvatar: avatar.getUrl()
+        });  
+      });
+      
       post=post.getRetwistedPost();
       
     }
@@ -114,11 +122,16 @@ module.exports = Post = React.createClass({
     
     var post = Twister.getUser(this.props.post.username).getPost(this.props.post.id);
     var retwist = false;
+    var retwistWithComment = false;
+    var comment = "";
     
     if (post.isRetwist()) {
       retwist = true;
+      if(post.isRetwistWithComment()){
+        retwistWithComment=true;
+        comment =  post.getContent();
+      }
       post=post.getRetwistedPost();
-      
     }
     
     if (post.isReply()) {
@@ -158,24 +171,32 @@ module.exports = Post = React.createClass({
     
     return (
       <ListGroupItem>
-          <Row className="nomargin">
-            <Col xs={2} md={2} className="fullytight">
+          <Row className="nomargin post-main">
+            <Col xs={1} md={1} className="fullytight">
               <a href={"#/profile/"+post.getUsername()}>
                 <img className="img-responsive" src={this.state.avatar}/>
               </a>
             </Col>
-            <Col xs={9} md={9}>
-              <strong>{this.state.fullname}</strong>
+            <Col xs={11} md={11}>
+              <Row>
+                <Col xs={11} md={11}>
+                  <strong>{this.state.fullname}</strong>
+                </Col>
+                <Col xs={1} md={1} className="fullytight">
+                  <small>{this.state.timeAgo}</small>
+                </Col>
+              </Row>
               <PostContent content={post.getContent()}/>
             </Col>
-            <Col xs={1} md={1} className="fullytight text-align-right">{this.state.timeAgo}</Col>
           </Row>
           <Row className="nomargin">
-            <Col xs={6} md={6} className="fullytight">
-        {retwist && <small><em>retwisted by {this.state.retwistingUserFullname}</em></small>
-          }
+            <Col xs={8} md={8} className="fullytight">
+              {retwist && <small><em>
+                retwisted by <img className="micro-avatar" src={this.state.retwistingUserAvatar} />{this.state.retwistingUserFullname}{retwistWithComment && ":"}
+              </em></small>
+              }
             </Col>
-            <Col xs={4} md={4} className="fullytight text-align-right">
+            <Col xs={2} md={2} className="fullytight text-align-right">
               {conversationLink}
             </Col>
             <Col xs={1} md={1} className="fullytight text-align-right">
@@ -185,7 +206,12 @@ module.exports = Post = React.createClass({
               {retwistLink}
             </Col>
           </Row>
-
+          {retwistWithComment && <Row>
+            <Col xs={12} md={12}>
+              <small><PostContent content={comment}/></small>
+            </Col>
+          </Row>
+          }
       </ListGroupItem>
     );
   }

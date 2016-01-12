@@ -30001,8 +30001,8 @@ TwisterAccount.prototype.reply = function (replyusername,replyid,msg,cbfunc) {
   this._signAndPublish(post,function(newpost){
     
     var v = {
-      rt: newpost._data,
-      sig_rt: newpost._signature
+      sig_userpost: newpost._signature,
+      userpost: newpost._data
     }
     
     thisAccount._dhtput(
@@ -30193,27 +30193,31 @@ TwisterAccount.prototype._dhtput = function(username,resource,sorm,value,seq,cbf
   thisAccount.RPC("getinfo",[],function(info){
     
     var p = {
-        height: info.blocks-1,
-        v:value,
-        seq: seq,
-        target:{
-          "n" : username,
-          "r" : resource,
-          "t" : sorm
-        },
-        time: Math.round(Date.now()/1000),
-        v: value
-      };
+      height: info.blocks-1,
+      target:{
+        "n" : username,
+        "r" : resource,
+        "t" : sorm
+      },
+      time: Math.round(Date.now()/1000),
+      v: value
+    };
     
-    console.log("dhtputraw",p)
+    if(sorm=="s"){
+      p.seq=seq;
+    }
     
-    thisAccount._privkey.sign(p,function(sig){
+    console.log("dhtputraw",username,resource,sorm,p)
+    
+    thisAccount._privkey.sign(p,function(sig,pWithBuffers){
       
         var dhtentry = {
-          p: p,
+          p: pWithBuffers,
           sig_user:thisAccount._name,
           sig_p: sig
         }
+                
+        //console.log("p",dhtentry)
         
         var message = bencode.encode(dhtentry);
         
@@ -30275,10 +30279,14 @@ TwisterAccount.prototype._publishPostOnDht = function(v,cbfunc){
     }
   );
   
+  console.log(v)
+  
   if(v.userpost && v.userpost.msg){
     
     var parsedContent = TwisterContentParser.parseContent(v.userpost.msg);
-            
+           
+    console.log("parsed content",parsedContent)
+    
     parsedContent.map(function(item){
       
       if(item.type=="hashtag"){
@@ -30863,6 +30871,20 @@ TwisterPrivKey.prototype.sign = function (message_ori, cbfunc) {
 
   var message = JSON.parse(JSON.stringify(message_ori));
 
+  if ("p" in message && (typeof message.p)=="object"){ 
+    if ("v" in message.p && (typeof message.p.v)=="object"){ 
+      if("sig_userpost" in message.p.v && !Buffer.isBuffer(message.p.v.sig_userpost)) {
+        message.p.v.sig_userpost = new Buffer(message.p.v.sig_userpost, 'hex');
+      }
+      if ("userpost" in message.p.v) { 
+        if ("sig_rt" in message.p.v.userpost && !Buffer.isBuffer(message.p.v.userpost.sig_rt)) {
+          message.p.v.userpost.sig_rt = new Buffer(message.p.v.userpost.sig_rt, 'hex');
+        }
+      }
+    }
+  }
+  
+  
   if ("v" in message && (typeof message.v)=="object"){ 
     if("sig_userpost" in message.v && !Buffer.isBuffer(message.v.sig_userpost)) {
       message.v.sig_userpost = new Buffer(message.v.sig_userpost, 'hex');
@@ -30876,6 +30898,9 @@ TwisterPrivKey.prototype.sign = function (message_ori, cbfunc) {
 
   if ("sig_rt" in message && !Buffer.isBuffer(message.sig_rt)) {
     message.sig_rt = new Buffer(message.sig_rt, 'hex');
+  } 
+  if("sig_userpost" in message && !Buffer.isBuffer(message.sig_userpost)) {
+    message.sig_userpost = new Buffer(message.sig_userpost, 'hex');
   }
 
   var Twister = this._scope;
@@ -30886,11 +30911,13 @@ TwisterPrivKey.prototype.sign = function (message_ori, cbfunc) {
 
     var startTime = Date.now();
 
-    message = bencode.encode(message);
+    //console.log("signing",message);
+    
+    bmessage = bencode.encode(message);
 
     try {
-      var retVal = Bitcoin.message.sign(keyPair,message ,twister_network);
-      cbfunc(retVal)
+      var retVal = Bitcoin.message.sign(keyPair,bmessage ,twister_network);
+      cbfunc(retVal,message)
     } catch(e) {
       //console.log(e)
       thisResource._handleError({
@@ -33363,6 +33390,14 @@ TwisterPost.prototype.isRetwist = function () {
     return ("rt" in this._data);
 }
 
+/** @function
+ * @name isRetwist 
+ * @description returns true if the postis an rewtist.
+ */
+TwisterPost.prototype.isRetwistWithComment = function () {
+    return ("rt" in this._data && "msg" in this._data);
+}
+
 
 /** @function
  * @name getRetwistedId 
@@ -33903,6 +33938,10 @@ TwisterPubKey.prototype.getKey = function () {
 
 TwisterPubKey.prototype.verifySignature = function (message_ori, signature_ori, cbfunc) {
 
+  var verifySignatures = (this.getQuerySetting("signatureVerification")!="none");
+  
+  if(verifySignatures){
+  
     var thisResource = this;
   
     var signature = JSON.parse(JSON.stringify(signature_ori));
@@ -33967,7 +34006,9 @@ TwisterPubKey.prototype.verifySignature = function (message_ori, signature_ori, 
 
     },timeout);
 
-
+  }else{
+    cbfunc(true);
+  }
 
 }
 }).call(this,require("buffer").Buffer)

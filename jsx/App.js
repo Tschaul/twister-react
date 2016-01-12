@@ -246,6 +246,7 @@ if (accounts.length==0) {
     host: appSettings.host,
     logfunc: function(log){console.log(log)},
     outdatedLimit: appSettings.pollInterval,
+    signatureVerification: "none",
     walletType: "client",
     querySettingsByType: {
 
@@ -262,31 +263,6 @@ if (accounts.length==0) {
 
   initializeApp();
   
-  /*Twister.importClientSideAccount("pampalulu","L12kz6tabDN6VmPes1rfEpiznztPF6vgkHp8UZVBgZadxzebHhAp",function(){
-
-    var activeAccount =  localStorage.getItem("twister-react-activeAccount");
-    
-    var accounts = Twister.getAccounts();
-    
-    if (!activeAccount) {
-    
-      activeAccount = accounts[0];
-      localStorage.setItem("twister-react-activeAccount",activeAccount);
-      
-    }
-    
-    console.log("active account defaulted to "+activeAccount)
-    
-    console.log(Twister.getAccount(activeAccount))
-    
-    Twister.getAccount(activeAccount).activateTorrents(function(){
-      
-      initializeApp();
-      
-    });
-      
-  });
-*/
 } else {
 
   var activeAccount =  localStorage.getItem("twister-react-activeAccount");
