@@ -49,15 +49,19 @@ module.exports = FollowButton = React.createClass({
     
     thisComponent = this;
     
-    Twister.getUser(thisComponent.props.activeAccount).doFollowings(function(followings){
-      if(followings.map(function(fol){
-        return fol.getUsername();
-      }).indexOf(thisComponent.props.username)<0){
-        thisComponent.setStateSafe({isCurrentlyFollowing: false, hasLoaded: true});
-      }else{
-        thisComponent.setStateSafe({isCurrentlyFollowing: true, hasLoaded: true});        
-      }
-    })
+    if(thisComponent.props.activeAccount){
+      Twister.getUser(thisComponent.props.activeAccount).doFollowings(function(followings){
+        if(followings.map(function(fol){
+          return fol.getUsername();
+        }).indexOf(thisComponent.props.username)<0){
+          thisComponent.setStateSafe({isCurrentlyFollowing: false, hasLoaded: true});
+        }else{
+          thisComponent.setStateSafe({isCurrentlyFollowing: true, hasLoaded: true});        
+        }
+      })
+    }
+    
+    
   },
   render: function() {
     

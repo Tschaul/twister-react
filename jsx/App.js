@@ -38,6 +38,7 @@ var Mentions = require('./profile/Mentions.js');
 var Conversation = require('./other/Conversation.js');
 var Hashtag = require('./other/Hashtag.js');
 var Settings = require('./other/Settings.js');
+var Accounts = require('./other/Accounts.js');
 var AppSettingsMixin = require('./common/AppSettingsMixin.js');
 
 App = React.createClass({
@@ -66,6 +67,33 @@ App = React.createClass({
     } else {return "none"}
   },
   
+  getInitialState: function () {
+    
+    var state={};
+    
+    state.activeAccount = localStorage.getItem("twister-react-activeAccount")
+    
+    state.accounts = Twister.getAccounts().map(function(acc){
+      return {
+        name: acc.getUsername(),
+        status: acc.getKeyStatus()
+      }
+    });
+        
+    //console.log(state);
+  
+    return state;
+    
+  },
+  
+  componentDidMount: function () {
+    
+    this.setInterval(this.saveCache,300000);
+    
+    this.setInterval(this.checkAccounts,60000);
+
+  },
+  
   clearCache: function () {
     localStorage.setItem("twister-cache", null);
   },
@@ -74,6 +102,24 @@ App = React.createClass({
     var timestamp = Date.now()/1000 - 60*60*24*14;
     Twister.trimCache(timestamp);
     localStorage.setItem("twister-cache", JSON.stringify(Twister.serializeCache()))
+  },
+  
+  checkAccounts: function() {
+    
+    this.state.accounts.map(function(acc){
+      
+      Twister.getAccount(newaccoutname).verifyKey(function(key){
+        thisComponent.setState(function(oldstate,props){
+          
+          oldstate.accounts[acc].status = key.getStatus();
+          
+          return oldstate;
+          
+        });
+      });
+      
+    })
+    
   },
   
   switchAccount: function (newaccoutname) {
@@ -100,28 +146,14 @@ App = React.createClass({
       
     }
     
-  },
-  
-  getInitialState: function () {
+    this.setState(function(oldstate,props){
+      oldstate.accounts.push({
+        name: event.detail.getUsername(),
+        status: event.detail.getKeyStatus()
+      })
+      return oldstate;
+    })
     
-    var state={};
-    
-    state.activeAccount = localStorage.getItem("twister-react-activeAccount")
-    
-    state.accounts = Twister.getAccounts();
-    
-    if (!state.activeAccount) { state.activeAccount=state.accounts[0]; }
-    
-    //console.log(state);
-  
-    return state;
-    
-  },
-  
-  componentDidMount: function () {
-    
-    this.setInterval(this.saveCache,300000);
-
   },
   
   render: function() {
@@ -134,11 +166,11 @@ App = React.createClass({
     for (var i in this.state.accounts) {
       userbuttons.push(
         <MenuItem 
-          key={this.state.accounts[i]}
-          bsStyle={this.state.accounts[i]==this.state.activeAccount ? 'primary' : 'default'}
-          onClick={this.switchAccount.bind(this,this.state.accounts[i])}
+          key={this.state.accounts[i].name}
+          bsStyle={this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default'}
+          onClick={this.switchAccount.bind(this,this.state.accounts[i].name)}
           href="javascript:void(0);"
-        >{this.state.accounts[i]}</MenuItem>
+        >{this.state.accounts[i].name}</MenuItem>
       );
     }
     
@@ -166,12 +198,14 @@ App = React.createClass({
                 >Clear Cache</MenuItem>
                 <MenuItem href="#/search" >Search</MenuItem>
                 <MenuItem href="#/settings" >Settings</MenuItem>
+                <MenuItem href="#/accounts" >Accounts</MenuItem>
                 <MenuItem href="#/howtofollow" >How to Follow</MenuItem>
                 <MenuItem href="#/trendinghashtags" >Trending Hashtags</MenuItem>
               </DropdownButton>
             </ButtonGroup>
             <br/>
             <RouteHandler 
+              accounts={this.state.accounts}
               activeAccount={this.state.activeAccount} 
               key={this.getHandlerKey()}
             />
@@ -200,6 +234,7 @@ var routes = (
     <Route name="conversation" path="/conversation/:username/:postid" handler={Conversation}/>
     <Route name="hashtag" path="/hashtag/:hashtag" handler={Hashtag}/>
     <Route name="settings" path="/settings" handler={Settings}/>
+    <Route name="accounts" path="/accounts" handler={Accounts}/>
     <DefaultRoute name="home" handler={Home} />
   </Route>
 );
@@ -228,7 +263,7 @@ if (accounts.length==0) {
       pollInterval:60,
       pollIntervalProfile: 3600,
       ignoredUsers: "nobody",
-      host: "http://tschaul.com:8080"
+      host: window.location.protocol+"//"+window.location.host+"/"
 
     };
     

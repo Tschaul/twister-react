@@ -16,7 +16,7 @@ var ReactBootstrap = require('react-bootstrap')
   , Button = ReactBootstrap.Button
   , Input = ReactBootstrap.Input
 
-module.exports = Home = React.createClass({
+module.exports = Settings = React.createClass({
     
   mixins: [
     SetIntervalMixin,
@@ -66,7 +66,6 @@ module.exports = Home = React.createClass({
                 wrapperClassName='col-xs-8' className="settings-host"/>
               <Input type='submit' value='Save' wrapperClassName='col-xs-offset-10 col-xs-2'/>
             </form>
-            <ImportAccountModalButton/>
           </ListGroupItem>
         </ListGroup>
       );

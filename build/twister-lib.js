@@ -29652,6 +29652,18 @@ TwisterAccount.prototype.trim = function (timestamp) {
 
 TwisterAccount.prototype.getUsername = function () {return this._name}
 
+TwisterAccount.prototype.verifyKey = function (cbfunc,querySettings) {
+
+  this._privkey.verifyKey(cbfunc,querySettings);
+
+}
+
+TwisterAccount.prototype.getKeyStatus = function () {
+
+  this._privkey.getStatus();
+
+}
+
 TwisterAccount.prototype.activateTorrents = function (cbfunc,querySettings) {
 
 	var Twister = this._scope;
@@ -30749,7 +30761,6 @@ var twister_network = Bitcoin.networks.bitcoin;
 
 twister_network.messagePrefix= '\x18twister Signed Message:\n';
 
-
 /**
  * Describes the public key of a user.
  * @class
@@ -30764,18 +30775,33 @@ var TwisterPrivKey = function (name,scope) {
   
     this._verified = true;
 
-    
+    this._status =  "unchecked";
+  
+    this._createdAt = Date.now()/1000;
+  
 }
 
 inherits(TwisterPrivKey,TwisterResource);
 
 module.exports = TwisterPrivKey;
 
+TwisterPrivKey.prototype.flatten = function () {
+
+  var flatData = TwisterResource.prototype.flatten.call(this);
+
+  flatData.status = this._status;
+  flatData.createdAt = this._createdAt;
+
+  return flatData;
+    
+}
+
 TwisterPrivKey.prototype.inflate = function (flatData) {
 
     TwisterResource.prototype.inflate.call(this,flatData);
 
-    console.log("inflating privkey",flatData);
+    this._status = flatData.status;
+    this._createdAt = flatData.createdAt;
   
     if (this._data) {
     
@@ -30787,6 +30813,18 @@ TwisterPrivKey.prototype.inflate = function (flatData) {
 
 TwisterPrivKey.prototype.trim = function (timestamp) {
 
+}
+
+TwisterPrivKey.prototype.getStatus = function () {
+  
+  return this._status || "unchecked";
+  
+}
+
+TwisterPrivKey.prototype.getCreatedAt = function () {
+  
+  return this._createdAt;
+  
 }
 
 TwisterPrivKey.prototype.getKey = function () {
@@ -30807,29 +30845,42 @@ TwisterPrivKey.prototype.setKey = function (key) {
   
 }
 
-TwisterPrivKey.prototype.verifyKey = function (cbfunc) {
+TwisterPrivKey.prototype.makeRandomKey = function (key) {
+
+  this._btcKey = Bitcoin.ECPair.makeRandom(twister_network);
+  
+  this._data = this._btcKey.toWIF();
+  
+}
+
+TwisterPrivKey.prototype.verifyKey = function (cbfunc,querySettings) {
   
   var Twister = this._scope;
   
   var thisResource = this;
   
-  Twister.getUser(this._name)._doPubKey(function(pubkey){
+  Twister.getUser(this._name)._doPubKey(function(pubkey,querySettings){
+          
+    if(pubkey._data){
       
-    if(pubkey._data!=thisResource.getPubKey()){
+      if(pubkey._data==thisResource.getPubKey()){
+        
+        thisResource._status = "confirmed";
+        
+      }else{
+        
+        thisResource._status = "conflicting";
+        
+      }
       
-      this._data = null;
-      this._btcKey = null;
-      
-      thisResource._handleError({
-        message: "Private key is in conflict with public key.",
-        code: 32064
-      })
       
     }else{
-      if(cbfunc){
-        cbfunc(thisResource);
-      }
+      
+      thisResource._status = "unconfirmed";
+      
     }
+    
+    if(cbfunc) cbfunc(thisResource);
     
   })
   
@@ -32344,6 +32395,7 @@ TwisterTorrent.prototype.fillPostsCache = function (id,cbfunc) {
 
 }
 },{"../TwisterResource.js":157,"inherits":52}],147:[function(require,module,exports){
+(function (Buffer){
 'use strict';
 
 /**
@@ -32496,7 +32548,7 @@ Twister.getAccounts = function () {
   var res = [];
   
   for (var acc in Twister._wallet) {
-    res.push(acc);
+    res.push(Twister._wallet[acc]);
   }
   
   return res;
@@ -32543,11 +32595,9 @@ Twister.loadServerAccounts = function (cbfunc) {
 
 }
 
-
-
 /** @function
- * @name loadAccounts 
- * @description loads available account into the wallet. 
+ * @name importClientSideAccount 
+ * @description imports an account into client side wallet. The private key is not send to any server. 
  */
 Twister.importClientSideAccount = function (name,key,cbfunc) {
 	
@@ -32556,9 +32606,68 @@ Twister.importClientSideAccount = function (name,key,cbfunc) {
   Twister._wallet[name] = new TwisterAccount(name,Twister);
 
   Twister._wallet[name]._privkey.setKey(key)
-  Twister._wallet[name]._privkey.verifyKey(function(){
+  Twister._wallet[name]._privkey.verifyKey(function(key){
 
-    if(cbfunc) cbfunc(Twister._wallet[name])
+    if(key.getStatus()=="confirmed"){
+      
+      if(cbfunc) cbfunc(Twister._wallet[name])
+      
+    }else{
+      
+      Twister._handleError({
+        message: "Private key is in conflict with public key.",
+        code: 32064
+      })
+      
+    }
+    
+    
+  })
+  
+}
+
+/** @function
+ * @name generateClientSideAccount 
+ * @description generate an account in the client side wallet. The private key is not send to any server. 
+ */
+Twister.generateClientSideAccount = function (name,cbfunc) {
+	
+  var TwisterAccount = require('./ClientWallet/TwisterAccount.js');
+
+  Twister._wallet[name] = new TwisterAccount(name,Twister);
+
+  var newAccount = Twister._wallet[name];
+  
+  newAccount._privkey.makeRandomKey()
+  newAccount._privkey.verifyKey(function(){
+
+    var pubkey = newAccount._privkey.getPubKey();
+    
+    Twister.RPC("createrawtransaction",[name,pubkey],function(raw){
+      
+      console.log("raw transaction: ",raw);
+      
+      Twister.RPC("sendrawtransaction",raw,function(res){
+        
+        console.log("sent transaction",res);
+      
+        var twisterPubKey = Twister.getUser(username)._pubkey
+        
+        twisterPubKey._lastUpdate = Date.now()/1000;
+
+        twisterPubKey._data = res;
+
+        twisterPubKey._btcKey = Bitcoin.ECPair.fromPublicKeyBuffer(new Buffer(res,"hex"),twister_network);
+        
+        if(cbfunc) cbfunc(newAccount)
+        
+      },function(err){
+      console.log("error",err);
+      })
+    },function(err){
+      console.log("error",err);
+    })
+    
     
   })
   
@@ -32726,7 +32835,8 @@ Twister.onQueryComplete = function (id, cbfunc){
 
 module.exports = Twister;
 
-},{"./ClientWallet/TwisterAccount.js":139,"./ServerWallet/TwisterAccount.js":144,"./TwisterHashtag.js":150,"./TwisterPromotedPosts.js":154,"./TwisterResource.js":157,"./TwisterUser.js":160}],148:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"./ClientWallet/TwisterAccount.js":139,"./ServerWallet/TwisterAccount.js":144,"./TwisterHashtag.js":150,"./TwisterPromotedPosts.js":154,"./TwisterResource.js":157,"./TwisterUser.js":160,"buffer":177}],148:[function(require,module,exports){
 var inherits = require('inherits');
 
 var TwisterResource = require('./TwisterResource.js');

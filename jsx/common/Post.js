@@ -121,6 +121,11 @@ module.exports = Post = React.createClass({
   render: function() {
     
     var post = Twister.getUser(this.props.post.username).getPost(this.props.post.id);
+    if(!post){
+      return (
+        <span/>
+      )
+    }
     var retwist = false;
     var retwistWithComment = false;
     var comment = "";
