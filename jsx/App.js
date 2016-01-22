@@ -106,12 +106,14 @@ App = React.createClass({
   
   checkAccounts: function() {
     
-    this.state.accounts.map(function(acc){
+    var thisComponent = this;
+    
+    thisComponent.state.accounts.map(function(acc){
       
-      Twister.getAccount(newaccoutname).verifyKey(function(key){
+      Twister.getAccount(acc.name).verifyKey(function(key){
         thisComponent.setState(function(oldstate,props){
           
-          oldstate.accounts[acc].status = key.getStatus();
+          oldstate.accounts[acc.name].status = key.getStatus();
           
           return oldstate;
           
@@ -138,9 +140,11 @@ App = React.createClass({
   
   onnewaccountbyuser: function(event) {
     
+    console.log("catched onnewaccountbyuser event !!!!! ",event,this.state)
+    
     this.saveCache();
     
-    if(!this.activeAccount){
+    if(!this.state.activeAccount){
       
       this.switchAccount(event.detail.getUsername());
       
@@ -162,17 +166,41 @@ App = React.createClass({
     
     //console.log(firstroute);
     
-    var userbuttons = [];
-    for (var i in this.state.accounts) {
-      userbuttons.push(
-        <MenuItem 
-          key={this.state.accounts[i].name}
-          bsStyle={this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default'}
-          onClick={this.switchAccount.bind(this,this.state.accounts[i].name)}
-          href="javascript:void(0);"
-        >{this.state.accounts[i].name}</MenuItem>
+    var guestMode = true;
+    
+    if(this.state.accounts.filter(function(acc){
+      return acc.status=="confirmed";
+    }).length){
+      guestMode = false;
+    }
+    
+    if(guestMode){
+      var accountSelector = (
+        <Button href='#/accounts' disabled>guest</Button>
+      );
+    }else{
+      var userbuttons = [];
+      for (var i in this.state.accounts.filter(function(acc){
+        return acc.status=="confirmed";
+      })) {
+        userbuttons.push(
+          <MenuItem 
+            key={this.state.accounts[i].name}
+            bsStyle={this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default'}
+            onClick={this.switchAccount.bind(this,this.state.accounts[i].name)}
+            href="javascript:void(0);"
+          >{this.state.accounts[i].name}</MenuItem>
+        );
+      }  
+      var accountSelector = (
+
+        <DropdownButton title={this.state.activeAccount}>
+          {userbuttons}
+        </DropdownButton>
+
       );
     }
+  
     
     return (
       <Grid>
@@ -182,19 +210,18 @@ App = React.createClass({
               <Button 
                 href='#' 
                 bsStyle={firstroute=="home" ? 'primary' : 'default'}
+                disabled = {guestMode}
               ><Glyphicon glyph="home"/></Button>
               <Button 
                 href='#/profile'
                 bsStyle={firstroute=="profile-active" ? 'primary' : 'default'}
+                disabled = {guestMode}
               ><Glyphicon glyph="user"/></Button>
-              <Button href='#/directmessages'><Glyphicon glyph="transfer"/></Button>
-              <DropdownButton title={this.state.activeAccount}>
-                {userbuttons}
-              </DropdownButton>
+              <Button href='#/directmessages' disabled><Glyphicon glyph="transfer"/></Button>
+              {accountSelector}
               <DropdownButton title={<Glyphicon glyph="menu-hamburger"/>}>
                 <MenuItem 
                   onClick={this.clearCache}
-                  href="javascript:void(0);"
                 >Clear Cache</MenuItem>
                 <MenuItem href="#/search" >Search</MenuItem>
                 <MenuItem href="#/settings" >Settings</MenuItem>

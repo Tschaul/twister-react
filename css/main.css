@@ -7,6 +7,10 @@ body.modal-open {
   margin: 0;
 }
 
+.btn-group-justified>.btn-group .dropdown-menu {
+    right: 0;
+}
+
 .container {
   padding: 0;
 }

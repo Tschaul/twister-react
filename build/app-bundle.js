@@ -107,12 +107,14 @@ App = React.createClass({displayName: "App",
   
   checkAccounts: function() {
     
-    this.state.accounts.map(function(acc){
+    var thisComponent = this;
+    
+    thisComponent.state.accounts.map(function(acc){
       
-      Twister.getAccount(newaccoutname).verifyKey(function(key){
+      Twister.getAccount(acc.name).verifyKey(function(key){
         thisComponent.setState(function(oldstate,props){
           
-          oldstate.accounts[acc].status = key.getStatus();
+          oldstate.accounts[acc.name].status = key.getStatus();
           
           return oldstate;
           
@@ -139,9 +141,11 @@ App = React.createClass({displayName: "App",
   
   onnewaccountbyuser: function(event) {
     
+    console.log("catched onnewaccountbyuser event !!!!! ",event,this.state)
+    
     this.saveCache();
     
-    if(!this.activeAccount){
+    if(!this.state.activeAccount){
       
       this.switchAccount(event.detail.getUsername());
       
@@ -163,17 +167,41 @@ App = React.createClass({displayName: "App",
     
     //console.log(firstroute);
     
-    var userbuttons = [];
-    for (var i in this.state.accounts) {
-      userbuttons.push(
-        React.createElement(MenuItem, {
-          key: this.state.accounts[i].name, 
-          bsStyle: this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default', 
-          onClick: this.switchAccount.bind(this,this.state.accounts[i].name), 
-          href: "javascript:void(0);"
-        }, this.state.accounts[i].name)
+    var guestMode = true;
+    
+    if(this.state.accounts.filter(function(acc){
+      return acc.status=="confirmed";
+    }).length){
+      guestMode = false;
+    }
+    
+    if(guestMode){
+      var accountSelector = (
+        React.createElement(Button, {href: "#/accounts", disabled: true}, "guest")
+      );
+    }else{
+      var userbuttons = [];
+      for (var i in this.state.accounts.filter(function(acc){
+        return acc.status=="confirmed";
+      })) {
+        userbuttons.push(
+          React.createElement(MenuItem, {
+            key: this.state.accounts[i].name, 
+            bsStyle: this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default', 
+            onClick: this.switchAccount.bind(this,this.state.accounts[i].name), 
+            href: "javascript:void(0);"
+          }, this.state.accounts[i].name)
+        );
+      }  
+      var accountSelector = (
+
+        React.createElement(DropdownButton, {title: this.state.activeAccount}, 
+          userbuttons
+        )
+
       );
     }
+  
     
     return (
       React.createElement(Grid, null, 
@@ -182,20 +210,19 @@ App = React.createClass({displayName: "App",
             React.createElement(ButtonGroup, {justified: true}, 
               React.createElement(Button, {
                 href: "#", 
-                bsStyle: firstroute=="home" ? 'primary' : 'default'
+                bsStyle: firstroute=="home" ? 'primary' : 'default', 
+                disabled: guestMode
               }, React.createElement(Glyphicon, {glyph: "home"})), 
               React.createElement(Button, {
                 href: "#/profile", 
-                bsStyle: firstroute=="profile-active" ? 'primary' : 'default'
+                bsStyle: firstroute=="profile-active" ? 'primary' : 'default', 
+                disabled: guestMode
               }, React.createElement(Glyphicon, {glyph: "user"})), 
-              React.createElement(Button, {href: "#/directmessages"}, React.createElement(Glyphicon, {glyph: "transfer"})), 
-              React.createElement(DropdownButton, {title: this.state.activeAccount}, 
-                userbuttons
-              ), 
+              React.createElement(Button, {href: "#/directmessages", disabled: true}, React.createElement(Glyphicon, {glyph: "transfer"})), 
+              accountSelector, 
               React.createElement(DropdownButton, {title: React.createElement(Glyphicon, {glyph: "menu-hamburger"})}, 
                 React.createElement(MenuItem, {
-                  onClick: this.clearCache, 
-                  href: "javascript:void(0);"
+                  onClick: this.clearCache
                 }, "Clear Cache"), 
                 React.createElement(MenuItem, {href: "#/search"}, "Search"), 
                 React.createElement(MenuItem, {href: "#/settings"}, "Settings"), 
@@ -1034,7 +1061,7 @@ var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Post = require("../common/Post.js");
 
-module.exports = Postboard = React.createClass({displayName: "Postboard",
+module.exports = ProfileBoard = React.createClass({displayName: "ProfileBoard",
   render: function() {
     
     var thisComponent = this;
@@ -1748,19 +1775,24 @@ module.exports = Accounts = React.createClass({displayName: "Accounts",
     router: React.PropTypes.func
   },
   render: function() {
+    
+    var thisComponent = this;
+    
     return (
         React.createElement(ListGroup, null, 
-          React.createElement(ListGroupItem, null, "Settings"), 
+          React.createElement(ListGroupItem, null, "Accounts"), 
           React.createElement(ListGroupItem, null, 
-            React.createElement("ul", null, 
-              this.props.accounts.map(function(acc,index) {
-                //console.log(acc,index)
-                return (
-                  React.createElement("li", null, acc.name, " - ", acc.status)
-                );
-              })
-            ), 
-            React.createElement(ImportAccountModalButton, null)
+            React.createElement(ImportAccountModalButton, null), 
+            React.createElement("hr", null), 
+            this.props.accounts.map(function(acc,index) {
+              //console.log(acc,index)
+              return (
+                React.createElement("div", null, 
+                  React.createElement(MiniProfile, {username: acc.name, key: "miniprofile:"+acc.name, pollIntervalProfile: thisComponent.props.pollIntervalProfile}), 
+                  React.createElement("p", null, acc.status)
+                )
+              );
+            })
           )
         )
       );
@@ -1816,11 +1848,21 @@ module.exports = Conversation = React.createClass({displayName: "Conversation",
 
     var goUpConversation = function (post) {
       
-        
+      if(!post) return;
       
       if (post.isReply()) {
 
-        post.doPostRepliedTo(goUpConversation);
+        post.doPostRepliedTo(function(otherpost){
+          if(otherpost){
+            goUpConversation(otherpost);
+          }else{
+            thisComponent.addPost(post);
+        
+            thisComponent.setStateSafe({loading: false});
+
+            post.doReplies(doRepliesRecursive);
+          }
+        });
 
       } else {
         

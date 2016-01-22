@@ -47,11 +47,21 @@ module.exports = Conversation = React.createClass({
 
     var goUpConversation = function (post) {
       
-        
+      if(!post) return;
       
       if (post.isReply()) {
 
-        post.doPostRepliedTo(goUpConversation);
+        post.doPostRepliedTo(function(otherpost){
+          if(otherpost){
+            goUpConversation(otherpost);
+          }else{
+            thisComponent.addPost(post);
+        
+            thisComponent.setStateSafe({loading: false});
+
+            post.doReplies(doRepliesRecursive);
+          }
+        });
 
       } else {
         

@@ -27,19 +27,24 @@ module.exports = Accounts = React.createClass({
     router: React.PropTypes.func
   },
   render: function() {
+    
+    var thisComponent = this;
+    
     return (
         <ListGroup>
-          <ListGroupItem>Settings</ListGroupItem>
+          <ListGroupItem>Accounts</ListGroupItem>
           <ListGroupItem>
-            <ul>
-              {this.props.accounts.map(function(acc,index) {
-                //console.log(acc,index)
-                return (
-                  <li>{acc.name} - {acc.status}</li>
-                );
-              })}
-            </ul>
             <ImportAccountModalButton/>
+            <hr/>
+            {this.props.accounts.map(function(acc,index) {
+              //console.log(acc,index)
+              return (
+                <div>
+                  <MiniProfile username={acc.name} key={"miniprofile:"+acc.name} pollIntervalProfile={thisComponent.props.pollIntervalProfile}/>
+                  <p>{acc.status}</p>
+                </div>
+              );
+            })}
           </ListGroupItem>
         </ListGroup>
       );

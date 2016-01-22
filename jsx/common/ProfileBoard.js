@@ -14,7 +14,7 @@ var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Post = require("../common/Post.js");
 
-module.exports = Postboard = React.createClass({
+module.exports = ProfileBoard = React.createClass({
   render: function() {
     
     var thisComponent = this;
