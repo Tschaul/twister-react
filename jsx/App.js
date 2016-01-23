@@ -102,7 +102,9 @@ App = React.createClass({
       Twister.getAccount(acc.name).verifyKey(function(key){
         thisComponent.setState(function(oldstate,props){
           
-          oldstate.accounts[acc.name].status = key.getStatus();
+          oldstate.accounts.find(function(a){
+            return a.name==acc.name;
+          }).status = key.getStatus();
           
           return oldstate;
           
@@ -151,9 +153,13 @@ App = React.createClass({
   
   render: function() {
     
-    //var firstroute = this.context.router.getCurrentRoutes()[1].name;
+    var route = this.props.location.pathname.split("/").filter(function(s){
+      return s!="";
+    });
+        
+    var isOnHome = (route.length==0);
     
-    //console.log(firstroute);
+    var isOnOwnProfile = ( route[0]="profile" && route[1]==this.state.activeAccount );
     
     var guestMode = true;
     
@@ -198,13 +204,13 @@ App = React.createClass({
           <Col xs={12} sm={10} smOffset={1} md={8} mdOffset={2} lg={6} lgOffset={3}>
             <ButtonGroup justified>  
               <Button 
-                href='#' 
-                //bsStyle={firstroute=="home" ? 'primary' : 'default'}
+                href='#/' 
+                bsStyle={isOnHome ? 'primary' : 'default'}
                 disabled = {guestMode}
               ><Glyphicon glyph="home"/></Button>
               <Button 
-                href='#/profile'
-                //bsStyle={firstroute=="profile-active" ? 'primary' : 'default'}
+                href={'#/profile/'+this.state.activeAccount}
+                bsStyle={isOnOwnProfile ? 'primary' : 'default'}
                 disabled = {guestMode}
               ><Glyphicon glyph="user"/></Button>
               <Button href='#/directmessages' disabled><Glyphicon glyph="transfer"/></Button>
@@ -241,12 +247,6 @@ initializeApp = function () {
       <Router history={hashHistory}>
         <Route component={App} path="/">
           <IndexRoute component={Home} />
-          <Route path="/profile" component={Profile}>
-            <IndexRoute component={Timeline} />
-            <Route path="timeline" component={Timeline} />
-            <Route path="followings" component={Followings} />
-            <Route path="mentions" component={Mentions} />
-          </Route>
           <Route path="/profile/:username" component={Profile}>
             <IndexRoute component={Timeline} />
             <Route path="timeline" component={Timeline} />

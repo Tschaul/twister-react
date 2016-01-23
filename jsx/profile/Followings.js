@@ -24,12 +24,9 @@ var ReactBootstrap = require('react-bootstrap')
 module.exports = Followings = React.createClass({
     
   mixins: [AppSettingsMixin,SetIntervalMixin,SafeStateChangeMixin],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
-      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      username: (this.props.params.username ? this.props.params.username : this.props.activeAccount),
       followings: [],
       loading: true
     };

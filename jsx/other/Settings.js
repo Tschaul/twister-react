@@ -23,9 +23,6 @@ module.exports = Settings = React.createClass({
     SafeStateChangeMixin,
     AppSettingsMixin
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   handeSettingsUpdate: function (e) {
     e.preventDefault();
     

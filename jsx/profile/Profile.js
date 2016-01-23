@@ -23,7 +23,7 @@ var FollowButton = require('../common/FollowButton.js');
 var EditProfileModalButton = require('../profile/EditProfileModalButton.js');
 var EditAvatarModalButton = require('../profile/EditAvatarModalButton.js');
 
-module.exports = Post = React.createClass({
+module.exports = Profile = React.createClass({
   mixins: [
     SetIntervalMixin,
     SafeStateChangeMixin,
@@ -33,9 +33,13 @@ module.exports = Post = React.createClass({
     
     var routeprefix = "#/profile/"+(this.props.params.username ? this.props.params.username+"/" : "")
     
-    //var subroute = this.context.router.getCurrentRoutes()[2].name
-    
-    //console.log(this.context.router.getCurrentRoutes());
+    var route = this.props.location.pathname.split("/").filter(function(s){
+      return s!="";
+    });
+        
+    var isOnTimeline = !route[2] || route[2]=="timeline";
+    var isOnMentions = route[2]=="mentions";
+    var isOnFollowings = route[2]=="followings";
         
     return (
       <ListGroup fill>
@@ -70,13 +74,13 @@ module.exports = Post = React.createClass({
         </ListGroupItem>
         <ListGroupItem className="fullytight_all">
           <ButtonGroup justified>
-            <Button href={routeprefix+"timeline"} ><Glyphicon glyph="list"/></Button>
-            <Button href={routeprefix+"followings"} ><Glyphicon glyph="eye-open"/></Button>
-            <Button href={routeprefix+"mentions"} ><Glyphicon glyph="comment"/></Button>
+            <Button href={routeprefix+"timeline"} bsStyle={isOnTimeline ? 'primary' : 'default'}><Glyphicon glyph="list"/></Button>
+            <Button href={routeprefix+"followings"} bsStyle={isOnFollowings ? 'primary' : 'default'}><Glyphicon glyph="eye-open"/></Button>
+            <Button href={routeprefix+"mentions"} bsStyle={isOnMentions ? 'primary' : 'default'}><Glyphicon glyph="comment"/></Button>
           </ButtonGroup>
         </ListGroupItem>
           {this.props.children && React.cloneElement(this.props.children, {
-            activeAccount:this.state.activeAccount
+            activeAccount:this.props.activeAccount
           })}
       </ListGroup>
     );

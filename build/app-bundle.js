@@ -103,7 +103,9 @@ App = React.createClass({displayName: "App",
       Twister.getAccount(acc.name).verifyKey(function(key){
         thisComponent.setState(function(oldstate,props){
           
-          oldstate.accounts[acc.name].status = key.getStatus();
+          oldstate.accounts.find(function(a){
+            return a.name==acc.name;
+          }).status = key.getStatus();
           
           return oldstate;
           
@@ -152,9 +154,13 @@ App = React.createClass({displayName: "App",
   
   render: function() {
     
-    //var firstroute = this.context.router.getCurrentRoutes()[1].name;
+    var route = this.props.location.pathname.split("/").filter(function(s){
+      return s!="";
+    });
+        
+    var isOnHome = (route.length==0);
     
-    //console.log(firstroute);
+    var isOnOwnProfile = ( route[0]="profile" && route[1]==this.state.activeAccount );
     
     var guestMode = true;
     
@@ -199,13 +205,13 @@ App = React.createClass({displayName: "App",
           React.createElement(Col, {xs: 12, sm: 10, smOffset: 1, md: 8, mdOffset: 2, lg: 6, lgOffset: 3}, 
             React.createElement(ButtonGroup, {justified: true}, 
               React.createElement(Button, {
-                href: "#", 
-                //bsStyle={firstroute=="home" ? 'primary' : 'default'}
+                href: "#/", 
+                bsStyle: isOnHome ? 'primary' : 'default', 
                 disabled: guestMode
               }, React.createElement(Glyphicon, {glyph: "home"})), 
               React.createElement(Button, {
-                href: "#/profile", 
-                //bsStyle={firstroute=="profile-active" ? 'primary' : 'default'}
+                href: '#/profile/'+this.state.activeAccount, 
+                bsStyle: isOnOwnProfile ? 'primary' : 'default', 
                 disabled: guestMode
               }, React.createElement(Glyphicon, {glyph: "user"})), 
               React.createElement(Button, {href: "#/directmessages", disabled: true}, React.createElement(Glyphicon, {glyph: "transfer"})), 
@@ -242,12 +248,6 @@ initializeApp = function () {
       React.createElement(Router, {history: hashHistory}, 
         React.createElement(Route, {component: App, path: "/"}, 
           React.createElement(IndexRoute, {component: Home}), 
-          React.createElement(Route, {path: "/profile", component: Profile}, 
-            React.createElement(IndexRoute, {component: Timeline}), 
-            React.createElement(Route, {path: "timeline", component: Timeline}), 
-            React.createElement(Route, {path: "followings", component: Followings}), 
-            React.createElement(Route, {path: "mentions", component: Mentions})
-          ), 
           React.createElement(Route, {path: "/profile/:username", component: Profile}, 
             React.createElement(IndexRoute, {component: Timeline}), 
             React.createElement(Route, {path: "timeline", component: Timeline}), 
@@ -1462,12 +1462,12 @@ module.exports = ProfileMixin = {
     }
   },
   getInitialState: function() {
-    
+        
     var username = this.props.username;
     
     if (!username) {
     
-      username = (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount);
+      username = (this.props.params.username ? this.props.params.username : this.props.activeAccount);
       
     }
     
@@ -2534,9 +2534,6 @@ module.exports = Settings = React.createClass({displayName: "Settings",
     SafeStateChangeMixin,
     AppSettingsMixin
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   handeSettingsUpdate: function (e) {
     e.preventDefault();
     
@@ -2880,12 +2877,9 @@ var ReactBootstrap = require('react-bootstrap')
 module.exports = Followings = React.createClass({displayName: "Followings",
     
   mixins: [AppSettingsMixin,SetIntervalMixin,SafeStateChangeMixin],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
-      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      username: (this.props.params.username ? this.props.params.username : this.props.activeAccount),
       followings: [],
       loading: true
     };
@@ -2952,12 +2946,9 @@ var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 module.exports = Mentions = React.createClass({displayName: "Mentions",
     
   mixins: [StreamMixin,AppSettingsMixin,SetIntervalMixin,SafeStateChangeMixin],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
-      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      username: (this.props.params.username ? this.props.params.username : this.props.activeAccount),
       data: [],
       postIdentifiers: {},
       loading: true
@@ -3020,7 +3011,7 @@ var FollowButton = require('../common/FollowButton.js');
 var EditProfileModalButton = require('../profile/EditProfileModalButton.js');
 var EditAvatarModalButton = require('../profile/EditAvatarModalButton.js');
 
-module.exports = Post = React.createClass({displayName: "Post",
+module.exports = Profile = React.createClass({displayName: "Profile",
   mixins: [
     SetIntervalMixin,
     SafeStateChangeMixin,
@@ -3028,11 +3019,15 @@ module.exports = Post = React.createClass({displayName: "Post",
   ],
   render: function() {
     
-    var routeprefix = "#/profile/"+(this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username+"/" : "")
+    var routeprefix = "#/profile/"+(this.props.params.username ? this.props.params.username+"/" : "")
     
-    var subroute = this.context.router.getCurrentRoutes()[2].name
-    
-    //console.log(this.context.router.getCurrentRoutes());
+    var route = this.props.location.pathname.split("/").filter(function(s){
+      return s!="";
+    });
+        
+    var isOnTimeline = !route[2] || route[2]=="timeline";
+    var isOnMentions = route[2]=="mentions";
+    var isOnFollowings = route[2]=="followings";
         
     return (
       React.createElement(ListGroup, {fill: true}, 
@@ -3067,13 +3062,13 @@ module.exports = Post = React.createClass({displayName: "Post",
         ), 
         React.createElement(ListGroupItem, {className: "fullytight_all"}, 
           React.createElement(ButtonGroup, {justified: true}, 
-            React.createElement(Button, {href: routeprefix+"timeline", bsStyle: subroute.indexOf("timeline")>-1 ? "primary" : "default"}, React.createElement(Glyphicon, {glyph: "list"})), 
-            React.createElement(Button, {href: routeprefix+"followings", bsStyle: subroute.indexOf("followings")>-1 ? "primary" : "default"}, React.createElement(Glyphicon, {glyph: "eye-open"})), 
-            React.createElement(Button, {href: routeprefix+"mentions", bsStyle: subroute.indexOf("mentions")>-1 ? "primary" : "default"}, React.createElement(Glyphicon, {glyph: "comment"}))
+            React.createElement(Button, {href: routeprefix+"timeline", bsStyle: isOnTimeline ? 'primary' : 'default'}, React.createElement(Glyphicon, {glyph: "list"})), 
+            React.createElement(Button, {href: routeprefix+"followings", bsStyle: isOnFollowings ? 'primary' : 'default'}, React.createElement(Glyphicon, {glyph: "eye-open"})), 
+            React.createElement(Button, {href: routeprefix+"mentions", bsStyle: isOnMentions ? 'primary' : 'default'}, React.createElement(Glyphicon, {glyph: "comment"}))
           )
         ), 
           this.props.children && React.cloneElement(this.props.children, {
-            activeAccount:this.state.activeAccount
+            activeAccount:this.props.activeAccount
           })
       )
     );
@@ -3108,12 +3103,9 @@ module.exports = Timeline = React.createClass({displayName: "Timeline",
     EventListenerMixin('scrolledtobottom'),
     EventListenerMixin('newpostbyuser')
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
-      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      username: (this.props.params.username ? this.props.params.username : this.props.activeAccount),
       data: [], 
       postIdentifiers: {},
       postCount: 30,

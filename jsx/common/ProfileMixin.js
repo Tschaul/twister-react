@@ -32,12 +32,12 @@ module.exports = ProfileMixin = {
     }
   },
   getInitialState: function() {
-    
+        
     var username = this.props.username;
     
     if (!username) {
     
-      username = (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount);
+      username = (this.props.params.username ? this.props.params.username : this.props.activeAccount);
       
     }
     

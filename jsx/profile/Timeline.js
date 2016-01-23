@@ -26,12 +26,9 @@ module.exports = Timeline = React.createClass({
     EventListenerMixin('scrolledtobottom'),
     EventListenerMixin('newpostbyuser')
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
-      username: (this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username : this.props.activeAccount),
+      username: (this.props.params.username ? this.props.params.username : this.props.activeAccount),
       data: [], 
       postIdentifiers: {},
       postCount: 30,
