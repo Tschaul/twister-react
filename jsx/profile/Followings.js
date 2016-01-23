@@ -1,7 +1,7 @@
 
-var React = require('react/addons');
+var React = require('react');
 
-var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 
 var MiniProfile = require("../common/MiniProfile.js");
 var ProfileBoard = require("../common/ProfileBoard.js");

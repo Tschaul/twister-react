@@ -11,7 +11,8 @@
     "react-router-bootstrap": "*",
     "react-dom": "*",
     "selection-range": "*",
-    "escape-html": "*"
+    "escape-html": "*",
+    "react-addons-css-transition-group": "*"
   },
   "devDependencies": {
     "react-tools": "*",

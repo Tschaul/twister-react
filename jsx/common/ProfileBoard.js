@@ -8,9 +8,9 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Button = ReactBootstrap.Button
 
-var React = require('react/addons');
+var React = require('react');
 
-var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 
 var Post = require("../common/Post.js");
 
