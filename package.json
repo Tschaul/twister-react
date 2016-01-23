@@ -10,8 +10,7 @@
     "react-router": "*",
     "react-router-bootstrap": "*",
     "react-dom": "*",
-    "selection-range": "*",
-    "escape-html": "*",
+    "react-wysiwyg": "*",
     "react-addons-css-transition-group": "*"
   },
   "devDependencies": {

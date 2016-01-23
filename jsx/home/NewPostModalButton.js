@@ -10,7 +10,7 @@ var React = require('react');
 
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
-var TwistComposer = require("../common/TwistComposer.js");
+var PostComposer = require("../common/PostComposer.js");
 
 module.exports = NewPostModalButton = React.createClass({
   getInitialState: function () {
@@ -23,10 +23,9 @@ module.exports = NewPostModalButton = React.createClass({
       isModalOpen: !this.state.isModalOpen
     });
   },
-  handleNewPost: function (e) {
-    e.preventDefault();
-    //console.log(e)
-    var msg = JSON.parse(JSON.stringify(e.target[0].value));
+  handleNewPost: function (text) {
+    console.log(text)
+    var msg = text;
     if (!msg) {
       console.log("empty post was passed as new post")
       return;
@@ -39,38 +38,23 @@ module.exports = NewPostModalButton = React.createClass({
       window.dispatchEvent(event);
     
     });
-    
-    e.target[0].value = "";
-    
-    
+        
     this.handleToggle();
     
     //React.findDOMNode(this.refs.msg).value = '';
     return;
+        
   },
   render: function() {
     return (
-      <div>
         <Button onClick={this.handleToggle} className="link-button-gray pull-right fullytight_all" bsStyle="link">
           <Glyphicon glyph='pencil' />
+          <Modal title={<Glyphicon glyph='pencil'/>} show={this.state.isModalOpen} bsStyle='primary' onHide={this.handleToggle}>
+            <div className='modal-body'>
+              <PostComposer onSubmit={this.handleNewPost} />
+            </div>
+          </Modal>
         </Button>
-        <Modal show={this.state.isModalOpen} bsStyle='primary' title={<Glyphicon glyph='pencil'/>} onRequestHide={this.handleToggle}>
-          <div className='modal-body'>
-            <form onSubmit={this.handleNewPost}>
-              <Input type='textarea' label='Write Something' placeholder='textarea'/>
-              <Input type='submit' value='Submit Post' data-dismiss="modal" />
-            </form>
-          </div>
-        </Modal>
-      </div>
     );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return <span/>;
-    }
-    
-  
   }
 });

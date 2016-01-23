@@ -6,6 +6,7 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Modal = ReactBootstrap.Modal
   , Input = ReactBootstrap.Input
+  , Button = ReactBootstrap.Button
 
 var React = require('react');
 
@@ -74,7 +75,7 @@ module.exports = FollowButton = React.createClass({
     var methodName = this.state.isCurrentlyFollowing ? "Unfollow" : "Follow";
         
     return (
-        <button onClick={this.handleClick}>{methodName}</button>
+        <Button onClick={this.handleClick}>{methodName}</Button>
     );
   }
 });
