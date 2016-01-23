@@ -37,7 +37,7 @@ module.exports = ProfileBoard = React.createClass({
       <ListGroup fill>
         {this.props.header}
         {spinner}
-        <ReactCSSTransitionGroup transitionName="item">
+        <ReactCSSTransitionGroup transitionName="item" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
           {profiles}
         </ReactCSSTransitionGroup>
       </ListGroup>

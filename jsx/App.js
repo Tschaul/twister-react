@@ -56,24 +56,6 @@ App = React.createClass({
     SafeStateChangeMixin,
     EventListenerMixin('newaccountbyuser')],
   
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
-  getHandlerKey: function () {
-    var childDepth = 1; // assuming App is top-level route
-    var router = this.context.router
-    //console.log(router.getCurrentParams())
-    if ( router.getCurrentRoutes()[childDepth] ) {
-      var key = router.getCurrentRoutes()[childDepth].name;
-      if (key=="home" || key=="profile-active" || key=="accountProfileMore") {key=key+"/"+this.state.activeAccount;}
-      var id = JSON.stringify(router.getCurrentParams());
-      if (id) { key += id; }
-      //console.log(key);
-      return key;
-    } else {return "none"}
-  },
-  
   getInitialState: function () {
     
     var state={};
@@ -169,7 +151,7 @@ App = React.createClass({
   
   render: function() {
     
-    var firstroute = this.context.router.getCurrentRoutes()[1].name;
+    //var firstroute = this.context.router.getCurrentRoutes()[1].name;
     
     //console.log(firstroute);
     
@@ -196,12 +178,13 @@ App = React.createClass({
             bsStyle={this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default'}
             onClick={this.switchAccount.bind(this,this.state.accounts[i].name)}
             href="javascript:void(0);"
+            eventKey={i}
           >{this.state.accounts[i].name}</MenuItem>
         );
       }  
       var accountSelector = (
 
-        <DropdownButton title={this.state.activeAccount}>
+        <DropdownButton title={this.state.activeAccount} id={'dropdown-accounts'}>
           {userbuttons}
         </DropdownButton>
 
@@ -216,17 +199,17 @@ App = React.createClass({
             <ButtonGroup justified>  
               <Button 
                 href='#' 
-                bsStyle={firstroute=="home" ? 'primary' : 'default'}
+                //bsStyle={firstroute=="home" ? 'primary' : 'default'}
                 disabled = {guestMode}
               ><Glyphicon glyph="home"/></Button>
               <Button 
                 href='#/profile'
-                bsStyle={firstroute=="profile-active" ? 'primary' : 'default'}
+                //bsStyle={firstroute=="profile-active" ? 'primary' : 'default'}
                 disabled = {guestMode}
               ><Glyphicon glyph="user"/></Button>
               <Button href='#/directmessages' disabled><Glyphicon glyph="transfer"/></Button>
               {accountSelector}
-              <DropdownButton title={<Glyphicon glyph="menu-hamburger"/>}>
+              <DropdownButton title={<Glyphicon glyph="menu-hamburger"/>} id={'dropdown-other'}>
                 <MenuItem 
                   onClick={this.clearCache}
                 >Clear Cache</MenuItem>
@@ -239,7 +222,10 @@ App = React.createClass({
               </DropdownButton>
             </ButtonGroup>
             <br/>
-            {this.props.children}
+            {this.props.children && React.cloneElement(this.props.children, {
+              accounts:this.state.accounts,
+              activeAccount:this.state.activeAccount
+            })}
           </Col>
         </Row>
       </Grid>

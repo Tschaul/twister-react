@@ -142,7 +142,7 @@ module.exports = Post = React.createClass({
     if (post.isReply()) {
       var conversationLink = (
         <OverlayTrigger placement='left' overlay={
-          <Tooltip>View Conversation</Tooltip>
+          <Tooltip id="view-conversation">View Conversation</Tooltip>
         }>
       <small><a href={"#/conversation/"+post.getUsername()+"/"+post.getId()} className="link-button-gray"><Glyphicon glyph="comment"/></a></small>
     </OverlayTrigger>
@@ -154,7 +154,7 @@ module.exports = Post = React.createClass({
                                           
     if (!post.isRetwist()) {
       var replyLink = <OverlayTrigger placement='left' overlay={
-          <Tooltip>Reply</Tooltip>
+          <Tooltip id="reply">Reply</Tooltip>
         }>
           <small>
             <ReplyModalButton replyUsername={post.getUsername()} replyPostId={post.getId()} activeAccount={this.props.activeAccount} originalMsg={post.getContent()} replyUserFullname={this.state.fullname}/>
@@ -166,7 +166,7 @@ module.exports = Post = React.createClass({
                                            
     
     var retwistLink = <OverlayTrigger placement='left' overlay={
-        <Tooltip>Retwist</Tooltip>
+        <Tooltip id="retwist">Retwist</Tooltip>
       }>
         <small>
           <RetwistModalButton retwistUsername={post.getUsername()} retwistPostId={post.getId()} activeAccount={this.props.activeAccount} originalMsg={post.getContent()} retwistUserFullname={this.state.fullname}/>

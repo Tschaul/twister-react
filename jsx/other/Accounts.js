@@ -23,9 +23,6 @@ module.exports = Accounts = React.createClass({
     SafeStateChangeMixin,
     AppSettingsMixin
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   render: function() {
     
     var thisComponent = this;
@@ -39,8 +36,8 @@ module.exports = Accounts = React.createClass({
             {this.props.accounts.map(function(acc,index) {
               //console.log(acc,index)
               return (
-                <div>
-                  <MiniProfile username={acc.name} key={"miniprofile:"+acc.name} pollIntervalProfile={thisComponent.props.pollIntervalProfile}/>
+                <div key={"miniprofile:"+acc.name}>
+                  <MiniProfile username={acc.name} pollIntervalProfile={thisComponent.props.pollIntervalProfile}/>
                   <p>{acc.status}</p>
                 </div>
               );

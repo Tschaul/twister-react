@@ -27,9 +27,6 @@ module.exports = Home = React.createClass({
     EventListenerMixin('scrolledtobottom'),
     EventListenerMixin('newpostbyuser')
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
       data: [], 

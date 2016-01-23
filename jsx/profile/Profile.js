@@ -29,22 +29,6 @@ module.exports = Post = React.createClass({
     SafeStateChangeMixin,
     ProfileMixin
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-  getHandlerKey: function () {
-    var childDepth = 2; // assuming App is top-level route
-    var router = this.context.router;
-    //console.log(router.getCurrentParams())
-    if ( router.getCurrentRoutes()[childDepth] ) {
-      var key = router.getCurrentRoutes()[childDepth].name;
-      if (key.indexOf("active")>-1) {key+="/"+this.props.activeAccount;}
-      var id = JSON.stringify(router.getCurrentParams());
-      if (id) { key += id; }
-      //console.log(key);
-      return key;
-    } else {return "none"}
-  },
   render: function() {
     
     var routeprefix = "#/profile/"+(this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username+"/" : "")
@@ -91,7 +75,9 @@ module.exports = Post = React.createClass({
             <Button href={routeprefix+"mentions"} bsStyle={subroute.indexOf("mentions")>-1 ? "primary" : "default"}><Glyphicon glyph="comment"/></Button>
           </ButtonGroup>
         </ListGroupItem>
-        {this.props.children}
+          {this.props.children && React.cloneElement(this.props.children, {
+            activeAccount:this.state.activeAccount
+          })}
       </ListGroup>
     );
   }

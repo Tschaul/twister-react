@@ -57,24 +57,6 @@ App = React.createClass({displayName: "App",
     SafeStateChangeMixin,
     EventListenerMixin('newaccountbyuser')],
   
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
-  getHandlerKey: function () {
-    var childDepth = 1; // assuming App is top-level route
-    var router = this.context.router
-    //console.log(router.getCurrentParams())
-    if ( router.getCurrentRoutes()[childDepth] ) {
-      var key = router.getCurrentRoutes()[childDepth].name;
-      if (key=="home" || key=="profile-active" || key=="accountProfileMore") {key=key+"/"+this.state.activeAccount;}
-      var id = JSON.stringify(router.getCurrentParams());
-      if (id) { key += id; }
-      //console.log(key);
-      return key;
-    } else {return "none"}
-  },
-  
   getInitialState: function () {
     
     var state={};
@@ -170,7 +152,7 @@ App = React.createClass({displayName: "App",
   
   render: function() {
     
-    var firstroute = this.context.router.getCurrentRoutes()[1].name;
+    //var firstroute = this.context.router.getCurrentRoutes()[1].name;
     
     //console.log(firstroute);
     
@@ -196,13 +178,14 @@ App = React.createClass({displayName: "App",
             key: this.state.accounts[i].name, 
             bsStyle: this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default', 
             onClick: this.switchAccount.bind(this,this.state.accounts[i].name), 
-            href: "javascript:void(0);"
+            href: "javascript:void(0);", 
+            eventKey: i
           }, this.state.accounts[i].name)
         );
       }  
       var accountSelector = (
 
-        React.createElement(DropdownButton, {title: this.state.activeAccount}, 
+        React.createElement(DropdownButton, {title: this.state.activeAccount, id: 'dropdown-accounts'}, 
           userbuttons
         )
 
@@ -217,17 +200,17 @@ App = React.createClass({displayName: "App",
             React.createElement(ButtonGroup, {justified: true}, 
               React.createElement(Button, {
                 href: "#", 
-                bsStyle: firstroute=="home" ? 'primary' : 'default', 
+                //bsStyle={firstroute=="home" ? 'primary' : 'default'}
                 disabled: guestMode
               }, React.createElement(Glyphicon, {glyph: "home"})), 
               React.createElement(Button, {
                 href: "#/profile", 
-                bsStyle: firstroute=="profile-active" ? 'primary' : 'default', 
+                //bsStyle={firstroute=="profile-active" ? 'primary' : 'default'}
                 disabled: guestMode
               }, React.createElement(Glyphicon, {glyph: "user"})), 
               React.createElement(Button, {href: "#/directmessages", disabled: true}, React.createElement(Glyphicon, {glyph: "transfer"})), 
               accountSelector, 
-              React.createElement(DropdownButton, {title: React.createElement(Glyphicon, {glyph: "menu-hamburger"})}, 
+              React.createElement(DropdownButton, {title: React.createElement(Glyphicon, {glyph: "menu-hamburger"}), id: 'dropdown-other'}, 
                 React.createElement(MenuItem, {
                   onClick: this.clearCache
                 }, "Clear Cache"), 
@@ -240,11 +223,10 @@ App = React.createClass({displayName: "App",
               )
             ), 
             React.createElement("br", null), 
-            React.createElement(RouteHandler, {
-              accounts: this.state.accounts, 
-              activeAccount: this.state.activeAccount, 
-              key: this.getHandlerKey()}
-            )
+            this.props.children && React.cloneElement(this.props.children, {
+              accounts:this.state.accounts,
+              activeAccount:this.state.activeAccount
+            })
           )
         )
       )
@@ -259,24 +241,24 @@ initializeApp = function () {
     ReactDOM.render((
       React.createElement(Router, {history: hashHistory}, 
         React.createElement(Route, {component: App, path: "/"}, 
-          React.createElement(IndexRoute, {name: "home", component: Home}), 
-          React.createElement(Route, {name: "profile-active", path: "/profile", component: Profile}, 
-            React.createElement(IndexRoute, {name: "profile-active-timeline-default", component: Timeline}), 
-            React.createElement(Route, {name: "profile-active-timeline", path: "timeline", component: Timeline}), 
-            React.createElement(Route, {name: "profile-active-followings", path: "followings", component: Followings}), 
-            React.createElement(Route, {name: "profile-active-mentions", path: "mentions", component: Mentions})
+          React.createElement(IndexRoute, {component: Home}), 
+          React.createElement(Route, {path: "/profile", component: Profile}, 
+            React.createElement(IndexRoute, {component: Timeline}), 
+            React.createElement(Route, {path: "timeline", component: Timeline}), 
+            React.createElement(Route, {path: "followings", component: Followings}), 
+            React.createElement(Route, {path: "mentions", component: Mentions})
           ), 
-          React.createElement(Route, {name: "profile", path: "/profile/:username", component: Profile}, 
-            React.createElement(IndexRoute, {name: "profile-timeline-default", component: Timeline}), 
-            React.createElement(Route, {name: "profile-timeline", path: "timeline", component: Timeline}), 
-            React.createElement(Route, {name: "profile-followings", path: "followings", component: Followings}), 
-            React.createElement(Route, {name: "profile-mentions", path: "mentions", component: Mentions})
+          React.createElement(Route, {path: "/profile/:username", component: Profile}, 
+            React.createElement(IndexRoute, {component: Timeline}), 
+            React.createElement(Route, {path: "timeline", component: Timeline}), 
+            React.createElement(Route, {path: "followings", component: Followings}), 
+            React.createElement(Route, {path: "mentions", component: Mentions})
           ), 
-          React.createElement(Route, {name: "conversation", path: "/conversation/:username/:postid", component: Conversation}), 
-          React.createElement(Route, {name: "hashtag", path: "/hashtag/:hashtag", component: Hashtag}), 
-          React.createElement(Route, {name: "settings", path: "/settings", component: Settings}), 
-          React.createElement(Route, {name: "accounts", path: "/accounts", component: Accounts}), 
-          React.createElement(Route, {name: "featured", path: "/featured", component: Featured})
+          React.createElement(Route, {path: "/conversation/:username/:postid", component: Conversation}), 
+          React.createElement(Route, {path: "/hashtag/:hashtag", component: Hashtag}), 
+          React.createElement(Route, {path: "/settings", component: Settings}), 
+          React.createElement(Route, {path: "/accounts", component: Accounts}), 
+          React.createElement(Route, {path: "/featured", component: Featured})
         )
       )
     ), document.getElementById('content'));
@@ -1047,7 +1029,7 @@ module.exports = Post = React.createClass({displayName: "Post",
     if (post.isReply()) {
       var conversationLink = (
         React.createElement(OverlayTrigger, {placement: "left", overlay: 
-          React.createElement(Tooltip, null, "View Conversation")
+          React.createElement(Tooltip, {id: "view-conversation"}, "View Conversation")
         }, 
       React.createElement("small", null, React.createElement("a", {href: "#/conversation/"+post.getUsername()+"/"+post.getId(), className: "link-button-gray"}, React.createElement(Glyphicon, {glyph: "comment"})))
     )
@@ -1059,7 +1041,7 @@ module.exports = Post = React.createClass({displayName: "Post",
                                           
     if (!post.isRetwist()) {
       var replyLink = React.createElement(OverlayTrigger, {placement: "left", overlay: 
-          React.createElement(Tooltip, null, "Reply")
+          React.createElement(Tooltip, {id: "reply"}, "Reply")
         }, 
           React.createElement("small", null, 
             React.createElement(ReplyModalButton, {replyUsername: post.getUsername(), replyPostId: post.getId(), activeAccount: this.props.activeAccount, originalMsg: post.getContent(), replyUserFullname: this.state.fullname})
@@ -1071,7 +1053,7 @@ module.exports = Post = React.createClass({displayName: "Post",
                                            
     
     var retwistLink = React.createElement(OverlayTrigger, {placement: "left", overlay: 
-        React.createElement(Tooltip, null, "Retwist")
+        React.createElement(Tooltip, {id: "retwist"}, "Retwist")
       }, 
         React.createElement("small", null, 
           React.createElement(RetwistModalButton, {retwistUsername: post.getUsername(), retwistPostId: post.getId(), activeAccount: this.props.activeAccount, originalMsg: post.getContent(), retwistUserFullname: this.state.fullname})
@@ -1391,7 +1373,7 @@ module.exports = Postboard = React.createClass({displayName: "Postboard",
       React.createElement(ListGroup, {fill: true}, 
         this.props.header, 
         spinner, 
-        React.createElement(ReactCSSTransitionGroup, {transitionName: "item"}, 
+        React.createElement(ReactCSSTransitionGroup, {transitionName: "item", transitionEnterTimeout: 500, transitionLeaveTimeout: 300}, 
           posts
         )
       )
@@ -1438,7 +1420,7 @@ module.exports = ProfileBoard = React.createClass({displayName: "ProfileBoard",
       React.createElement(ListGroup, {fill: true}, 
         this.props.header, 
         spinner, 
-        React.createElement(ReactCSSTransitionGroup, {transitionName: "item"}, 
+        React.createElement(ReactCSSTransitionGroup, {transitionName: "item", transitionEnterTimeout: 500, transitionLeaveTimeout: 300}, 
           profiles
         )
       )
@@ -1907,9 +1889,6 @@ module.exports = Home = React.createClass({displayName: "Home",
     EventListenerMixin('scrolledtobottom'),
     EventListenerMixin('newpostbyuser')
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
       data: [], 
@@ -2174,9 +2153,6 @@ module.exports = Accounts = React.createClass({displayName: "Accounts",
     SafeStateChangeMixin,
     AppSettingsMixin
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   render: function() {
     
     var thisComponent = this;
@@ -2190,8 +2166,8 @@ module.exports = Accounts = React.createClass({displayName: "Accounts",
             this.props.accounts.map(function(acc,index) {
               //console.log(acc,index)
               return (
-                React.createElement("div", null, 
-                  React.createElement(MiniProfile, {username: acc.name, key: "miniprofile:"+acc.name, pollIntervalProfile: thisComponent.props.pollIntervalProfile}), 
+                React.createElement("div", {key: "miniprofile:"+acc.name}, 
+                  React.createElement(MiniProfile, {username: acc.name, pollIntervalProfile: thisComponent.props.pollIntervalProfile}), 
                   React.createElement("p", null, acc.status)
                 )
               );
@@ -3050,22 +3026,6 @@ module.exports = Post = React.createClass({displayName: "Post",
     SafeStateChangeMixin,
     ProfileMixin
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-  getHandlerKey: function () {
-    var childDepth = 2; // assuming App is top-level route
-    var router = this.context.router;
-    //console.log(router.getCurrentParams())
-    if ( router.getCurrentRoutes()[childDepth] ) {
-      var key = router.getCurrentRoutes()[childDepth].name;
-      if (key.indexOf("active")>-1) {key+="/"+this.props.activeAccount;}
-      var id = JSON.stringify(router.getCurrentParams());
-      if (id) { key += id; }
-      //console.log(key);
-      return key;
-    } else {return "none"}
-  },
   render: function() {
     
     var routeprefix = "#/profile/"+(this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username+"/" : "")
@@ -3112,10 +3072,9 @@ module.exports = Post = React.createClass({displayName: "Post",
             React.createElement(Button, {href: routeprefix+"mentions", bsStyle: subroute.indexOf("mentions")>-1 ? "primary" : "default"}, React.createElement(Glyphicon, {glyph: "comment"}))
           )
         ), 
-        React.createElement(RouteHandler, {
-          activeAccount: this.props.activeAccount, 
-          key: this.getHandlerKey()}
-        )
+          this.props.children && React.cloneElement(this.props.children, {
+            activeAccount:this.state.activeAccount
+          })
       )
     );
   }
