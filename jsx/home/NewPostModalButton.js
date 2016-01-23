@@ -1,6 +1,5 @@
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -14,7 +13,6 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var TwistComposer = require("../common/TwistComposer.js");
 
 module.exports = NewPostModalButton = React.createClass({
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false
@@ -52,9 +50,19 @@ module.exports = NewPostModalButton = React.createClass({
   },
   render: function() {
     return (
+      <div>
         <Button onClick={this.handleToggle} className="link-button-gray pull-right fullytight_all" bsStyle="link">
           <Glyphicon glyph='pencil' />
         </Button>
+        <Modal show={this.state.isModalOpen} bsStyle='primary' title={<Glyphicon glyph='pencil'/>} onRequestHide={this.handleToggle}>
+          <div className='modal-body'>
+            <form onSubmit={this.handleNewPost}>
+              <Input type='textarea' label='Write Something' placeholder='textarea'/>
+              <Input type='submit' value='Submit Post' data-dismiss="modal" />
+            </form>
+          </div>
+        </Modal>
+      </div>
     );
   }, 
   renderOverlay: function() {
@@ -62,19 +70,7 @@ module.exports = NewPostModalButton = React.createClass({
     if (!this.state.isModalOpen) {
       return <span/>;
     }
-    /*
-    */
     
-    return (
-      <Modal bsStyle='primary' title={<Glyphicon glyph='pencil'/>} onRequestHide={this.handleToggle}>
-        <div className='modal-body'>
-          <form onSubmit={this.handleNewPost}>
-            <Input type='textarea' label='Write Something' placeholder='textarea'/>
-            <Input type='submit' value='Submit Post' data-dismiss="modal" />
-          </form>
-        </div>
-      </Modal>
-    );
   
   }
 });
