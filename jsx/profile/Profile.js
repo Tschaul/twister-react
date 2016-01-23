@@ -91,10 +91,7 @@ module.exports = Post = React.createClass({
             <Button href={routeprefix+"mentions"} bsStyle={subroute.indexOf("mentions")>-1 ? "primary" : "default"}><Glyphicon glyph="comment"/></Button>
           </ButtonGroup>
         </ListGroupItem>
-        <RouteHandler 
-          activeAccount={this.props.activeAccount} 
-          key={this.getHandlerKey()}
-        />
+        {this.props.children}
       </ListGroup>
     );
   }

@@ -239,11 +239,7 @@ App = React.createClass({
               </DropdownButton>
             </ButtonGroup>
             <br/>
-            <RouteHandler 
-              accounts={this.state.accounts}
-              activeAccount={this.state.activeAccount} 
-              key={this.getHandlerKey()}
-            />
+            {this.props.children}
           </Col>
         </Row>
       </Grid>
@@ -258,24 +254,24 @@ initializeApp = function () {
     ReactDOM.render((
       <Router history={hashHistory}>
         <Route component={App} path="/">
-          <IndexRoute name="home" component={Home} />
-          <Route name="profile-active" path="/profile" component={Profile}>
-            <IndexRoute name="profile-active-timeline-default" component={Timeline} />
-            <Route name="profile-active-timeline" path="timeline" component={Timeline} />
-            <Route name="profile-active-followings" path="followings" component={Followings} />
-            <Route name="profile-active-mentions" path="mentions" component={Mentions} />
+          <IndexRoute component={Home} />
+          <Route path="/profile" component={Profile}>
+            <IndexRoute component={Timeline} />
+            <Route path="timeline" component={Timeline} />
+            <Route path="followings" component={Followings} />
+            <Route path="mentions" component={Mentions} />
           </Route>
-          <Route name="profile" path="/profile/:username" component={Profile}>
-            <IndexRoute name="profile-timeline-default" component={Timeline} />
-            <Route name="profile-timeline" path="timeline" component={Timeline} />
-            <Route name="profile-followings" path="followings" component={Followings} />
-            <Route name="profile-mentions" path="mentions" component={Mentions} />
+          <Route path="/profile/:username" component={Profile}>
+            <IndexRoute component={Timeline} />
+            <Route path="timeline" component={Timeline} />
+            <Route path="followings" component={Followings} />
+            <Route path="mentions" component={Mentions} />
           </Route>
-          <Route name="conversation" path="/conversation/:username/:postid" component={Conversation}/>
-          <Route name="hashtag" path="/hashtag/:hashtag" component={Hashtag}/>
-          <Route name="settings" path="/settings" component={Settings}/>
-          <Route name="accounts" path="/accounts" component={Accounts}/>
-          <Route name="featured" path="/featured" component={Featured}/>
+          <Route path="/conversation/:username/:postid" component={Conversation}/>
+          <Route path="/hashtag/:hashtag" component={Hashtag}/>
+          <Route path="/settings" component={Settings}/>
+          <Route path="/accounts" component={Accounts}/>
+          <Route path="/featured" component={Featured}/>
         </Route>
       </Router>
     ), document.getElementById('content'));
