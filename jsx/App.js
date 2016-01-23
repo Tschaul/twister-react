@@ -39,6 +39,7 @@ var Conversation = require('./other/Conversation.js');
 var Hashtag = require('./other/Hashtag.js');
 var Settings = require('./other/Settings.js');
 var Accounts = require('./other/Accounts.js');
+var Featured = require('./other/Featured.js');
 var AppSettingsMixin = require('./common/AppSettingsMixin.js');
 
 App = React.createClass({
@@ -226,6 +227,7 @@ App = React.createClass({
                 <MenuItem href="#/search" >Search</MenuItem>
                 <MenuItem href="#/settings" >Settings</MenuItem>
                 <MenuItem href="#/accounts" >Accounts</MenuItem>
+                <MenuItem href="#/featured" >Featured</MenuItem>
                 <MenuItem href="#/howtofollow" >How to Follow</MenuItem>
                 <MenuItem href="#/trendinghashtags" >Trending Hashtags</MenuItem>
               </DropdownButton>
@@ -262,6 +264,7 @@ var routes = (
     <Route name="hashtag" path="/hashtag/:hashtag" handler={Hashtag}/>
     <Route name="settings" path="/settings" handler={Settings}/>
     <Route name="accounts" path="/accounts" handler={Accounts}/>
+    <Route name="featured" path="/featured" handler={Featured}/>
     <DefaultRoute name="home" handler={Home} />
   </Route>
 );

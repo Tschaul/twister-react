@@ -11,6 +11,7 @@ var React = require('react');
 
 var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
+var TwistComposer = require("../common/TwistComposer.js");
 
 module.exports = NewPostModalButton = React.createClass({
   mixins: [OverlayMixin],
@@ -61,6 +62,8 @@ module.exports = NewPostModalButton = React.createClass({
     if (!this.state.isModalOpen) {
       return <span/>;
     }
+    /*
+    */
     
     return (
       <Modal bsStyle='primary' title={<Glyphicon glyph='pencil'/>} onRequestHide={this.handleToggle}>
