@@ -25,8 +25,14 @@ var ReactBootstrap = require('react-bootstrap')
   , Row = ReactBootstrap.Row
 
 var React = require('react');
-var Router = require('react-router');
-var Route = Router.Route; var DefaultRoute = Router.DefaultRoute; var RouteHandler = Router.RouteHandler; var Link = Router.Link;
+var ReactDOM = require('react-dom');
+var ReactRouter = require('react-router');
+var Router = ReactRouter.Router;
+var Route = ReactRouter.Route; 
+var IndexRoute = ReactRouter.IndexRoute; 
+var RouteHandler = ReactRouter.RouteHandler; 
+var Link = ReactRouter.Link;
+var hashHistory = ReactRouter.hashHistory;
 
 var Home = require("./home/Home.js");
 var Profile = require("./profile/Profile.js");
@@ -246,35 +252,34 @@ App = React.createClass({
 });
 
 
-var routes = (
-  <Route handler={App} path="/">
-    <Route name="profile-active" path="/profile" handler={Profile}>
-      <Route name="profile-active-timeline" path="timeline" handler={Timeline} />
-      <Route name="profile-active-followings" path="followings" handler={Followings} />
-      <Route name="profile-active-mentions" path="mentions" handler={Mentions} />
-      <DefaultRoute name="profile-active-timeline-default" handler={Timeline} />
-    </Route>
-    <Route name="profile" path="/profile/:username" handler={Profile}>
-      <Route name="profile-timeline" path="timeline" handler={Timeline} />
-      <Route name="profile-followings" path="followings" handler={Followings} />
-      <Route name="profile-mentions" path="mentions" handler={Mentions} />
-      <DefaultRoute name="profile-timeline-default" handler={Timeline} />
-    </Route>
-    <Route name="conversation" path="/conversation/:username/:postid" handler={Conversation}/>
-    <Route name="hashtag" path="/hashtag/:hashtag" handler={Hashtag}/>
-    <Route name="settings" path="/settings" handler={Settings}/>
-    <Route name="accounts" path="/accounts" handler={Accounts}/>
-    <Route name="featured" path="/featured" handler={Featured}/>
-    <DefaultRoute name="home" handler={Home} />
-  </Route>
-);
-
-
 initializeApp = function () {
     
-  Router.run(routes, function (Handler) {
-    React.render(<Handler/>, document.getElementById('content'));
-  });
+  //Router.run(routes, function (Handler) {
+    ReactDOM.render((
+      <Router history={hashHistory}>
+        <Route component={App} path="/">
+          <IndexRoute name="home" component={Home} />
+          <Route name="profile-active" path="/profile" component={Profile}>
+            <IndexRoute name="profile-active-timeline-default" component={Timeline} />
+            <Route name="profile-active-timeline" path="timeline" component={Timeline} />
+            <Route name="profile-active-followings" path="followings" component={Followings} />
+            <Route name="profile-active-mentions" path="mentions" component={Mentions} />
+          </Route>
+          <Route name="profile" path="/profile/:username" component={Profile}>
+            <IndexRoute name="profile-timeline-default" component={Timeline} />
+            <Route name="profile-timeline" path="timeline" component={Timeline} />
+            <Route name="profile-followings" path="followings" component={Followings} />
+            <Route name="profile-mentions" path="mentions" component={Mentions} />
+          </Route>
+          <Route name="conversation" path="/conversation/:username/:postid" component={Conversation}/>
+          <Route name="hashtag" path="/hashtag/:hashtag" component={Hashtag}/>
+          <Route name="settings" path="/settings" component={Settings}/>
+          <Route name="accounts" path="/accounts" component={Accounts}/>
+          <Route name="featured" path="/featured" component={Featured}/>
+        </Route>
+      </Router>
+    ), document.getElementById('content'));
+  //});
    
 }
 

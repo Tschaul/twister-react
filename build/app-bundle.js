@@ -26,8 +26,14 @@ var ReactBootstrap = require('react-bootstrap')
   , Row = ReactBootstrap.Row
 
 var React = require('react');
-var Router = require('react-router');
-var Route = Router.Route; var DefaultRoute = Router.DefaultRoute; var RouteHandler = Router.RouteHandler; var Link = Router.Link;
+var ReactDOM = require('react-dom');
+var ReactRouter = require('react-router');
+var Router = ReactRouter.Router;
+var Route = ReactRouter.Route; 
+var IndexRoute = ReactRouter.IndexRoute; 
+var RouteHandler = ReactRouter.RouteHandler; 
+var Link = ReactRouter.Link;
+var hashHistory = ReactRouter.hashHistory;
 
 var Home = require("./home/Home.js");
 var Profile = require("./profile/Profile.js");
@@ -247,35 +253,34 @@ App = React.createClass({displayName: "App",
 });
 
 
-var routes = (
-  React.createElement(Route, {handler: App, path: "/"}, 
-    React.createElement(Route, {name: "profile-active", path: "/profile", handler: Profile}, 
-      React.createElement(Route, {name: "profile-active-timeline", path: "timeline", handler: Timeline}), 
-      React.createElement(Route, {name: "profile-active-followings", path: "followings", handler: Followings}), 
-      React.createElement(Route, {name: "profile-active-mentions", path: "mentions", handler: Mentions}), 
-      React.createElement(DefaultRoute, {name: "profile-active-timeline-default", handler: Timeline})
-    ), 
-    React.createElement(Route, {name: "profile", path: "/profile/:username", handler: Profile}, 
-      React.createElement(Route, {name: "profile-timeline", path: "timeline", handler: Timeline}), 
-      React.createElement(Route, {name: "profile-followings", path: "followings", handler: Followings}), 
-      React.createElement(Route, {name: "profile-mentions", path: "mentions", handler: Mentions}), 
-      React.createElement(DefaultRoute, {name: "profile-timeline-default", handler: Timeline})
-    ), 
-    React.createElement(Route, {name: "conversation", path: "/conversation/:username/:postid", handler: Conversation}), 
-    React.createElement(Route, {name: "hashtag", path: "/hashtag/:hashtag", handler: Hashtag}), 
-    React.createElement(Route, {name: "settings", path: "/settings", handler: Settings}), 
-    React.createElement(Route, {name: "accounts", path: "/accounts", handler: Accounts}), 
-    React.createElement(Route, {name: "featured", path: "/featured", handler: Featured}), 
-    React.createElement(DefaultRoute, {name: "home", handler: Home})
-  )
-);
-
-
 initializeApp = function () {
     
-  Router.run(routes, function (Handler) {
-    React.render(React.createElement(Handler, null), document.getElementById('content'));
-  });
+  //Router.run(routes, function (Handler) {
+    ReactDOM.render((
+      React.createElement(Router, {history: hashHistory}, 
+        React.createElement(Route, {component: App, path: "/"}, 
+          React.createElement(IndexRoute, {name: "home", component: Home}), 
+          React.createElement(Route, {name: "profile-active", path: "/profile", component: Profile}, 
+            React.createElement(IndexRoute, {name: "profile-active-timeline-default", component: Timeline}), 
+            React.createElement(Route, {name: "profile-active-timeline", path: "timeline", component: Timeline}), 
+            React.createElement(Route, {name: "profile-active-followings", path: "followings", component: Followings}), 
+            React.createElement(Route, {name: "profile-active-mentions", path: "mentions", component: Mentions})
+          ), 
+          React.createElement(Route, {name: "profile", path: "/profile/:username", component: Profile}, 
+            React.createElement(IndexRoute, {name: "profile-timeline-default", component: Timeline}), 
+            React.createElement(Route, {name: "profile-timeline", path: "timeline", component: Timeline}), 
+            React.createElement(Route, {name: "profile-followings", path: "followings", component: Followings}), 
+            React.createElement(Route, {name: "profile-mentions", path: "mentions", component: Mentions})
+          ), 
+          React.createElement(Route, {name: "conversation", path: "/conversation/:username/:postid", component: Conversation}), 
+          React.createElement(Route, {name: "hashtag", path: "/hashtag/:hashtag", component: Hashtag}), 
+          React.createElement(Route, {name: "settings", path: "/settings", component: Settings}), 
+          React.createElement(Route, {name: "accounts", path: "/accounts", component: Accounts}), 
+          React.createElement(Route, {name: "featured", path: "/featured", component: Featured})
+        )
+      )
+    ), document.getElementById('content'));
+  //});
    
 }
 
@@ -373,7 +378,7 @@ setInterval(function(){
   
 },1000);
 
-},{"./common/AppSettingsMixin.js":2,"./common/SafeStateChangeMixin.js":14,"./common/SetIntervalMixin.js":15,"./home/Home.js":18,"./other/Accounts.js":20,"./other/Conversation.js":21,"./other/Featured.js":22,"./other/Hashtag.js":23,"./other/Settings.js":25,"./profile/Followings.js":28,"./profile/Mentions.js":29,"./profile/Profile.js":30,"./profile/Timeline.js":31,"react":499,"react-bootstrap":107,"react-router":307}],2:[function(require,module,exports){
+},{"./common/AppSettingsMixin.js":2,"./common/SafeStateChangeMixin.js":14,"./common/SetIntervalMixin.js":15,"./home/Home.js":18,"./other/Accounts.js":20,"./other/Conversation.js":21,"./other/Featured.js":22,"./other/Hashtag.js":23,"./other/Settings.js":25,"./profile/Followings.js":28,"./profile/Mentions.js":29,"./profile/Profile.js":30,"./profile/Timeline.js":31,"react":499,"react-bootstrap":107,"react-dom":279,"react-router":307}],2:[function(require,module,exports){
 module.exports = AppSettingsMixin = {
   getInitialState: function() {
     
