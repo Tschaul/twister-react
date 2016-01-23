@@ -31,9 +31,9 @@ module.exports = Post = React.createClass({
   ],
   render: function() {
     
-    var routeprefix = "#/profile/"+(this.context.router.getCurrentParams().username ? this.context.router.getCurrentParams().username+"/" : "")
+    var routeprefix = "#/profile/"+(this.props.params.username ? this.props.params.username+"/" : "")
     
-    var subroute = this.context.router.getCurrentRoutes()[2].name
+    //var subroute = this.context.router.getCurrentRoutes()[2].name
     
     //console.log(this.context.router.getCurrentRoutes());
         
@@ -70,9 +70,9 @@ module.exports = Post = React.createClass({
         </ListGroupItem>
         <ListGroupItem className="fullytight_all">
           <ButtonGroup justified>
-            <Button href={routeprefix+"timeline"} bsStyle={subroute.indexOf("timeline")>-1 ? "primary" : "default"}><Glyphicon glyph="list"/></Button>
-            <Button href={routeprefix+"followings"} bsStyle={subroute.indexOf("followings")>-1 ? "primary" : "default"}><Glyphicon glyph="eye-open"/></Button>
-            <Button href={routeprefix+"mentions"} bsStyle={subroute.indexOf("mentions")>-1 ? "primary" : "default"}><Glyphicon glyph="comment"/></Button>
+            <Button href={routeprefix+"timeline"} ><Glyphicon glyph="list"/></Button>
+            <Button href={routeprefix+"followings"} ><Glyphicon glyph="eye-open"/></Button>
+            <Button href={routeprefix+"mentions"} ><Glyphicon glyph="comment"/></Button>
           </ButtonGroup>
         </ListGroupItem>
           {this.props.children && React.cloneElement(this.props.children, {
