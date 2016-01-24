@@ -600,7 +600,7 @@ module.exports = Post = React.createClass({displayName: "Post",
       fullname: "",
       timeAgo: "",
       retwistingUsername: this.props.post.username,
-      retwistingUserFullname: "",
+      retwistingUserFullname: this.props.post.username,
       retwistingUserAvatar: "img/genericPerson.png",
     };
   },
@@ -869,7 +869,7 @@ module.exports = PostComposer = React.createClass({displayName: "PostComposer",
           tagName: "div", 
           html: this.state.html, 
           placeholder: this.state.placeholder, 
-          placeholderText: "Compose Your Twist", 
+          placeholderText: "write", 
           onKeyPress: this.onKeyPress, 
           preventStyling: true, 
           noLinebreaks: true, 
@@ -890,12 +890,12 @@ module.exports = PostComposer = React.createClass({displayName: "PostComposer",
               "Twist"
             )
           )
-        ), 
-        React.createElement("div", null, 
-          "Show autocomplete? ", this.state.queryMention ? 'Yes ' + this.state.queryMention : 'No'
         )
       )
     );
+        /*<div>
+          Show autocomplete? {this.state.queryMention ? 'Yes ' + this.state.queryMention : 'No'}
+        </div>*/
   },
 
   handleSubmit: function(){
@@ -925,7 +925,7 @@ module.exports = PostComposer = React.createClass({displayName: "PostComposer",
 
       var parsedContent = PostContentHelper.parseContent(copy);
       
-      console.log(copy,parsedContent);
+      //console.log(copy,parsedContent);
       
       var output = "";
       
@@ -1397,7 +1397,6 @@ module.exports = ProfileMixin = {
 },{"../common/AppSettingsMixin.js":2,"../common/EventListenerMixin.js":3}],13:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -1411,7 +1410,6 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var PostContent = require("../common/PostContent.js");
 
 module.exports = ReplyModalButton = React.createClass({displayName: "ReplyModalButton",
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false
@@ -1422,10 +1420,7 @@ module.exports = ReplyModalButton = React.createClass({displayName: "ReplyModalB
       isModalOpen: !this.state.isModalOpen
     });
   },
-  handleReply: function (e) {
-    e.preventDefault();
-    //console.log(e)
-    var msg = JSON.parse(JSON.stringify(e.target[0].value));
+  handleReply: function (msg) {
     if (!msg) {
       console.log("empty post was passed as new post")
       return;
@@ -1442,10 +1437,7 @@ module.exports = ReplyModalButton = React.createClass({displayName: "ReplyModalB
         window.dispatchEvent(event);
     
     });
-    
-    e.target[0].value = "";
-    
-    
+        
     this.handleToggle();
     
     //React.findDOMNode(this.refs.msg).value = '';
@@ -1453,36 +1445,25 @@ module.exports = ReplyModalButton = React.createClass({displayName: "ReplyModalB
   },
   render: function() {
     return (
-        React.createElement("a", {onClick: this.handleToggle, className: "link-button-gray"}, React.createElement(Glyphicon, {glyph: "arrow-left"}))
-    );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return React.createElement("span", null);
-    }
-    
-    return (
-      React.createElement(Modal, {bsStyle: "primary", title: 
+        React.createElement("a", {onClick: this.handleToggle, className: "link-button-gray"}, 
           React.createElement(Glyphicon, {glyph: "arrow-left"}), 
-        onRequestHide: this.handleToggle}, 
-        React.createElement("div", {className: "modal-body"}, 
-          React.createElement("form", {onSubmit: this.handleReply}, 
-              React.createElement("strong", null, this.props.replyUserFullname), " ", 
+          React.createElement(Modal, {bsStyle: "primary", show: this.state.isModalOpen, onHide: this.handleToggle}, 
+            React.createElement(Modal.Header, null, 
+              React.createElement(Glyphicon, {glyph: "arrow-left"})
+            ), 
+            React.createElement(Modal.Body, null, 
+              React.createElement("strong", null, this.props.replyUserFullname), 
               React.createElement(PostContent, {content: this.props.originalMsg}), 
-            React.createElement(Input, {type: "textarea", label: "", placeholder: "textarea"}), 
-            React.createElement(Input, {type: "submit", value: "Reply", "data-dismiss": "modal"})
+              React.createElement(PostComposer, {onSubmit: this.handleReply})
+            )
           )
         )
-      )
     );
-  
   }
 });
 },{"../common/PostContent.js":8,"../common/SafeStateChangeMixin.js":15,"../common/SetIntervalMixin.js":16,"react":500,"react-bootstrap":107}],14:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -1496,7 +1477,6 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var PostContent = require("../common/PostContent.js");
 
 module.exports = RetwistModalButton = React.createClass({displayName: "RetwistModalButton",
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false
@@ -1529,29 +1509,22 @@ module.exports = RetwistModalButton = React.createClass({displayName: "RetwistMo
   },
   render: function() {
     return (
-        React.createElement("a", {onClick: this.handleToggle, className: "link-button-gray"}, React.createElement(Glyphicon, {glyph: "retweet"}))
-    );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return React.createElement("span", null);
-    }
-    
-    return (
-      React.createElement(Modal, {bsStyle: "primary", title: 
+        React.createElement("a", {onClick: this.handleToggle, className: "link-button-gray"}, 
           React.createElement(Glyphicon, {glyph: "retweet"}), 
-        onRequestHide: this.handleToggle}, 
-        React.createElement("div", {className: "modal-body"}, 
-          React.createElement("form", {onSubmit: this.handleRetwist}, 
-              React.createElement("strong", null, this.props.retwistUserFullname), " ", 
-              React.createElement(PostContent, {content: this.props.originalMsg}), 
-            React.createElement(Input, {type: "submit", value: "Retwist", "data-dismiss": "modal"})
+          React.createElement(Modal, {show: this.state.isModalOpen, bsStyle: "primary", onHide: this.handleToggle}, 
+            React.createElement(Modal.Header, null, 
+              React.createElement(Glyphicon, {glyph: "retweet"})
+            ), 
+            React.createElement(Modal.Body, null, 
+              React.createElement("form", {onSubmit: this.handleRetwist}, 
+                React.createElement("strong", null, this.props.retwistUserFullname, " "), 
+                React.createElement(PostContent, {content: this.props.originalMsg}), 
+                React.createElement(Input, {type: "submit", value: "Retwist", "data-dismiss": "modal"})
+              )
+            )
           )
         )
-      )
     );
-  
   }
 });
 },{"../common/PostContent.js":8,"../common/SafeStateChangeMixin.js":15,"../common/SetIntervalMixin.js":16,"react":500,"react-bootstrap":107}],15:[function(require,module,exports){
@@ -1871,6 +1844,7 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Modal = ReactBootstrap.Modal
   , Input = ReactBootstrap.Input
+  , ListGroupItem = ReactBootstrap.ListGroupItem
 
 var React = require('react');
 
@@ -1915,8 +1889,11 @@ module.exports = NewPostModalButton = React.createClass({displayName: "NewPostMo
     return (
         React.createElement(Button, {onClick: this.handleToggle, className: "link-button-gray pull-right fullytight_all", bsStyle: "link"}, 
           React.createElement(Glyphicon, {glyph: "pencil"}), 
-          React.createElement(Modal, {title: React.createElement(Glyphicon, {glyph: "pencil"}), show: this.state.isModalOpen, bsStyle: "primary", onHide: this.handleToggle}, 
-            React.createElement("div", {className: "modal-body"}, 
+          React.createElement(Modal, {show: this.state.isModalOpen, bsStyle: "primary", onHide: this.handleToggle}, 
+            React.createElement(Modal.Header, null, 
+              React.createElement(Glyphicon, {glyph: "pencil"})
+            ), 
+            React.createElement(Modal.Body, null, 
               React.createElement(PostComposer, {onSubmit: this.handleNewPost})
             )
           )
@@ -2215,7 +2192,6 @@ module.exports = Hashtag = React.createClass({displayName: "Hashtag",
 },{"../common/AppSettingsMixin.js":2,"../common/EventListenerMixin.js":3,"../common/Postboard.js":10,"../common/SafeStateChangeMixin.js":15,"../common/SetIntervalMixin.js":16,"../common/StreamMixin.js":17,"react":500,"react-bootstrap":107}],24:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -2228,7 +2204,6 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 
 module.exports = ImportAccountModalButton = React.createClass({displayName: "ImportAccountModalButton",
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false,
@@ -2270,39 +2245,33 @@ module.exports = ImportAccountModalButton = React.createClass({displayName: "Imp
   },
   render: function() {
     
-        
     return (
-        React.createElement(Button, {onClick: this.handleToggle}, "Import Account")
-    );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return React.createElement("span", null);
-    }
-    
-    return (
-      React.createElement(Modal, {bsStyle: "primary", title: React.createElement(Glyphicon, {glyph: "pencil"}), onRequestHide: this.handleToggle}, 
-        React.createElement("div", {className: "modal-body"}, 
-          React.createElement("form", {onSubmit: this.handleImportAccount}, 
-            React.createElement(Input, {
-              type: "text", 
-              label: "Username", 
-              value: this.state.username, 
-              onChange: this.handleUsernameChange}
+        React.createElement(Button, {onClick: this.handleToggle}, 
+          "Import Account", 
+          React.createElement(Modal, {show: this.state.isModalOpen, bsStyle: "primary", onHide: this.handleToggle}, 
+            React.createElement(Modal.Header, null, 
+              React.createElement(Glyphicon, {glyph: "import"})
             ), 
-            React.createElement(Input, {
-              type: "text", 
-              label: "Private Key", 
-              value: this.state.privkey, 
-              onChange: this.handlePrivkeyChange}
-            ), 
-            React.createElement(Input, {type: "submit", value: "Import Account", "data-dismiss": "modal"})
+            React.createElement(Modal.Body, null, 
+              React.createElement("form", {onSubmit: this.handleImportAccount}, 
+                React.createElement(Input, {
+                  type: "text", 
+                  label: "Username", 
+                  value: this.state.username, 
+                  onChange: this.handleUsernameChange}
+                ), 
+                React.createElement(Input, {
+                  type: "text", 
+                  label: "Private Key", 
+                  value: this.state.privkey, 
+                  onChange: this.handlePrivkeyChange}
+                ), 
+                React.createElement(Input, {type: "submit", value: "Import Account", "data-dismiss": "modal"})
+              )
+            )
           )
         )
-      )
     );
-  
   }
 });
 },{"../common/SafeStateChangeMixin.js":15,"../common/SetIntervalMixin.js":16,"react":500,"react-bootstrap":107}],25:[function(require,module,exports){
@@ -2382,7 +2351,6 @@ module.exports = Settings = React.createClass({displayName: "Settings",
 
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -2395,7 +2363,6 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 
 module.exports = EditAvatarModalButton = React.createClass({displayName: "EditAvatarModalButton",
-  mixins: [OverlayMixin,SafeStateChangeMixin],
   getInitialState: function () {
     return {
       isModalOpen: false,
@@ -2494,38 +2461,30 @@ module.exports = EditAvatarModalButton = React.createClass({displayName: "EditAv
     
     return (
         React.createElement(Button, {onClick: this.handleToggle, className: "link-button-gray pull-right fullytight_all", bsStyle: "link"}, 
-          React.createElement(Glyphicon, {glyph: "pencil"})
-        )
-    );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return React.createElement("span", null);
-    }
-    
-    return (
-      React.createElement(Modal, {bsStyle: "primary", title: React.createElement(Glyphicon, {glyph: "pencil"}), onRequestHide: this.handleToggle}, 
-        React.createElement("div", {className: "modal-body"}, 
-          React.createElement("form", {onSubmit: this.handleAvatarEdit}, 
-            React.createElement("img", {src: this.state.avatar}), 
-            React.createElement(Input, {
-              type: "file", 
-              label: "Avatar", 
-              onChange: this.handleAvatarChange}
+          React.createElement(Glyphicon, {glyph: "pencil"}), 
+          React.createElement(Modal, {bsStyle: "primary", show: this.state.isModalOpen, onHide: this.handleToggle}, 
+            React.createElement(Modal.Header, null, 
+              React.createElement(Glyphicon, {glyph: "pencil"})
             ), 
-            React.createElement(Input, {type: "submit", value: "Update Avatar", "data-dismiss": "modal"})
+            React.createElement(Modal.Body, null, 
+              React.createElement("form", {onSubmit: this.handleAvatarEdit}, 
+                React.createElement("img", {src: this.state.avatar}), 
+                React.createElement(Input, {
+                  type: "file", 
+                  label: "Avatar", 
+                  onChange: this.handleAvatarChange}
+                ), 
+                React.createElement(Input, {type: "submit", value: "Update Avatar", "data-dismiss": "modal"})
+              )
+            )
           )
         )
-      )
     );
-  
   }
 });
 },{"../common/SafeStateChangeMixin.js":15,"../common/SetIntervalMixin.js":16,"react":500,"react-bootstrap":107}],27:[function(require,module,exports){
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -2538,7 +2497,6 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 
 module.exports = EditProfileModalButton = React.createClass({displayName: "EditProfileModalButton",
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false,
@@ -2601,50 +2559,43 @@ module.exports = EditProfileModalButton = React.createClass({displayName: "EditP
     
     return (
         React.createElement(Button, {onClick: this.handleToggle, className: "link-button-gray pull-right fullytight_all", bsStyle: "link"}, 
-          React.createElement(Glyphicon, {glyph: "pencil"})
-        )
-    );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return React.createElement("span", null);
-    }
-    
-    return (
-      React.createElement(Modal, {bsStyle: "primary", title: React.createElement(Glyphicon, {glyph: "pencil"}), onRequestHide: this.handleToggle}, 
-        React.createElement("div", {className: "modal-body"}, 
-          React.createElement("form", {onSubmit: this.handleProfileEdit}, 
-            React.createElement(Input, {
-              type: "text", 
-              label: "Fullname", 
-              value: this.state.fullname, 
-              onChange: this.handleFullnameChange}
+          React.createElement(Glyphicon, {glyph: "pencil"}), 
+          React.createElement(Modal, {bsStyle: "primary", show: this.state.isModalOpen, onHide: this.handleToggle}, 
+            React.createElement(Modal.Header, null, 
+              React.createElement(Glyphicon, {glyph: "pencil"})
             ), 
-            React.createElement(Input, {
-              type: "text", 
-              label: "Location", 
-              value: this.state.location, 
-              onChange: this.handleLocationChange}
-            ), 
-            React.createElement(Input, {
-              type: "text", 
-              label: "Bio", 
-              value: this.state.bio, 
-              onChange: this.handleBioChange}
-            ), 
-            React.createElement(Input, {
-              type: "text", 
-              label: "Url", 
-              value: this.state.url, 
-              onChange: this.handleUrlChange}
-            ), 
-            React.createElement(Input, {type: "submit", value: "Update Profile", "data-dismiss": "modal"})
+            React.createElement(Modal.Body, null, 
+              React.createElement("form", {onSubmit: this.handleProfileEdit}, 
+                React.createElement(Input, {
+                  type: "text", 
+                  label: "Fullname", 
+                  value: this.state.fullname, 
+                  onChange: this.handleFullnameChange}
+                ), 
+                React.createElement(Input, {
+                  type: "text", 
+                  label: "Location", 
+                  value: this.state.location, 
+                  onChange: this.handleLocationChange}
+                ), 
+                React.createElement(Input, {
+                  type: "text", 
+                  label: "Bio", 
+                  value: this.state.bio, 
+                  onChange: this.handleBioChange}
+                ), 
+                React.createElement(Input, {
+                  type: "text", 
+                  label: "Url", 
+                  value: this.state.url, 
+                  onChange: this.handleUrlChange}
+                ), 
+                React.createElement(Input, {type: "submit", value: "Update Profile", "data-dismiss": "modal"})
+              )
+            )
           )
         )
-      )
     );
-  
   }
 });
 },{"../common/SafeStateChangeMixin.js":15,"../common/SetIntervalMixin.js":16,"react":500,"react-bootstrap":107}],28:[function(require,module,exports){

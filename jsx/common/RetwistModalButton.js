@@ -1,6 +1,5 @@
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -14,7 +13,6 @@ var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 var PostContent = require("../common/PostContent.js");
 
 module.exports = RetwistModalButton = React.createClass({
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false
@@ -47,28 +45,21 @@ module.exports = RetwistModalButton = React.createClass({
   },
   render: function() {
     return (
-        <a onClick={this.handleToggle} className="link-button-gray"><Glyphicon glyph='retweet' /></a>
+        <a onClick={this.handleToggle} className="link-button-gray">
+          <Glyphicon glyph='retweet' />
+          <Modal show={this.state.isModalOpen} bsStyle='primary' onHide={this.handleToggle}>
+            <Modal.Header>
+              <Glyphicon glyph='retweet'/>
+            </Modal.Header>
+            <Modal.Body>
+              <form onSubmit={this.handleRetwist}>
+                <strong>{this.props.retwistUserFullname} </strong>
+                <PostContent content={this.props.originalMsg}/>
+                <Input type='submit' value='Retwist' data-dismiss="modal" />
+              </form>
+            </Modal.Body>
+          </Modal>
+        </a>
     );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return <span/>;
-    }
-    
-    return (
-      <Modal bsStyle='primary' title={
-          <Glyphicon glyph='retweet'/>
-        } onRequestHide={this.handleToggle}>
-        <div className='modal-body'>
-          <form onSubmit={this.handleRetwist}>
-              <strong>{this.props.retwistUserFullname}</strong>&nbsp;
-              <PostContent content={this.props.originalMsg}/>
-            <Input type='submit' value='Retwist' data-dismiss="modal" />
-          </form>
-        </div>
-      </Modal>
-    );
-  
   }
 });

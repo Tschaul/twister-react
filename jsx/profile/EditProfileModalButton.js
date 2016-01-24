@@ -1,6 +1,5 @@
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -13,7 +12,6 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 
 module.exports = EditProfileModalButton = React.createClass({
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false,
@@ -77,48 +75,41 @@ module.exports = EditProfileModalButton = React.createClass({
     return (
         <Button onClick={this.handleToggle} className="link-button-gray pull-right fullytight_all" bsStyle="link">
           <Glyphicon glyph='pencil' />
+          <Modal bsStyle='primary' show={this.state.isModalOpen} onHide={this.handleToggle}>
+            <Modal.Header>
+              <Glyphicon glyph='pencil'/>
+            </Modal.Header>
+            <Modal.Body>
+              <form onSubmit={this.handleProfileEdit}>
+                <Input 
+                  type='text' 
+                  label='Fullname' 
+                  value={this.state.fullname}
+                  onChange={this.handleFullnameChange} 
+                />
+                <Input 
+                  type='text' 
+                  label='Location' 
+                  value={this.state.location}
+                  onChange={this.handleLocationChange} 
+                />
+                <Input 
+                  type='text' 
+                  label='Bio' 
+                  value={this.state.bio}
+                  onChange={this.handleBioChange} 
+                />
+                <Input 
+                  type='text' 
+                  label='Url' 
+                  value={this.state.url}
+                  onChange={this.handleUrlChange} 
+                />
+                <Input type='submit' value='Update Profile' data-dismiss="modal" />
+              </form>
+            </Modal.Body>
+          </Modal>
         </Button>
     );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return <span/>;
-    }
-    
-    return (
-      <Modal bsStyle='primary' title={<Glyphicon glyph='pencil'/>} onRequestHide={this.handleToggle}>
-        <div className='modal-body'>
-          <form onSubmit={this.handleProfileEdit}>
-            <Input 
-              type='text' 
-              label='Fullname' 
-              value={this.state.fullname}
-              onChange={this.handleFullnameChange} 
-            />
-            <Input 
-              type='text' 
-              label='Location' 
-              value={this.state.location}
-              onChange={this.handleLocationChange} 
-            />
-            <Input 
-              type='text' 
-              label='Bio' 
-              value={this.state.bio}
-              onChange={this.handleBioChange} 
-            />
-            <Input 
-              type='text' 
-              label='Url' 
-              value={this.state.url}
-              onChange={this.handleUrlChange} 
-            />
-            <Input type='submit' value='Update Profile' data-dismiss="modal" />
-          </form>
-        </div>
-      </Modal>
-    );
-  
   }
 });

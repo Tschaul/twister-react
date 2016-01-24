@@ -1,6 +1,5 @@
 
 var ReactBootstrap = require('react-bootstrap')
-  , OverlayMixin = ReactBootstrap.OverlayMixin
   , Button = ReactBootstrap.Button
   , ButtonGroup = ReactBootstrap.ButtonGroup
   , Glyphicon = ReactBootstrap.Glyphicon
@@ -13,7 +12,6 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 
 module.exports = ImportAccountModalButton = React.createClass({
-  mixins: [OverlayMixin],
   getInitialState: function () {
     return {
       isModalOpen: false,
@@ -55,38 +53,32 @@ module.exports = ImportAccountModalButton = React.createClass({
   },
   render: function() {
     
-        
     return (
-        <Button onClick={this.handleToggle}>Import Account</Button>
+        <Button onClick={this.handleToggle}>
+          Import Account
+          <Modal show={this.state.isModalOpen} bsStyle='primary' onHide={this.handleToggle}>
+            <Modal.Header>
+              <Glyphicon glyph='import'/>
+            </Modal.Header>
+            <Modal.Body>
+              <form onSubmit={this.handleImportAccount}>
+                <Input 
+                  type='text' 
+                  label='Username' 
+                  value={this.state.username}
+                  onChange={this.handleUsernameChange} 
+                />
+                <Input 
+                  type='text' 
+                  label='Private Key' 
+                  value={this.state.privkey}
+                  onChange={this.handlePrivkeyChange} 
+                />
+                <Input type='submit' value='Import Account' data-dismiss="modal" />
+              </form>
+            </Modal.Body>
+          </Modal>
+        </Button>
     );
-  }, 
-  renderOverlay: function() {
-  
-    if (!this.state.isModalOpen) {
-      return <span/>;
-    }
-    
-    return (
-      <Modal bsStyle='primary' title={<Glyphicon glyph='pencil'/>} onRequestHide={this.handleToggle}>
-        <div className='modal-body'>
-          <form onSubmit={this.handleImportAccount}>
-            <Input 
-              type='text' 
-              label='Username' 
-              value={this.state.username}
-              onChange={this.handleUsernameChange} 
-            />
-            <Input 
-              type='text' 
-              label='Private Key' 
-              value={this.state.privkey}
-              onChange={this.handlePrivkeyChange} 
-            />
-            <Input type='submit' value='Import Account' data-dismiss="modal" />
-          </form>
-        </div>
-      </Modal>
-    );
-  
   }
 });

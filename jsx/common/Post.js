@@ -58,7 +58,7 @@ module.exports = Post = React.createClass({
       fullname: "",
       timeAgo: "",
       retwistingUsername: this.props.post.username,
-      retwistingUserFullname: "",
+      retwistingUserFullname: this.props.post.username,
       retwistingUserAvatar: "img/genericPerson.png",
     };
   },

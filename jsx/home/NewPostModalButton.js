@@ -5,6 +5,7 @@ var ReactBootstrap = require('react-bootstrap')
   , Glyphicon = ReactBootstrap.Glyphicon
   , Modal = ReactBootstrap.Modal
   , Input = ReactBootstrap.Input
+  , ListGroupItem = ReactBootstrap.ListGroupItem
 
 var React = require('react');
 
@@ -49,10 +50,13 @@ module.exports = NewPostModalButton = React.createClass({
     return (
         <Button onClick={this.handleToggle} className="link-button-gray pull-right fullytight_all" bsStyle="link">
           <Glyphicon glyph='pencil' />
-          <Modal title={<Glyphicon glyph='pencil'/>} show={this.state.isModalOpen} bsStyle='primary' onHide={this.handleToggle}>
-            <div className='modal-body'>
+          <Modal show={this.state.isModalOpen} bsStyle='primary' onHide={this.handleToggle}>
+            <Modal.Header>
+              <Glyphicon glyph='pencil'/>
+            </Modal.Header>
+            <Modal.Body>
               <PostComposer onSubmit={this.handleNewPost} />
-            </div>
+            </Modal.Body>
           </Modal>
         </Button>
     );
