@@ -80,6 +80,8 @@ App = React.createClass({
     this.setInterval(this.saveCache,300000);
     
     this.setInterval(this.checkAccounts,60000);
+    
+    setTimeout(this.checkAccounts,0);
 
   },
   

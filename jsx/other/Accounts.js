@@ -5,6 +5,7 @@ var EventListenerMixin = require('../common/EventListenerMixin.js');
 var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 var ImportAccountModalButton = require('../other/ImportAccountModalButton.js');
+var GenerateAccountModalButton = require('../other/GenerateAccountModalButton.js');
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
@@ -21,17 +22,18 @@ module.exports = Accounts = React.createClass({
   mixins: [
     SetIntervalMixin,
     SafeStateChangeMixin,
-    AppSettingsMixin
+    AppSettingsMixin 
   ],
   render: function() {
     
-    var thisComponent = this;
+    var thisComponent = this; 
     
     return (
         <ListGroup>
           <ListGroupItem>Accounts</ListGroupItem>
           <ListGroupItem>
             <ImportAccountModalButton/>
+            <GenerateAccountModalButton/>
             <hr/>
             {this.props.accounts.map(function(acc,index) {
               //console.log(acc,index)

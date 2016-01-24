@@ -66,7 +66,7 @@ module.exports = EditAvatarModalButton = React.createClass({
                 imgURL = canvas.toDataURL('image/jpeg', quality);
             }
           
-            thisComponent.setStateSafe({avatar: imgURL});
+            thisComponent.setState({avatar: imgURL});
         };
         sourceImage.src = dataUrl;
 

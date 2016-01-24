@@ -29907,7 +29907,7 @@ TwisterAccount.prototype.updateProfileFields = function (newdata,cbfunc) {
   
     thisUser.doProfile(function(profile){
       
-      var olddata = JSON.parse(JSON.stringify(profile._data));
+      var olddata = JSON.parse(JSON.stringify(profile._data)) || {};
       
       for (var key in newdata) {
 
@@ -30853,17 +30853,17 @@ TwisterPrivKey.prototype.makeRandomKey = function (key) {
   
 }
 
-TwisterPrivKey.prototype.verifyKey = function (cbfunc,querySettings) {
+TwisterPrivKey.prototype.verifyKey = function (cbfunc) {
   
   var Twister = this._scope;
   
   var thisResource = this;
   
-  Twister.getUser(this._name)._doPubKey(function(pubkey,querySettings){
+  thisResource.RPC("dumppubkey",[thisResource._name],function(result){
           
-    if(pubkey._data){
+    if(result.length){
       
-      if(pubkey._data==thisResource.getPubKey()){
+      if(result==thisResource.getPubKey()){
         
         thisResource._status = "confirmed";
         
@@ -30882,6 +30882,8 @@ TwisterPrivKey.prototype.verifyKey = function (cbfunc,querySettings) {
     
     if(cbfunc) cbfunc(thisResource);
     
+  },function(error){
+    thisAccount._handleError(error);
   })
   
 }
@@ -32403,6 +32405,9 @@ TwisterTorrent.prototype.fillPostsCache = function (id,cbfunc) {
  * @module
  */
 
+var Bitcoin = require('bitcoinjs-lib');
+var twister_network = Bitcoin.networks.bitcoin;
+twister_network.messagePrefix= '\x18twister Signed Message:\n';
 
 var TwisterResource = require("./TwisterResource.js");
 var Twister = new TwisterResource("twister",{});
@@ -32456,9 +32461,15 @@ Twister.setup = function (options) {
     		Twister["_"+key] = options[key];
 			
 		}
-		
+	
 	}
 
+}
+
+Twister.getQuerySetting = function(key){
+  if(availableOptions.indexOf(key)>-1){
+    return Twister["_"+key];
+  }
 }
 
 /** @function
@@ -32647,17 +32658,23 @@ Twister.generateClientSideAccount = function (name,cbfunc) {
       
       console.log("raw transaction: ",raw);
       
-      Twister.RPC("sendrawtransaction",raw,function(res){
+      Twister.RPC("sendrawtransaction",[raw],function(res){
         
         console.log("sent transaction",res);
       
-        var twisterPubKey = Twister.getUser(username)._pubkey
+        var twisterPubKey = Twister.getUser(name)._pubkey
         
         twisterPubKey._lastUpdate = Date.now()/1000;
 
-        twisterPubKey._data = res;
+        twisterPubKey._data = pubkey;
 
-        twisterPubKey._btcKey = Bitcoin.ECPair.fromPublicKeyBuffer(new Buffer(res,"hex"),twister_network);
+        twisterPubKey._btcKey = Bitcoin.ECPair.fromPublicKeyBuffer(new Buffer(pubkey,"hex"),twister_network);
+        
+        var twisterStream= Twister.getUser(name)._stream
+        
+        twisterPubKey._lastUpdate = Date.now()/1000;
+
+        twisterPubKey._latestId = 0;
         
         if(cbfunc) cbfunc(newAccount)
         
@@ -32670,6 +32687,26 @@ Twister.generateClientSideAccount = function (name,cbfunc) {
     
     
   })
+  
+}
+
+/** @function
+ * @name checkUsernameAvailable 
+ * @description checks if username is available by querying for its public key.
+ */
+Twister.checkUsernameAvailable = function(username,cbfunc){
+  
+  Twister.RPC("dumppubkey",[username],function(pubkey){
+          
+    if(pubkey.length){
+      cbfunc(false);
+    }else{
+      cbfunc(true);
+    }
+    
+  },function(error){
+    
+  });
   
 }
 
@@ -32836,7 +32873,7 @@ Twister.onQueryComplete = function (id, cbfunc){
 module.exports = Twister;
 
 }).call(this,require("buffer").Buffer)
-},{"./ClientWallet/TwisterAccount.js":139,"./ServerWallet/TwisterAccount.js":144,"./TwisterHashtag.js":150,"./TwisterPromotedPosts.js":154,"./TwisterResource.js":157,"./TwisterUser.js":160,"buffer":177}],148:[function(require,module,exports){
+},{"./ClientWallet/TwisterAccount.js":139,"./ServerWallet/TwisterAccount.js":144,"./TwisterHashtag.js":150,"./TwisterPromotedPosts.js":154,"./TwisterResource.js":157,"./TwisterUser.js":160,"bitcoinjs-lib":44,"buffer":177}],148:[function(require,module,exports){
 var inherits = require('inherits');
 
 var TwisterResource = require('./TwisterResource.js');
@@ -34456,8 +34493,8 @@ TwisterResource.prototype.RPC = function (method, params, resultFunc, errorFunc)
     if ( (typeof $ == "function") && ( typeof $.JsonRpcClient == "function") ) {
         
         var foo = new $.JsonRpcClient({ 
-        ajaxUrl: this.getQuerySetting("host"),
-        timeout: this.getQuerySetting("timeout")
+        ajaxUrl: thisResource.getQuerySetting("host"),
+        timeout: thisResource.getQuerySetting("timeout")
         });
         foo.call(method, params,
             function(ret) { if(typeof resultFunc === "function") resultFunc(ret); },
@@ -34469,9 +34506,9 @@ TwisterResource.prototype.RPC = function (method, params, resultFunc, errorFunc)
         var request = require('request');
         request({
           
-            uri: this.getQuerySetting("host"),
+            uri: thisResource.getQuerySetting("host"),
             method: "POST",
-            timeout: this.getQuerySetting("timeout"),
+            timeout: thisResource.getQuerySetting("timeout"),
             followRedirect: true,
             maxRedirects: 10,
             body: '{"jsonrpc": "2.0", "method": "'+method+'", "params": '+JSON.stringify(params)+', "id": 0}'
@@ -35058,7 +35095,7 @@ TwisterStream.prototype._doPost = function (id, cbfunc, querySettings) {
 
   var thisResource = this;
   
-  if (id && id>0) {
+  if (id && id>-1) {
 
     if (id in this._posts){
 
@@ -35130,7 +35167,7 @@ TwisterStream.prototype._doUntil = function (cbfunc, querySettings) {
 
     var retVal = cbfunc(post);
 
-    if( post.getLastId() && retVal!==false ) { 
+    if(post.getLastId() && retVal!==false ) { 
 
       post.doPreviousPost(doUntil, querySettings); 
 
