@@ -186,7 +186,6 @@ App = React.createClass({displayName: "App",
             key: this.state.accounts[i].name, 
             bsStyle: this.state.accounts[i].name==this.state.activeAccount ? 'primary' : 'default', 
             onClick: this.switchAccount.bind(this,this.state.accounts[i].name), 
-            href: "javascript:void(0);", 
             eventKey: i
           }, this.state.accounts[i].name)
         );
@@ -233,7 +232,8 @@ App = React.createClass({displayName: "App",
             React.createElement("br", null), 
             this.props.children && React.cloneElement(this.props.children, {
               accounts:this.state.accounts,
-              activeAccount:this.state.activeAccount
+              activeAccount:this.state.activeAccount,
+              key:this.state.activeAccount
             })
           )
         )

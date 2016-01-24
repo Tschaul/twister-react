@@ -30142,11 +30142,13 @@ TwisterAccount.prototype._signAndPublish = function(post_ori,cbfunc){
         
         //console.log("new post msg after",status)
 
+        if(status){
+          post.lastk = status.getId();
+        }
         
         post.height = info.blocks-1;
         post.n = thisAccount._name;
         post.k = newid;
-        post.lastk = status.getId();
         post.time = Math.round(Date.now()/1000);
         
         //console.log("new post will be",post)
@@ -32929,13 +32931,13 @@ TwisterAvatar.prototype._queryAndDo = function (cbfunc) {
 
             } else {
 			
-				thisResource._handleError({
+				/*thisResource._handleError({
                   message: "DHT resource is empty.",
                   code: 32052
-                })
+                })*/
                 thisResource._revisionNumber=0;
                 thisResource._lastUpdate=Date.now()/1000;
-                //cbfunc(thisResource);
+                cbfunc(thisResource);
 			
 			}
 
@@ -33693,13 +33695,13 @@ TwisterProfile.prototype._queryAndDo = function (cbfunc) {
 
             } else {
 			
-				thisResource._handleError({
+				/*thisResource._handleError({
                   message: "DHT resource is empty.",
                   code: 32052
-                })
+                })*/
                 thisResource._revisionNumber=0;
                 thisResource._lastUpdate=Date.now()/1000;
-                //cbfunc(thisResource);
+                cbfunc(thisResource);
 			
 			}
 
@@ -34951,12 +34953,12 @@ TwisterStream.prototype._queryAndDo = function (cbfunc) {
 
                     } else { 
 			
-                      thisResource._handleError({
+                      /*thisResource._handleError({
                         message: "DHT resource is empty.",
                         code: 32052
-                      })
+                      })*/
                       thisResource._updateInProgress = false;
-                      //cbfunc(null);
+                      cbfunc(null);
                       
                     }
 
@@ -35135,12 +35137,12 @@ TwisterStream.prototype._doPost = function (id, cbfunc, querySettings) {
                 
               } else {
 			
-                thisResource._handleError({
+                /*thisResource._handleError({
                   message: "DHT resource is empty.",
                   code: 32052
-                })
+                })*/
                 thisResource._updateInProgress = false;
-                //cbfunc(null);
+                cbfunc(null);
                 
               }
           
@@ -35157,6 +35159,8 @@ TwisterStream.prototype._doPost = function (id, cbfunc, querySettings) {
 
     }
 
+  }else{
+    cbfunc(null);
   }
     
 };
@@ -35165,13 +35169,17 @@ TwisterStream.prototype._doUntil = function (cbfunc, querySettings) {
 
   this._checkQueryAndDo(function doUntil(post){
 
-    var retVal = cbfunc(post);
+    if(post){
+      
+      var retVal = cbfunc(post);
 
-    if(post.getLastId() && retVal!==false ) { 
+      if(post.getLastId() && retVal!==false ) { 
 
-      post.doPreviousPost(doUntil, querySettings); 
+        post.doPreviousPost(doUntil, querySettings); 
 
-    }
+      }
+      
+    }    
 
   }, querySettings);
 	
