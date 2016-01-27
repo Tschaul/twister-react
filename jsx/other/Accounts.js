@@ -5,6 +5,7 @@ var EventListenerMixin = require('../common/EventListenerMixin.js');
 var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 var ImportAccountModalButton = require('../other/ImportAccountModalButton.js');
+var ExportAccountModalButton = require('../other/ExportAccountModalButton.js');
 var GenerateAccountModalButton = require('../other/GenerateAccountModalButton.js');
 
 var ReactBootstrap = require('react-bootstrap')
@@ -40,7 +41,10 @@ module.exports = Accounts = React.createClass({
               return (
                 <div key={"miniprofile:"+acc.name}>
                   <MiniProfile username={acc.name} pollIntervalProfile={thisComponent.props.pollIntervalProfile}/>
-                  <p>{acc.status}</p>
+                  <p>
+                    {acc.status}
+                    <ExportAccountModalButton username={acc.name}/>
+                  </p>
                 </div>
               );
             })}

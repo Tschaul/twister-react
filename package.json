@@ -19,6 +19,7 @@
   },
   "scripts": {
     "test": "jsx jsx build-buffer && node test/PosContentTest.js",
+    "watch": "watch \"npm run pull-lib-and-build\" jsx",
     "build": "jsx jsx build-buffer && browserify build-buffer/App.js -o build/app-bundle.js",
     "pull-lib-and-build": "cd ../twister-lib-js && npm run bundle && cd ../twister-react && cp ../twister-lib-js/twister-lib.js build && jsx jsx build-buffer && browserify build-buffer/App.js -o build/app-bundle.js"
   },

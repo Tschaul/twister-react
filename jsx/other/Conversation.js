@@ -24,13 +24,10 @@ module.exports = Conversation = React.createClass({
     SafeStateChangeMixin,
     EventListenerMixin('newpostbyuser')
   ],
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState: function() {
     return {
-      username: this.context.router.getCurrentParams().username,
-      postid: parseInt(this.context.router.getCurrentParams().postid),
+      username: this.props.params.username,
+      postid: parseInt(this.props.params.postid),
       data: [], 
       postIdentifiers: {},
       loading: true
