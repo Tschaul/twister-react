@@ -162,9 +162,28 @@ module.exports = PostComposer = React.createClass({
             output+=('<span class="text-primary">'+item.raw+'</span>');
             break;
           default:
-            output+=('<span>'+item.raw+'</span>');
+            output+=(item.raw);
         }
       });
+            
+      var rules = [
+        {regex: /\[([^\[]+)\]\(([^\)]+)\)/g,
+         replacement: '<span class="ghost">[</span><a>$1</a><span class="ghost">]($2)</span>'},        // hyperlink
+        {regex: /(\s?)(\*)(.*?)(\*)(\s?)/g, 
+         replacement: '$1<span class="ghost">*</span><b>$3</b><span class="ghost">*</span>$5'},                         // emphasis
+        {regex: /(\s?)(\~)(.*?)(\~)(\s?)/g, 
+         replacement: '$1<span class="ghost">~</span><i>$3</i><span class="ghost">~</span>$5'},                         // emphasis
+        {regex: /(\s?)(\-)(.*?)(\-)(\s?)/g, 
+         replacement: '$1<span class="ghost">-</span><del>$3</del><span class="ghost">-</span>$5'},                         // emphasis
+        {regex: /(\s?)(\_)(.*?)(\_)(\s?)/g, 
+         replacement: '$1<span class="ghost">_</span><u>$3</u><span class="ghost">_</span>$5'},                         // emphasis
+      ]
+      
+      rules.forEach(function (rule) {
+        output = output.replace(rule.regex, rule.replacement);
+      });
+      
+      console.log(text.slice(0, this.state.maxLength),output)
       
       // text overflow
       if (text.length > this.state.maxLength) {

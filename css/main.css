@@ -101,3 +101,10 @@ body.modal-open {
   margin-left: 0.25em;
   margin-right: 0.125em;
 }
+
+.ghost {
+  display: inline-block; 
+  width: 0; 
+  overflow: hidden; 
+  height: 0;
+}
