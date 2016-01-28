@@ -5,8 +5,9 @@ var EventListenerMixin = require('../common/EventListenerMixin.js');
 var AppSettingsMixin = require('../common/AppSettingsMixin.js');
 
 var ImportAccountModalButton = require('../other/ImportAccountModalButton.js');
-var ExportAccountModalButton = require('../other/ExportAccountModalButton.js');
 var GenerateAccountModalButton = require('../other/GenerateAccountModalButton.js');
+var ExportAccountModalButton = require('../other/ExportAccountModalButton.js');
+var LogoutModalButton = require('../other/LogoutModalButton.js');
 
 var ReactBootstrap = require('react-bootstrap')
   , NavItem = ReactBootstrap.NavItem
@@ -43,7 +44,8 @@ module.exports = Accounts = React.createClass({
                   <MiniProfile username={acc.name} pollIntervalProfile={thisComponent.props.pollIntervalProfile}/>
                   <p>
                     {acc.status}
-                    <ExportAccountModalButton username={acc.name}/>
+                    <ExportAccountModalButton username={acc.name} accountStatus={acc.status}/>
+                    <LogoutModalButton username={acc.name} accountStatus={acc.status}/>
                   </p>
                 </div>
               );

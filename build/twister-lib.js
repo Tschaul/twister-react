@@ -32885,7 +32885,7 @@ TwisterPrivKey.prototype.encryptPrivateKey = function(passphrase,cbfunc,progress
     
     var privateKeyWif = thisResource._btcKey.toWIF()
 
-    var bip38 = new Bip38()
+    var bip38 = new Bip38();
     var encrypted = bip38.encrypt(privateKeyWif, passphrase, thisResource._btcKey.getAddress(), progressfunc)
     cbfunc(encrypted);
     
@@ -32899,6 +32899,7 @@ TwisterPrivKey.prototype.decryptAndImportPrivateKey = function(encryptedKey,pass
   
   setTimeout(function(){
     
+    var bip38 = new Bip38();
     var privateKeyWif = bip38.decrypt(encryptedKey, passphrase, progressfunc)
     thisResource.setKey(privateKeyWif);
     cbfunc(thisResource);
@@ -34571,7 +34572,7 @@ Twister.importClientSideAccountFromEncryptedKey = function (name,encryptedKey,pa
 
   Twister._wallet[name] = new TwisterAccount(name,Twister);
 
-  Twister._wallet[name]._privkey.decryptAndImportPrivateKey(encryptPrivateKey,passphrase,function(){
+  Twister._wallet[name]._privkey.decryptAndImportPrivateKey(encryptedKey,passphrase,function(){
     
     Twister._wallet[name]._privkey.verifyKey(function(key){
 
@@ -34666,6 +34667,17 @@ Twister.checkUsernameAvailable = function(username,cbfunc){
   },function(error){
     
   });
+  
+}
+
+
+/** @function
+ * @name checkUsernameAvailable 
+ * @description checks if username is available by querying for its public key.
+ */
+Twister.removeAccount = function(username){
+  
+  delete Twister._wallet[username];
   
 }
 

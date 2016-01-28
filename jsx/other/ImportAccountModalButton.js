@@ -12,11 +12,13 @@ var SafeStateChangeMixin = require('../common/SafeStateChangeMixin.js');
 var SetIntervalMixin = require("../common/SetIntervalMixin.js");
 
 module.exports = ImportAccountModalButton = React.createClass({
+  mixins: [SafeStateChangeMixin],
   getInitialState: function () {
     return {
       isModalOpen: false,
       privkey: "",
       username: "",
+      passphrase: "",
     };
   },
   handlePrivkeyChange: function(e) {
@@ -25,29 +27,56 @@ module.exports = ImportAccountModalButton = React.createClass({
   handleUsernameChange: function(e) {
     this.setState({username: e.target.value});
   },
+  handlePassphraseChange: function(e) {
+    this.setState({passphrase: e.target.value});
+  },
   handleToggle: function () {
     this.setState({
       isModalOpen: !this.state.isModalOpen
     });
   },
+  pullFromTwister: function(){
+  
+    var thisComponent = this;
+    
+    Twister.getUser(this.state.username).doProfile(function(profile){
+      
+      var key = profile.getField("bip38");
+      
+      if(key) {
+        thisComponent.setStateSafe({privkey:key});
+      }
+      
+    })
+    
+  },
   handleImportAccount: function (e) {
+    
+    var thisComponent = this;
     
     e.preventDefault();
     
     var newprivkey = this.state.privkey;
     var newusername = this.state.username;
+    var passphrase = this.state.passphrase;
     
-    Twister.importClientSideAccount(newusername,newprivkey,function(newaccount){
+    var success = function(newaccount){
 
       console.log(newaccount._name);
       
       var event = new CustomEvent('newaccountbyuser',{detail: newaccount});
       //alert("scrolled to bottom")
       window.dispatchEvent(event);
+      
+      thisComponent.handleToggle();
 
-    })
-            
-    this.handleToggle();
+    }
+    
+    if(passphrase.length){
+      Twister.importClientSideAccountFromEncryptedKey(newusername,newprivkey,passphrase,success)
+    }else{
+      Twister.importClientSideAccount(newusername,newprivkey,success)
+    }
     
     return;
   },
@@ -70,9 +99,16 @@ module.exports = ImportAccountModalButton = React.createClass({
                 />
                 <Input 
                   type='text' 
-                  label='Private Key' 
+                  label='(Encrypted) Private Key' 
                   value={this.state.privkey}
                   onChange={this.handlePrivkeyChange} 
+                />
+                <Button onClick={this.pullFromTwister}>Pull From Twister</Button>
+                <Input 
+                  type='password' 
+                  label='Passphrase (only for encrypted keys)' 
+                  value={this.state.passphrase}
+                  onChange={this.handlePassphraseChange} 
                 />
                 <Input type='submit' value='Import Account' data-dismiss="modal" />
               </form>

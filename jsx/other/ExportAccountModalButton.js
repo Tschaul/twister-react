@@ -21,10 +21,10 @@ module.exports = ExportAccountModalButton = React.createClass({
       useEncryption: true,
       passphrase1: "",
       passphrase2: "",
-      setupComplete: false,
       encryptionInProgess: false,
       encryptionComplete: false,
       encryptedKey: "",
+      publishedOnTiwster: false,
     };
   },
   handleUseEncryptionChange: function(e) {
@@ -32,6 +32,8 @@ module.exports = ExportAccountModalButton = React.createClass({
       useEncryption: e.target.checked,
       encryptionInProgess: false,
       encryptionComplete: false,
+      encryptedKey: "",
+      publishedOnTwister: false,
     });
   },
   handlePassphrase1Change: function(e) {
@@ -39,6 +41,8 @@ module.exports = ExportAccountModalButton = React.createClass({
       passphrase1: e.target.value,
       encryptionInProgess: false,
       encryptionComplete: false,
+      encryptedKey: "",
+      publishedOnTwister: false,
     });
   },
   handlePassphrase2Change: function(e) {
@@ -46,6 +50,8 @@ module.exports = ExportAccountModalButton = React.createClass({
       passphrase2: e.target.value,
       encryptionInProgess: false,
       encryptionComplete: false,
+      encryptedKey: "",
+      publishedOnTwister: false,
     });
   },
   handleToggle: function () {
@@ -83,6 +89,21 @@ module.exports = ExportAccountModalButton = React.createClass({
                 
     return;
   },
+  publishOnTwister: function() {
+    
+    var thisComponent = this;
+    
+    if(this.state.useEncryption && this.state.encryptedKey.length && this.state.encryptedKey.startsWith("6P")){
+      
+      Twister.getAccount(this.props.username).updateProfileFields({bip38:this.state.encryptedKey},function(profile){
+        
+        thisComponent.setStateSafe({publishedOnTwister: true});
+        
+      })
+      
+    }
+    
+  },
   render: function() {
     
     var belowForm = (
@@ -106,16 +127,32 @@ module.exports = ExportAccountModalButton = React.createClass({
         
         var mailToLink = "mailto:?body=" + encodeURIComponent(formattedBody) + "&subject=" + encodeURIComponent(subject);
         
+        var dataUrl = "data:text/plain;charset=utf-8;base64,"+btoa(this.state.encryptedKey);
+        
+        var publishOnTwisterDisabled = this.props.accountStatus != "confirmed";
+        
+        var publishedOnTwisterButtonStr = "Publish on Twister" + (this.state.publishedOnTwister?" ✓":"");
+        
+        
         belowForm = (
           <p>
             {"Your encrypted key: "+this.state.encryptedKey}
+            <br/>
+            <Button download="twisterkey.txt" href={dataUrl}>Download</Button>         
             <Button href={mailToLink}>Send via Email</Button>
+            <Button onClick={this.publishOnTwister} disabled={publishOnTwisterDisabled}>{publishedOnTwisterButtonStr}</Button>   
           </p>
         )
-      }else{
+      }else{        
+        
+        var dataUrl = "data:text/plain;charset=utf-8;base64,"+btoa(this.state.encryptedKey);
+
         belowForm = (
           <p>
-            {"Your private key: "+this.state.encryptedKey}
+            {"Your private key: "+this.state.encryptedKey}      
+            <Button download="twisterkey.txt" href={dataUrl}>Download</Button>
+            <Button disabled>Send via Email</Button>
+            <Button disabled>Publish on Twister</Button>      
           </p>
         )
       }

@@ -54,8 +54,8 @@ App = React.createClass({
     AppSettingsMixin,
     SetIntervalMixin,
     SafeStateChangeMixin,
-    EventListenerMixin('newaccountbyuser')],
-  
+    EventListenerMixin('newaccountbyuser'),
+    EventListenerMixin('accountremovedbyuser')],
   getInitialState: function () {
     
     var state={};
@@ -123,11 +123,18 @@ App = React.createClass({
     
     var thisComponent = this;
     
-    Twister.getAccount(newaccoutname).activateTorrents(function(){
+    var afterwards = function(){
       thisComponent.setStateSafe({activeAccount: newaccoutname},function(){
         localStorage.setItem("twister-react-activeAccount", newaccoutname);
       });
-    });
+    }
+    
+    if(newaccoutname){
+      Twister.getAccount(newaccoutname).activateTorrents(afterwards);
+    }else{
+      afterwards();
+    }
+    
     
   },
   
@@ -150,6 +157,31 @@ App = React.createClass({
       })
       return oldstate;
     })
+    
+  },
+  
+  
+  
+  onaccountremovedbyuser: function(event) {
+    
+    console.log("catched onaccountremovedbyuser event !!!!! ",event,this.state)
+    
+    this.saveCache();
+    
+    this.setState(function(oldstate,props){
+      oldstate.accounts = oldstate.accounts.filter(function(acc){
+        return acc.name!=event.detail.username;
+      })
+      return oldstate;
+    })
+    
+    if(this.state.activeAccount && this.state.activeAccount==event.detail.username){
+            
+      this.switchAccount(this.state.accounts.find(function(acc){
+        return acc.name!=event.detail.username && acc.status=="confirmed";
+      })||null);
+      
+    }
     
   },
   
