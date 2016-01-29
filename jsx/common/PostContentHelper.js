@@ -141,10 +141,12 @@ module.exports = {
           }*/
       }
 
-      output.push({type:"text",raw:this.reverseHtmlEntities(msg)});
+      output.push({type:"text",raw:msg});
       msg = "";
       
     }
+    
+    //console.log(output)
     
     return output;
     

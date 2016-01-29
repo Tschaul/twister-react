@@ -1,4 +1,4 @@
 var PostContentHelper = require("../build-buffer/common/PostContentHelper.js");
 
 
-console.log(PostContentHelper.parseContent("asd http://"));
+console.log(PostContentHelper.parseContent("asd http:// <u"));
