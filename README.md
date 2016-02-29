@@ -79,9 +79,9 @@ Now we can start it up. When starting for the first time it will pull the twiste
 ./run.sh
 ```
 
-twisterd now needs a while (10min to 1h depending on your connection) to download the blockchain. You can check `top` to see if twisterd is still busy. If its not busy anymore (cpu at around 10%) its ready to use. Go to https://example.com/index.html where example.com is your domain and start twisting :-).
+twisterd now needs a while (10min to 1h depending on your connection) to download the blockchain. You can check `top` to see if twisterd is still busy. If it's not busy anymore (cpu at around 10%) it's ready to use. Go to https://example.com/index.html where example.com is your domain and start twisting :-).
 
-to stop twisterd and the the proxy run:
+To stop twisterd and the proxy, run:
 
 ```
 killall twisterd
