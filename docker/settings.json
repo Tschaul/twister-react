@@ -1,13 +1,15 @@
 {
     "Server":
     {
-        "ssl_key_file": "insert/path/to/your/server-key-file",
-        "ssl_certificate_file": "insert/path/to/your/ssl-certificate",
-        "enable_https": false,
-        
+        "ssl_key_file": "/certs/privkey.pem",
+        "ssl_certificate_file": "/ecerts/cert.pem",
+        "ssl_chain_file": "/certs/chain.pem",
+        "ssl_fullchain_file": "/certs/fullchain.pem",
+        "enable_https": true,
         "https_port": 443,
-        "http_port": 8080
+        "http_port": 0
     },
+
     
     "RPC": 
     { 
