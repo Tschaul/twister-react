@@ -1,15 +1,15 @@
 {
     "Server":
     {
-        "ssl_key_file": "/certs/privkey.pem",
-        "ssl_certificate_file": "/ecerts/cert.pem",
-        "ssl_chain_file": "/certs/chain.pem",
-        "ssl_fullchain_file": "/certs/fullchain.pem",
+        "ssl_key_file": "/etc/letsencrypt/live/example.com/privkey.pem",
+        "ssl_certificate_file": "/etc/letsencrypt/live/example.com/cert.pem",
+	"ssl_chain_file": "/etc/letsencrypt/live/example.com/chain.pem",
+	"ssl_fullchain_file": "/etc/letsencrypt/live/example.com/fullchain.pem",
         "enable_https": true,
+        
         "https_port": 443,
         "http_port": 0
     },
-
     
     "RPC": 
     { 
@@ -43,18 +43,18 @@
         },
         {
             "name": "dhtget",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "listusernamespartial",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "gettrendinghashtags",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "stop",
@@ -203,8 +203,8 @@
         },
         {
             "name": "dumppubkey",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "testvector",
@@ -293,8 +293,8 @@
         },
         {
             "name": "getposts",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "getdirectmsgs",
@@ -318,8 +318,8 @@
         },
         {
             "name": "follow",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "unfollow",
@@ -333,8 +333,8 @@
         },
         {
             "name": "getlasthave",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "getnumpieces",
@@ -353,8 +353,8 @@
         },
         {
             "name": "getspamposts",
-            "maxPerMinute": 999,
-            "maxPerMinutePerIP": 999
+            "maxPerMinute": 99999,
+            "maxPerMinutePerIP": 99999
         },
         {
             "name": "torrentstatus",
