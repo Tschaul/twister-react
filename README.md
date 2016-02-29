@@ -10,7 +10,7 @@ The main purpose of this project is to test the underlying Twister library [twis
 * Trending Hashtags
 * Direct Messages
 
-## Setup as hosted by a public twister proxy
+## Setup as hosted by a public twister proxy (ubuntu 15.10)
 
 First we install the basic dependecies.
 
