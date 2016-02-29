@@ -12,7 +12,7 @@ The main purpose of this project is to test the underlying Twister library [twis
 
 ## Setup as hosted by a public twister proxy
 
-First we install basic dependecies
+First we install the basic dependecies.
 
 ```
 apt-get update
@@ -20,7 +20,7 @@ apt-get install -y git curl nodejs nodejs-legacy npm
 curl -sSL https://get.docker.com/ | sh
 ```
 
-Now we pull twister-core
+Now we pull twister-core.
 
 ```
 git clone https://github.com/miguelfreitas/twister-core.git
@@ -30,7 +30,7 @@ echo -e "rpcuser=user\nrpcpassword=pwd\nhtmldir=~/twister-react" > ~/.twister/tw
 chmod 600 ~/.twister/twister.conf
 ```
 
-Next are this repo and twister-proxy
+Next pull this repo and twister-proxy
 
 ```
 git clone https://github.com/Tschaul/twister-react.git
@@ -80,6 +80,14 @@ Now we can start it up. When starting for the first time it will pull the twiste
 ```
 
 twisterd now needs a while (10min to 1h depending on your connection) to download the blockchain. You can check `top` to see if twisterd is still busy.
+
+to stop twisterd and the the proxy run:
+
+```
+killall twisterd
+killall nodejs
+```
+
 
 ## Screenshots
 
