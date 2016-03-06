@@ -13,9 +13,9 @@ Its builds upon [twister-lib-js](https://github.com/tschaul/twister-lib-js) whic
 
 ## Publicly hosted instances
 
-|Url|Admin|Note
-|-|-|-|
-|https://twister-proxy.tschaul.com/index.html|@tschaul| No guaranteed uptime, often used to testing purposes|
+Url | Admin | Note
+----- | ----- | ------
+https://twister-proxy.tschaul.com/index.html | @tschaul | No guaranteed uptime, often used to testing purposes
 
 *Your proxy is missing? Drop me a line or make a pull request!*
 
