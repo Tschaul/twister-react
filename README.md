@@ -1,14 +1,23 @@
 # twister-react
 A drop-in-replacement for [twister-html](https://github.com/miguelfreitas/twister-html) written in [React](https://facebook.github.io/react/) using [Bootstrap](http://getbootstrap.com/) with the [paper theme](https://bootswatch.com/paper/).
 
-The main purpose of this project is to test the underlying Twister library [twister-lib-js](https://github.com/tschaul/twister-lib-js).
-
+Its builds upon [twister-lib-js](https://github.com/tschaul/twister-lib-js) which enables browser-side-cryptography meaning that the private twister key is generated in the browser and does not leave the browser. It is meant to be used together with a remote twister-proxy that is accessable from anywhere enabeling a normal web-like usage. Because of browser-side-cryptorgraphy communatication is secured end-to-end and the twister-proxy is highly exchangeable. 
 
 ## Missing Features			
 
 * User Search
 * Trending Hashtags
 * Direct Messages
+* Promoted Posts
+
+
+## Publicly hosted instances
+
+|Url|Admin|Note
+|-|-|-|
+|https://twister-proxy.tschaul.com/index.html|@tschaul| No guaranteed uptime, often used to testing purposes|
+
+*Your proxy is missing? Drop me a line or make a pull request!*
 
 ## Setup as hosted by a public twister proxy (ubuntu 15.10)
 
@@ -88,6 +97,9 @@ killall twisterd
 killall nodejs
 ```
 
+If twister-proxy is hanging itself regularly try updating node to a newer version:
+
+http://askubuntu.com/questions/426750/how-can-i-update-my-nodejs-to-the-latest-version
 
 ## Screenshots
 
