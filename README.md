@@ -3,6 +3,8 @@ A drop-in-replacement for [twister-html](https://github.com/miguelfreitas/twiste
 
 Its builds upon [twister-lib-js](https://github.com/tschaul/twister-lib-js) which enables browser-side-cryptography meaning that the private twister key is generated in the browser and does not leave the browser. It is meant to be used together with a remote twister-proxy that is accessable from anywhere enabeling a normal web-like usage. Because of browser-side-cryptorgraphy communatication is secured end-to-end and the twister-proxy is highly exchangeable. 
 
+twister-react ist currently in alpha phase. Use at your own risk.
+
 ## Missing Features			
 
 * User Search
@@ -11,7 +13,7 @@ Its builds upon [twister-lib-js](https://github.com/tschaul/twister-lib-js) whic
 * Promoted Posts
 
 
-## Publicly hosted instances
+## Publicly hosted instances (use at your own risk)
 
 Url | Admin | Note
 ----- | ----- | ------
