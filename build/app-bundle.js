@@ -57,6 +57,7 @@ App = React.createClass({displayName: "App",
     SafeStateChangeMixin,
     EventListenerMixin('newaccountbyuser'),
     EventListenerMixin('accountremovedbyuser')],
+  
   getInitialState: function () {
     
     var state={};
@@ -230,7 +231,6 @@ App = React.createClass({displayName: "App",
 
       );
     }
-  
     
     return (
       React.createElement(Grid, null, 
@@ -265,7 +265,7 @@ App = React.createClass({displayName: "App",
             this.props.children && React.cloneElement(this.props.children, {
               accounts:this.state.accounts,
               activeAccount:this.state.activeAccount,
-              key:this.state.activeAccount
+              key: this.props.location.pathname
             })
           )
         )
