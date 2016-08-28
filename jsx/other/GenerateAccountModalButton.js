@@ -79,7 +79,7 @@ module.exports = GenerateAccountModalButton = React.createClass({
           )
         }else{
           showAvailable = (
-            <p>{this.state.username + " is allready taken"}</p>
+            <p>{this.state.username + " is already taken"}</p>
           )
         }
 

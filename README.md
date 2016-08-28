@@ -1,9 +1,9 @@
 # twister-react
 A drop-in-replacement for [twister-html](https://github.com/miguelfreitas/twister-html) written in [React](https://facebook.github.io/react/) using [Bootstrap](http://getbootstrap.com/) with the [paper theme](https://bootswatch.com/paper/).
 
-Its builds upon [twister-lib-js](https://github.com/tschaul/twister-lib-js) which enables browser-side-cryptography meaning that the private twister key is generated in the browser and does not leave the browser. It is meant to be used together with a remote twister-proxy that is accessable from anywhere enabeling a normal web-like usage. Because of browser-side-cryptorgraphy communatication is secured end-to-end and the twister-proxy is highly exchangeable. 
+It builds upon [twister-lib-js](https://github.com/tschaul/twister-lib-js) which enables browser-side-cryptography meaning that the private twister key is generated in the browser and does not leave the browser. It is meant to be used together with a remote twister-proxy that is accessible from anywhere enabling a normal web-like usage. Because of browser-side-cryptography communication is secured end-to-end and the twister-proxy is highly exchangeable. 
 
-twister-react ist currently in alpha phase. Use at your own risk.
+twister-react is currently in alpha phase. Use at your own risk.
 
 ## Missing Features			
 
@@ -17,7 +17,7 @@ twister-react ist currently in alpha phase. Use at your own risk.
 
 Url | Admin | Location | Note 
 ----- | ----- | ----- | ------
-https://twister-proxy.tschaul.com/index.html | @tschaul | Germany | No guaranteed uptime, often used to testing purposes
+https://twister-proxy.tschaul.com/index.html | @tschaul | Germany | No guaranteed uptime, often used for testing purposes
 
 *Your proxy is missing? Drop me a line or make a pull request!*
 
@@ -41,7 +41,7 @@ echo -e "rpcuser=user\nrpcpassword=pwd\nhtmldir=~/twister-react" > ~/.twister/tw
 chmod 600 ~/.twister/twister.conf
 ```
 
-Next pull this repo and twister-proxy
+Next pull this repo and twister-proxy.
 
 ```
 git clone https://github.com/Tschaul/twister-react.git
@@ -50,7 +50,7 @@ git clone https://github.com/digital-dreamer/twister-proxy.git
 npm install -g forever
 ```
 
-We setup twister-proxy and pull the settings from this repo
+We setup twister-proxy and pull the settings from this repo.
 
 ```
 cd twister-proxy
@@ -76,7 +76,7 @@ git clone https://github.com/letsencrypt/letsencrypt
 
 letsencrypt will ask you to provide an email address and your domain. It will then save your certificates in /etc/letsencrypt/live/example.com/ where example.com is your domain.
 
-As last step we have to tell twister-proxy where the certificates are
+For last step we have to tell twister-proxy where the certificates are.
 
 ```
 nano twister-proxy/settings.json 
@@ -99,7 +99,7 @@ killall twisterd
 killall nodejs
 ```
 
-If twister-proxy is hanging itself regularly try updating node to a newer version:
+If twister-proxy is hanging itself regularly try updating nodejs to a newer version:
 
 http://askubuntu.com/questions/426750/how-can-i-update-my-nodejs-to-the-latest-version
 
@@ -107,7 +107,7 @@ http://askubuntu.com/questions/426750/how-can-i-update-my-nodejs-to-the-latest-v
 
 ![Alt text](/screenshots/home.png?raw=true "Home")
 
-The home screen with two click account switching.
+The home screen with two click account switching
 
 ![Alt text](/screenshots/post.png?raw=true "New Post Modal")
 
